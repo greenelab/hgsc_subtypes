@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/18957/gwaygenomics/hgsc_subtypes.svg)](https://zenodo.org/badge/latestdoi/18957/gwaygenomics/hgsc_subtypes)
+-> [![DOI](https://zenodo.org/badge/18957/gwaygenomics/hgsc_subtypes.svg)](https://zenodo.org/badge/latestdoi/18957/gwaygenomics/hgsc_subtypes) ->
 ############################################
 # High-grade serous ovarian cancer subtypes are similar across populations
 #
