@@ -1,0 +1,304 @@
+% \VignetteEngine{knitr::knitr}
+% \VignetteIndexEntry{doppelgangR}
+
+\documentclass{article}
+
+
+<<style, eval=TRUE, echo=FALSE, results="asis">>=
+BiocStyle::latex()
+@
+<<echo=FALSE, message=FALSE>>=
+library(doppelgangR)
+options(width=78)
+@
+
+\title{doppelgangR: identifying duplicate samples in genomic databases}
+\author{Levi Waldron and Markus Riester}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+<<include=FALSE>>=
+library(knitr)
+opts_chunk$set(concordance=TRUE, cache=FALSE)
+@
+
+
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+\Biocpkg{doppelgangR} is a package for identifying duplicate samples
+within or between datasets.
+
+
+\section{The importance of batch correction}
+
+We load for datasets by Yoshihara \emph{et al.} that have been curated
+in \Biocpkg{curatedOvarianData}:
+
+<<cod>>=
+library(curatedOvarianData)
+data(GSE32062.GPL6480_eset)
+data(GSE17260_eset)
+@
+
+The \Rfunction{doppelgangR} function requires a list of
+\Rclass{ExpressionSet} objects as input, which we create here:
+
+<<testesets>>=
+testesets <- list(JapaneseA=GSE32062.GPL6480_eset,
+                  Yoshihara2010=GSE17260_eset)
+@
+
+We curate the alt\_sample\_name metadata simply by removing non-digits,
+which then can be matched across studies:
+
+<<curateids>>=
+testesets <- lapply(testesets, function(X){
+    # standardize the sample ids to improve matching based on clinical annotation
+    sampleNames(X) <- make.names(paste(X$sample_type,
+        gsub("\\D","",X$alt_sample_name), sep="_"))
+    X$alt_sample_name <- sampleNames(X)
+    pData(X) <- pData(X)[, !grepl("uncurated_author_metadata", colnames(pData(X)))]
+    X })
+@
+
+Run doppelgangR with default arguments:
+<<rundopp, results="hide", message=FALSE>>=
+results1 <- doppelgangR(testesets, phenoFinder.args=NULL, cache.dir=NULL)
+@
+
+This creates an object of class \Rclass{DoppelGang}, which has print, summary, and plot methods:
+<<summarizedop>>=
+summary(results1)
+@
+
+Plot creates a histogram of sample pairwise correlations within and between each study:
+
+<<plotdop, fig.cap="Doppelgangers identified on the basis of similar expression profiles.  The vertical red lines indicate samples that were flagged.">>=
+par(mfrow=c(2,2))
+plot(results1)
+@
+
+To create a data.frame of potential doppelgangers that you can write
+to file then open in a spreadsheet to examine in detail, use the
+summary method:
+<<>>=
+res.df <- summary(results1)
+dim(res.df)
+@
+
+
+To illustrate the importance of ComBat batch correction, we run again without batch correction:
+
+<<rundop2, results="hide", message=FALSE>>=
+results2 <- doppelgangR(testesets, corFinder.args=list(use.ComBat=FALSE), phenoFinder.args=NULL, cache.dir=NULL)
+@
+
+Fewer duplicates are found:
+<<summarizedop2>>=
+summary(results2)
+@
+
+We define a couple functions to assess which is more accurate, with or
+without batch correction.  The first function analyzes two datasets
+from a DoppelGang object: Iterating through each sample in the larger
+dataset, it selects the sample in the smaller dataset with highest
+correlation (doppelmelt).  This potential match is considered a True
+Positive if the sample name is the same.
+
+<<output2rocfunc>>=
+doppelmelt <- function(obj, ds1, ds2){
+    tmp1 <- obj@fullresults[[ds1]][[ds2]]$correlations
+    tmp2 <- obj@fullresults[[ds2]][[ds1]]$correlations
+    if(is.null(tmp1)){
+        cormat <- tmp2
+    }else{
+        cormat <- tmp1
+    }
+    if(nrow(cormat) < ncol(cormat)) cormat <- t(cormat)
+    idx <- sapply(rownames(cormat), function(x) which.max(cormat[x, ]))
+    corvec <- sapply(1:nrow(cormat), function(i) cormat[i, idx[i]])
+    output <- data.frame(sample1=rownames(cormat),
+                         sample2=colnames(cormat)[idx],
+                         cor=corvec, stringsAsFactors=FALSE)
+    output$truepos <- sub(".+:", "", output[, 1]) == sub(".+:", "", output[, 2])
+    return(output)
+}
+plotROC <- function(pred, labels, plot = TRUE, na.rm = TRUE, colorize = FALSE, ...) {
+    require(ROCR)
+    require(pROC)
+    if (na.rm) {
+        idx <- !is.na(labels)
+        pred <- pred[idx]
+        labels <- labels[idx]
+    }
+    pred.rocr <- prediction(pred, labels)
+    perf.rocr <- performance(pred.rocr, "tpr", "fpr")
+    auc <- performance(pred.rocr, "auc")@y.values[[1]][[1]]
+    roc.obj <- roc(labels, pred)
+    auc.ci <- ci(roc.obj)
+    significant <- ifelse(ci(roc.obj, conf.level=0.9)[1] > 0.5, "*", "")
+    best <- coords(roc.obj,x="best")
+    if (plot) {
+        plot(perf.rocr, colorize = colorize, cex.lab = 1.3, ...)
+        text(0, 0.9, paste("AUC = ", round(auc, digits = 2), significant,
+        sep=""), cex = 1.5, pos = 4)
+        abline(a = 0, b = 1, lty = 2)
+        text(1, 0.1, paste("n =", length(labels)), cex = 1.5, pos = 2)
+        abline(a = 0, b = 1, lty = 2)
+    }
+    invisible(list(auc,auc.ci,best))
+}
+@
+
+<<yoshihararoc, fig.height=3, fig.cap="Identification of Duplicate samples between the Japanese A dataset and Yoshihara 2010 dataset, without (left) and with (right) batch correction.">>=
+roc1 <- doppelmelt(results1, "JapaneseA", "Yoshihara2010")
+roc2 <- doppelmelt(results2, "JapaneseA", "Yoshihara2010")
+par(mfrow=c(1,2))
+plotROC(roc2$cor, roc2$truepos, main="No batch correction")
+plotROC(roc1$cor, roc1$truepos, main="Batch correction")
+@
+
+
+%% rocobj.cv <- ROC(test=preds.cv,
+%%     PV=FALSE,MX=FALSE,MI=FALSE,AUC=FALSE,
+%%     stat=(thisstat==levels(thisstat)[2]),
+%%     plot="ROC")
+%% rocobj.resubstitution <- ROC(test=preds.resubstitution,
+%%     PV=FALSE,MX=FALSE,MI=FALSE,AUC=FALSE,
+%%     stat=(thisstat==levels(thisstat)[2]),
+%%     plot="none")
+%% with(rocobj.resubstitution$res,lines(1-spec,sens),lty=3)
+%% legend("bottomright",lty=1,pch=-1,lw=1:2,
+%%        legend=c(paste("RESUBSTITUTION area under curve =",round(rocobj.resubstitution$AUC,2)),
+%%          paste("CROSS-VALIDATED area under curve =",round(rocobj.cv$AUC,2))))
+
+
+
+\section{Finding duplicates between microarray and RNA-seq data}
+
+Load TCGA microarray and RNA-seq data for ovarian cancer.  These are
+the level III RNA-seq data, as provided by the Data Portal (summarized
+at gene level).  Note that these are the same patients, profiled by
+microarray and RNA-seq.  We would like to see how well we can identify
+the duplicates based on expression data alone.
+
+<<tcgaovcload>>=
+tmpfile <- tempfile()
+download.file("http://bcb.dfci.harvard.edu/ovariancancer/dfiles_old/TCGA.RNASeqV2_eset.rda", destfile=tmpfile)
+load(tmpfile)
+data(TCGA_eset)
+tcgaov.esets <- list(microarray=TCGA_eset, rnaseq=TCGA.RNASeqV2_eset)
+@
+
+<<rundoptcga, results="hide", message=FALSE>>=
+tcgaout.batch <- doppelgangR(tcgaov.esets, phenoFinder.args=NULL, smokingGunFinder=NULL, cache.dir=NULL)
+tcgaout.nobatch <- doppelgangR(tcgaov.esets, phenoFinder.args=NULL, smokingGunFinder=NULL,
+                               corFinder.args=list(use.ComBat=FALSE), cache.dir=NULL)
+@
+
+<<plottcta, fig.height=4.7, fig.caption="Microarray samples identified as having RNA-seq duplicates in the TCGA ovarian cancer dataset.">>=
+par(mfrow=c(2, 3))
+plot(tcgaout.batch, xlim=c(0.8, 1))
+plot(tcgaout.nobatch, xlim=c(0.8, 1))
+@
+
+<<tcgaroc, fig.height=3.5, fig.cap="Identification of Affymetrix microarray profiles that have duplicate RNA-seq profiles in the TCGA ovarian cancer dataset.  Note that most of the errors after batch correction are due to an RNA mix-up in the TCGA Affymetrix dataset.">>=
+tcgamelt.batch <- doppelmelt(tcgaout.batch, 1, 2)
+tcgamelt.nobatch <- doppelmelt(tcgaout.nobatch, 1, 2)
+tcga.remove <- read.delim(system.file("extdata", "TCGA_remove.txt", package="doppelgangR"),
+                          as.is=TRUE)[, 1]
+par(mfrow=c(1,3))
+with(tcgamelt.nobatch, plotROC(cor, truepos, main="No batch correction"))
+with(tcgamelt.batch, plotROC(cor, truepos, main="Batch correction"))
+with(tcgamelt.batch[!sub("microarray:", "", tcgamelt.batch[, 1]) %in% tcga.remove, ],
+     plotROC(cor, truepos, main="Proven RNA mix-ups\n removed"))
+@
+
+\section{Application to breast cancer}
+
+To save time in building the vignette, six breast cancer datasets
+available as Bioconductor packages are installed, loaded, and prepared
+\emph{outside} of this vignette.  The following code for preparing the ExpressionSets is not run:
+
+<<createbreastesets, eval=FALSE>>=
+breast.packages <- c("breastCancerMAINZ", "breastCancerNKI",
+    "breastCancerTRANSBIG", "breastCancerUNT", "breastCancerUPP",
+    "breastCancerVDX")
+##
+other.packages <- "WGCNA"
+##
+if (!require(BiocInstaller))
+    stop("You need to install Bioconductor, which includes BiocInstaller.")
+##
+for (pkg in breast.packages){
+    if(!require(package=pkg, character.only=TRUE)){
+        print(paste("Need to install", pkg))
+        biocLite(pkg, suppressUpdates=TRUE, suppressAutoUpdate=TRUE, ask=FALSE)
+    }
+}
+##
+for (pkg in other.packages){
+    if(!require(package=pkg, character.only=TRUE)){
+        print(paste("Need to install", pkg))
+        biocLite(pkg, suppressUpdates=TRUE, suppressAutoUpdate=TRUE, ask=FALSE)
+    }
+}
+##
+esets <- lapply(breast.packages, function(pkg){
+    print(pkg)
+    library(affy)
+    esetname <- tolower(sub("breastCancer", "", pkg))
+    data(list=esetname)
+    output <- get(esetname)
+    output <- output[!is.na(featureData(output)$EntrezGene.ID), ]
+    merge.probeset <- WGCNA::collapseRows(datET=exprs(output),
+                                          rowGroup=featureData(output)$EntrezGene.ID,
+                                          rowID=featureNames(output))
+    output <- output[merge.probeset$selectedRow, ]
+    featureNames(output) <- featureData(output)$EntrezGene.ID
+    return(output)
+})
+names(esets) <- sub("breastCancer", "", breast.packages)
+##
+save(esets, file="esets_breast.rda")
+@
+
+Here we just load the prepared ExpressionSets.  These have had
+probesets collapsed to Entrez Gene identifiers, using the
+WGCNA::collapseRows() function using the probeset with maximum mean to
+represent each gene.
+<<loadbreastesets>>=
+load(url("http://bcb.dfci.harvard.edu/ovariancancer/dfiles_old/esets_breast.rda"))
+@
+
+Now run doppelgangR for UNT + UPP only.
+<<breastdoppel>>=
+output <- doppelgangR(esets[c("UNT", "UPP")], outlierFinder.expr.args = list(bonf.pvalue=10, transFun=atanh, tail="upper"),
+                      outlierFinder.pheno.args=NULL, cache.dir=NULL)
+output
+@
+
+<<plotbreastdoppel>>=
+par(mfrow=c(2,2))
+plot(output)
+@
+
+%% \section{Impact of doppelgangers on model validation}
+%% Hidden doppelgangers present in both a training and test set can substantially inflate estimates of prediction model accuracy.  We demonstrate this using the UNT and UPP breast cancer datasets.
+
+%% <<>>=
+%% eset.training <- esets["UPP"]
+%% eset.test <- esets["UNT"]
+%% @
+
+\section{Parallelization}
+DoppelgangR checks for duplicates within each dataset in the list of
+ExpressionSets, and between each pair of datasets.  This is an
+``embarassingly parallel'' process that can be divided among multiple
+processors.  Parallelization is implemented via
+
+\end{document}

@@ -1,0 +1,5 @@
+0.1: initial commit
+
+0.1.1: remove "smoking gun" columns from calculation of phenotype similarity.
+
+0.5.0: Add knn imputation by default.

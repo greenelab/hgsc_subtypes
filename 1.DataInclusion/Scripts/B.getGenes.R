@@ -1,0 +1,97 @@
+############################################
+# High-grade serous ovarian cancer subtypes are similar across populations
+# 
+# Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
+# Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
+# ~~~~~~~~~~~~~~~~~~~~~
+# Output gene lists (common genes and MAD genes) and
+# Overlapping Genes Venn Diagram: Supplemental Figure 1
+
+args <- commandArgs(trailingOnly = T)
+#args <- c("TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset")
+################################
+# Load Libraries
+################################
+library(limma) #Venn Diagram Functions
+library(grid)
+library(curatedOvarianData)
+
+# The script loads the ovarian cancer datasets
+source("1.DataInclusion/Scripts/Functions/LoadOVCA_Data.R")
+
+#Library has some important custom functions
+source("2.Clustering_DiffExprs/Scripts/Functions/kmeans_SAM_functions.R")
+
+################################
+# PART I: Load Data
+################################
+# Use the LoadOVCA_Data function to read in the datasets subset by commongenes
+ExpData <- LoadOVCA_Data(datasets = args, genelist_subset = "None")
+
+# Get all the common genes and universe genes
+commongeneSet <- c()
+universe <- c()
+for (dataset in 1:length(ExpData)) {
+  datasetExprs <- ExpData[[dataset]]
+  
+  # Extract the gene names for each dataset
+  datasetGenes <- rownames(datasetExprs)
+  
+  # We are also interested in all the genes that are measured
+  universe <- unique(c(universe, rownames(datasetExprs)))
+  if (dataset == 1) {
+    commongeneSet <- datasetGenes
+  } else {
+    commongeneSet <- intersect(commongeneSet, datasetGenes)
+  }
+}
+
+# Get MAD genes
+MADgeneSet <- c()
+for (dataset in 1:length(ExpData)) {
+  # Subset all datasets to common genes
+  datasetExprs <- ExpData[[dataset]][commongeneSet, ]
+  
+  # Use the MADgenes function to extract the top 1500 most variably expressed genes
+  madSet <- MADgenes(datasetExprs, numGenes = 1500)
+  
+  MADgeneSet <- unique(c(MADgeneSet, madSet))
+}
+
+# Write to file
+write.csv(commongeneSet, file = "1.DataInclusion/Data/Genes/CommonGenes_genelist.csv", 
+          row.names = F)
+write.csv(MADgeneSet, file = "1.DataInclusion/Data/Genes/GlobalMAD_genelist.csv", 
+          row.names = F)
+
+################################
+# PART II: Venn Diagram (Supplementary Figure S1a)
+################################
+# Initialize the venn matrix, which will serve as a template for the observing overlaps between the datasets 
+# (Supplementary Figure S1)
+venn <- matrix(NA, nrow = length(universe), ncol = length(args))
+rownames(venn) <- universe
+colnames(venn) <- c("TCGA", "Mayo", "Yoshihara", "Tothill", "Bonome")
+
+# Create the Venn Matrix
+for (gene in 1:length(universe)) {
+  vector <- c()
+  for (gene_sp in 1:length(args)) {
+    if (universe[gene] %in% rownames(ExpData[[gene_sp]])) {
+      tmp <- 1
+    } else {
+      tmp <- 0
+    }
+    vector <- c(vector, tmp)
+  }
+  venn[gene, ] <- vector
+}
+
+# Perform the limma functions to create the venn diagram
+# Supplementary Figure S1a
+S1a <- vennCounts(venn)
+
+# Write Plot to File
+tiff(filename = "1.DataInclusion/Figures/SuppFigS1_OverlappingGenesVenn.tiff", width = 1000, height = 1000)
+vennDiagram(S1a, main = "", cex = c(3, 2, 1.4), lwd = 2)
+dev.off()

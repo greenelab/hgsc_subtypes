@@ -1,0 +1,11 @@
+importFrom(sva, ComBat)
+importFrom(digest, digest)
+importFrom(impute, impute.knn)
+importFrom(mnormt, pmt, biv.nt.prob, pmnorm)
+export(doppelgangR, corFinder, outlierFinder, phenoDist, phenoFinder,
+smokingGunFinder, vectorHammingDist, vectorWeightedDist,
+st.mle, mst.mle, dst, pst, qst, rst)
+
+exportClasses("DoppelGang")
+
+exportMethods("print", "summary", "show", "plot")
