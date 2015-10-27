@@ -92,4 +92,4 @@ Rscript INSTALL.R
 * Windows 8
 
 # Other
-* Sleipner (version ___)
+* Sleipner (Normalizer version 1.0)
