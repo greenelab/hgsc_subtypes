@@ -56,7 +56,7 @@ Rscript INSTALL.R
 ~~~~~~~~~~
 
 #######################
-# VERSION CONTROL
+# VERSIONS TESTED
 #######################
 
 # R Version
@@ -92,3 +92,9 @@ Rscript INSTALL.R
 
 # Other
 * Sleipner (Normalizer version 1.0)
+
+#######################
+# ACKNOWLEDGEMENTS
+#######################
+
+This work was supported by the Institute for Quantitative Biomedical Sciences; the Norris Cotton Cancer Center Developmental Funds; the National Cancer Institute at the National Institutes of Health (R01 CA168758 to J.A.D., F31 CA186625 to J.R., R01 CA122443 to E.L.G.); the Mayo Clinic Ovarian Cancer SPORE (P50 CA136393 to E.L.G.); the Mayo Clinic Comprehensive Cancer Center-Gene Analysis Shared Resource (P30 CA15083); the Gordon and Betty Moore Foundation’s Data-Driven Discovery Initiative (grant number GBMF 4552 to C.S.G.); and the American Cancer Society (grant number IRG 8200327 to C.S.G.).
