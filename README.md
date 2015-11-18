@@ -4,7 +4,7 @@
 
 #### Way, G., Rudd, J., Wang, C., Hamidi, H., Fridley, B., Konecny, G., Goode, E., Greene, C., Doherty, J. 
 
-[![DOI](https://zenodo.org/badge/18957/gwaygenomics/hgsc_subtypes.svg)](https://zenodo.org/badge/latestdoi/18957/gwaygenomics/hgsc_subtypes)
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.32906.svg)](http://dx.doi.org/10.5281/zenodo.32906)
 ############################################
 
 #######################
