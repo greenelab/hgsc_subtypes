@@ -79,7 +79,7 @@ R --no-save --args $DATASETS "GSE12672_eset" < 1.DataInclusion/Scripts/B.getGene
 	#################
 	#~~~~~~NMF~~~~~~#
 	#################
-	# Output consensus matrices and NMF cluster membership files (Sup. Figure S2)
+	# Output consensus matrices, NMF cluster membership files (Sup. Figure S2) and cophenetic coefficients (Sup. Figures S3-S7)
 	R --no-save --args $KMIN $KMAX $NSTARTS $SEED $DATASETS < 2.Clustering_DiffExprs/Scripts/D.NMF.R
 
 	# Run SAM on NMF clusters (TRUE argument forces NMF analysis)

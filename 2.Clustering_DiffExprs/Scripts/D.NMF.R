@@ -6,7 +6,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~
 # This script will input a series of datasets and perform Non-negative Matrix Factorization (NMF)
 
-args <- commandArgs(trailingOnly=TRUE)
+args <- commandArgs(trailingOnly = TRUE)
 # args <- c(3, 4, 100, 123, "TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset")
 ################################
 # Load Libraries
@@ -61,12 +61,47 @@ for (dataset in 1:length(ExpData)) {
   # For each centroid assignment, perform NMF and assign cluster membership files to newMatrix
   for (centroid in rank1:rank2) {
     fname <- paste("NMF_Clusters_", names(ExpData)[dataset], "_K", centroid, sep = "")
+    
+    # Run custom NMF function with 100 runs for both k = 3 and k = 4
     newMatrix[ ,(centroid-2)] <- runNMF(ExpData[[dataset]], k = centroid, nrun = nruns, 
                                         KClusterAssign = ClusterAssign, fname = fname)
-  } 
+  }
   
   # Assign results to list
   nmfClusters[[dataset]] <- newMatrix
+  
+  # Run custom NMF function with 10 runs to output cophenetic coefficient
+  coph_coeff <- runNMF(ExpData[[dataset]], coph = T)
+  
+  # Base name to save figures
+  sup_fname <- paste("NMF_Clusters_", names(ExpData)[dataset], sep = "")
+  
+  # Write the consensus mapping as a figure
+  png(paste("2.Clustering_DiffExprs/Figures/nmf/CopheneticMaps/", 
+            paste(sup_fname, '_k2-6', sep = ""), ".png", sep = ""), 
+      width = 950, height = 550)
+  
+  # Plot consensus maps
+  consensusmap(coph_coeff$consensus[1:5], labCol = NA, labRow = NA, main = "", fontsize = 12)
+  
+  # Close the connection
+  dev.off()
+  
+  # Write the Cophenetic Coefficient as a figure
+  png(paste("2.Clustering_DiffExprs/Figures/nmf/CopheneticMaps/", 
+            paste(sup_fname, 'coph_coeff', sep = ""), ".png", sep = ""), 
+      width = 270, height = 230)
+  
+  # Plot cophenetic coefficient
+  par(mar = c(4.5, 4.5, 1.5, 1))
+  plot(coph_coeff$measures$cophenetic, xaxt = "n", cex.axis = 1.5, cex.lab = 1.5,
+       xlab = 'k', ylab = 'Cophenetic Correlation')
+  axis(1, at=1:7, labels=2:8, cex.axis = 1.5)
+  lines(coph_coeff$measures$cophenetic, lwd = 2)
+  points(coph_coeff$measures$cophenetic, col = 'black', pch = 19, cex = 1.2)
+  
+  # Close the connection
+  dev.off()
 }
 
 ############################################
