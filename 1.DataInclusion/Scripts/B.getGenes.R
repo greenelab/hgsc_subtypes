@@ -1,6 +1,6 @@
 ############################################
-# High-grade serous ovarian cancer subtypes are similar across populations
-# 
+# Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes
+#  
 # Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
 # Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
 # ~~~~~~~~~~~~~~~~~~~~~

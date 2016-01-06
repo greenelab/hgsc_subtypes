@@ -1,8 +1,8 @@
 #!/bin/bash
 
 ############################################
-# High-grade serous ovarian cancer subtypes are similar across populations
-# 
+# Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes 
+#
 # Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
 # Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
 # ~~~~~~~~~~~~~~~~~~~~~
@@ -100,6 +100,13 @@ R --no-save --args $DATASETS "GSE12672_eset" < 1.DataInclusion/Scripts/B.getGene
 	# Investigate the similarities in cluster membership in original TCGA 2011 paper, the Konecny 2014 paper, 
 	# and the Tothill 2008 paper (Table 4)
 	R --no-save < 2.Clustering_DiffExprs/Scripts/G.Dataset_Concordance.R
+        
+        #################
+        #  Tothill LMP  #
+        #################
+        # Observe consensus matrices and cophenetic coefficients for Tothill dataset if LMP samples are not removed.
+        # This is similar to the results presented by TCGA supplementary figure S6.2
+        R --no-save < 2.Clustering_DiffExprs/Scripts/H.TCGA_SupFig6.2_TothillPrediction.R
 
 #################
 # PART THREE: 
@@ -107,7 +114,7 @@ R --no-save --args $DATASETS "GSE12672_eset" < 1.DataInclusion/Scripts/B.getGene
 #################
 # ~~~~~~~~~~~~~~~~~~~~~
 # The section will output several figures, all different goodness of fit metrics, for each dataset
-# The metrics include AIC, BIC, Gap Statistic, and Silhouette Widths
+# The metrics include AIC, BIC, Gap Statistic, and Silhouette Widths (Note: Cophenetic obtained in step 2)
 # ~~~~~~~~~~~~~~~~~~~~~
 
 # Perform AIC, BIC, and silhouette width analyses
