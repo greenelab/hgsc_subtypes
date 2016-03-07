@@ -69,7 +69,7 @@ for (dataset in 1:length(ExpData)) {
   cat("200 bootstraps completed:", paste(names(ExpData)[dataset], "\n"))
   
   # Get the plot ready
-  tiff(file.path("3.Fit", "Figures", "Gap", paste(names(ExpData)[dataset], "GAP.tiff",sep = "_")), 
+  tiff(file.path("3.Fit", "Figures", "GAP", paste(names(ExpData)[dataset], "GAP.tiff",sep = "_")), 
        width = 1200, height=1200)
   
   # Get proper margins
