@@ -51,7 +51,7 @@ R --no-save --args < 1.DataInclusion/Scripts/A.getInclusion.R  # (Table 1)
 # moderated t score vectors and in clustering, respectively. This script will also output Venn diagrams
 # for visualizing overlapping genes (Sup. Fig. S1) #NOTE: Bonome (GSE12672) is removed following the
 # across dataset correlations analysis. Add it here.
-R --no-save --args $DATASETS "GSE12672_eset" < 1.DataInclusion/Scripts/B.getGenes.R
+R --no-save --args $DATASETS "GSE26712_eset" < 1.DataInclusion/Scripts/B.getGenes.R
 
 #################
 # PART TWO: 
@@ -68,7 +68,7 @@ R --no-save --args $DATASETS "GSE12672_eset" < 1.DataInclusion/Scripts/B.getGene
 	#~k means & SAM~#
 	#################
 	# Perform k means and SAM (args: kmin, kmax, nstarts, seed, bNMF) (Figure 3)
-	R --no-save --args $KMIN $KMAX $NSTARTS $SEED FALSE $DATASETS "GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/A.runKMeans_SAM.R
+	R --no-save --args $KMIN $KMAX $NSTARTS $SEED FALSE $DATASETS "GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/A.run_kmeans_SAM.R
 
 	# Output correlation matrices (Figure 1)	
 	R --no-save --args $KMIN $KMAX $SEED Figures/CorrelationMatrix/ $DATASETS "GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/B.CorrelationMatrix.R
@@ -83,7 +83,7 @@ R --no-save --args $DATASETS "GSE12672_eset" < 1.DataInclusion/Scripts/B.getGene
 	R --no-save --args $KMIN $KMAX $NSTARTS $SEED $DATASETS < 2.Clustering_DiffExprs/Scripts/D.NMF.R
 
 	# Run SAM on NMF clusters (TRUE argument forces NMF analysis)
-	R --no-save --args $KMIN $KMAX $NSTARTS $SEED $DATASETS TRUE < 2.Clustering_DiffExprs/Scripts/A.runKMeans_SAM.R
+	R --no-save --args $KMIN $KMAX $NSTARTS $SEED TRUE $DATASETS "GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/A.run_kmeans_SAM.R
 
 	#################
 	#k means vs. NMF#
@@ -99,7 +99,7 @@ R --no-save --args $DATASETS "GSE12672_eset" < 1.DataInclusion/Scripts/B.getGene
 	#################
 	# Investigate the similarities in cluster membership in original TCGA 2011 paper, the Konecny 2014 paper, 
 	# and the Tothill 2008 paper (Table 4)
-	R --no-save < 2.Clustering_DiffExprs/Scripts/G.Dataset_Concordance.R
+	R --no-save < 2.Clustering_DiffExprs/Scripts/G.Dataset_concordance.R
         
         #################
         #  Tothill LMP  #
@@ -133,10 +133,10 @@ R --no-save --args 8 250 20 50 $SEED $DATSETS < 3.Fit/Scripts/B.GAP_GoodnessFit.
 # ~~~~~~~~~~~~~~~~~~~~~
 
 # Output Kaplan-Meier survival curves, and perform a cox proportional hazards regression model
-R --no-save --args $DATASETS < 3.Survival/Scripts/A.Survival.R
+R --no-save --args $DATASETS < 4.Survival/Scripts/A.Survival.R
 
 # Summarize the results of the survival analysis
-R --no-save --args $DATASETS < 3.Survival/Scripts/B.Summarize_Survival.R
+R --no-save --args $DATASETS < 4.Survival/Scripts/B.Summarize_Survival.R
 
 #################
 # PART FIVE: 
@@ -147,6 +147,6 @@ R --no-save --args $DATASETS < 3.Survival/Scripts/B.Summarize_Survival.R
 # ~~~~~~~~~~~~~~~~~~~~~
 
 # Output tables of cluster specific genes based on significant SAM FDR values (Sup. Table S4)
-R --no-save --args $DATASETS < 4.Pathway/Scripts/A.GeneEnrichment.R 
+R --no-save --args $DATASETS < 5.Pathway/Scripts/A.GeneEnrichment.R
 
 # The output of this script is input into a PANTHER pathways analysis (http://pantherdb.org/)
