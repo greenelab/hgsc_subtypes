@@ -10,8 +10,8 @@
 # Install Libraries
 ####################################
 cranLib <- c("reshape2", "outliers", "grid", "gplots", "RColorBrewer", "ggplot2", "cluster", "NMF", 
-             "GGally", "sfsmisc", "survival", "devtools")
-bioCLib <- c("curatedOvarianData", "siggenes")
+             "GGally", "sfsmisc", "survival", "plyr", "smr", "mnormt", "phylobase", "devtools")
+bioCLib <- c("curatedOvarianData", "siggenes", "BiocParallel", "sva", "impute", "limma")
 customLib <- "1.DataInclusion/doppelgangR-master/"
 
 # Install CRAN libraries
