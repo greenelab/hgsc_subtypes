@@ -1,5 +1,5 @@
 ############################################
-# Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes
+# High-grade serous ovarian cancer subtypes are similar across populations
 # 
 # Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
 # Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
@@ -405,7 +405,7 @@ MapClusters <- function (DistMatrixList, Reference = "TCGA") {
 
 
 
-runNMF <- function (Data, k, fname, KClusterAssign, nruns = 10, coph = F, coph_range = 2:8) {
+runNMF <- function (Data, k, fname, KClusterAssign, nruns = 10) {
   # ~~~~~~~~~~~~~~
   # This function will perform NMF clustering on gene expression data
   #
@@ -414,14 +414,11 @@ runNMF <- function (Data, k, fname, KClusterAssign, nruns = 10, coph = F, coph_r
   # k: The number of clusters NMF should find
   # fname: The output file name to store result
   # KClusterAssign: The k-means cluster assignments
-  # nruns: How many iterations NMF should perform
-  # coph: Decide whether or not to output cophentic coefficient plots
-  # coph_range: for what values of k is the cophenetic coefficient determined?
+  # nruns: How many iterations NMF should perform 
   #
   # Returns:
   # 1) Consensus matrices with silhouette and k-means tracks
   # 2) Cluster membership files for each sample
-  # 3) Cophenetic coefficient plots
   # ~~~~~~~~~~~~~~
   
   # Determine the minimum of the data
@@ -434,37 +431,30 @@ runNMF <- function (Data, k, fname, KClusterAssign, nruns = 10, coph = F, coph_r
     Data <- apply(Data, 2, function(x){x + const})
   }
   
-  if (!coph) {
-    # Perform nmf clustering
-    clus.nmf <- nmf(Data, k, nrun = nruns, .options = "t")
-    
-    # Get Clustermembership predictions
-    clusterMemb <- predict(clus.nmf)
-    
-    # Write the consensus mapping as a figure
-    png(paste("2.Clustering_DiffExprs/Figures/nmf/ConsensusMaps/",fname, ".png", sep = ""), 
-        width = 700, height = 570)
-    
-    # The plot colors are different according to the number of clusters
-    if (k == 3) {
-      consensusmap(clus.nmf, labCol = NA, labRow = NA, tracks = c("silhouette:"), 
-                   annCol = list("kmeans" = as.character(paste(KClusterAssign$ClusterK3))), 
-                   annColors = list("kmeans" = c("blue", "red", "green")), main = "", 
-                   fontsize = 20, treeheight = 60)
-    } else {
-      consensusmap(clus.nmf, labCol = NA, labRow = NA, tracks = c("silhouette:"), 
-                   annCol = list("kmeans" = as.character(paste(KClusterAssign$ClusterK4))), 
-                   annColors = list("kmeans" = c("blue", "red", "green", "purple")), main = "", 
-                   fontsize = 20, treeheight = 60)
-    }
-    dev.off()
-    
-    return(as.character(clusterMemb))
-    
+  # Perform nmf clustering
+  clus.nmf <- nmf(Data, k, nrun = nruns, .options = "t")
+  
+  # Get Clustermembership predictions
+  clusterMemb <- predict(clus.nmf)
+  
+  # Write the consensus mapping as a figure
+  png(paste("2.Clustering_DiffExprs/Figures/nmf/ConsensusMaps/",fname, ".png", sep = ""), 
+       width = 700, height = 570)
+  
+  # The plot colors are different according to the number of clusters
+  if (k == 3) {
+    consensusmap(clus.nmf, labCol = NA, labRow = NA, tracks = c("silhouette:"), 
+                 annCol = list("kmeans" = as.character(paste(KClusterAssign$ClusterK3))), 
+                 annColors = list("kmeans" = c("blue", "red", "green")), main = "", 
+                 fontsize = 20, treeheight = 60)
   } else {
-    estim.coeff <- nmf(Data, coph_range, nrun = 10, seed = 123456)
-    return(estim.coeff)
+    consensusmap(clus.nmf, labCol = NA, labRow = NA, tracks = c("silhouette:"), 
+                 annCol = list("kmeans" = as.character(paste(KClusterAssign$ClusterK4))), 
+                 annColors = list("kmeans" = c("blue", "red", "green", "purple")), main = "", 
+                 fontsize = 20, treeheight = 60)
   }
-
+  dev.off()
+  
+  return(as.character(clusterMemb))
 }
 
