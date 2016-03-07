@@ -106,7 +106,7 @@ R --no-save --args $DATASETS "GSE26712_eset" < 1.DataInclusion/Scripts/B.getGene
         #################
         # Observe consensus matrices and cophenetic coefficients for Tothill dataset if LMP samples are not removed.
         # This is similar to the results presented by TCGA supplementary figure S6.2
-        R --no-save < 2.Clustering_DiffExprs/Scripts/H.TCGA_SupFig6.2_TothillPrediction.R
+        # R --no-save < 2.Clustering_DiffExprs/Scripts/H.TCGA_SupFig6.2_TothillPrediction.R
 
 #################
 # PART THREE: 
