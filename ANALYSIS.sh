@@ -17,7 +17,7 @@
 # PART ZERO: 
 # Install Packages and Download Mayo data
 #################
-Rscript INSTALL.R  # Note: refer to the README for version control
+#Rscript INSTALL.R  # Note: refer to the README for version control
 
 # COMBAT adjust Mayo data
 Rscript 1.DataInclusion/Scripts/processMayoEset/Agilent1and2and3_COMBAT_datamerge.R
@@ -80,7 +80,7 @@ R --no-save --args $DATASETS "GSE26712_eset" < 1.DataInclusion/Scripts/B.getGene
 	#~~~~~~NMF~~~~~~#
 	#################
 	# Output consensus matrices, NMF cluster membership files (Sup. Figure S2) and cophenetic coefficients (Sup. Figures S3-S7)
-	R --no-save --args $KMIN $KMAX $NSTARTS $SEED $DATASETS < 2.Clustering_DiffExprs/Scripts/D.NMF.R
+	R --no-save --args $KMIN $KMAX $NSTARTS $SEED $DATASETS "GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/D.NMF.R
 
 	# Run SAM on NMF clusters (TRUE argument forces NMF analysis)
 	R --no-save --args $KMIN $KMAX $NSTARTS $SEED TRUE $DATASETS "GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/A.run_kmeans_SAM.R
@@ -106,7 +106,7 @@ R --no-save --args $DATASETS "GSE26712_eset" < 1.DataInclusion/Scripts/B.getGene
         #################
         # Observe consensus matrices and cophenetic coefficients for Tothill dataset if LMP samples are not removed.
         # This is similar to the results presented by TCGA supplementary figure S6.2
-        # R --no-save < 2.Clustering_DiffExprs/Scripts/H.TCGA_SupFig6.2_TothillPrediction.R
+        R --no-save < 2.Clustering_DiffExprs/Scripts/H.TCGA_SupFig6.2_TothillPrediction.R
 
 #################
 # PART THREE: 

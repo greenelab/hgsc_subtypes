@@ -7,7 +7,9 @@
 # Reproduce Supplementary Figure S6.2 using our genes in TCGA OvCa paper 
 # except without removing LMP samples to contrast our biological filtering
 # findings
-#
+
+set.seed(123)
+
 ################################
 # Load Libraries
 ################################

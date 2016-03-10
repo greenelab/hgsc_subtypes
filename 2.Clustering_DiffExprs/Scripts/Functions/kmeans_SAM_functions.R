@@ -361,18 +361,23 @@ AssignReference_NMF <- function (kmeans_dscore_dir, nmf_Dlist, nmf_cluster_list,
   return(nmf_cluster_list)
 }
 
-MapClusters <- function (DistMatrixList, Reference = "TCGA") {
+MapClusters <- function (DistMatrixList, dataset_names, Reference = "TCGA") {
   # ~~~~~~~~~~~~~~
   # This function will use a distance matrix and hierarchical clustering to map clusters 
   # across populations.
   #
   # Args: 
   # DistMatrixList: a list of distance matrices for each value of k
+  # dataset_names: a character string of all names in the dataset
   # Reference: defaults to TCGA; which population to use for mapping clusters across populations
   #
   # Returns:
   # New cluster assignments for the reference dataset
   # ~~~~~~~~~~~~~~
+  
+  # Curate the dataset names
+  dataset_names <- gsub('_eset', '', dataset_names)
+  dataset_names <- dataset_names[!grepl(Reference, dataset_names)]
   
   # This is initializing the list that we will be returning
   resultList <- list()
@@ -380,29 +385,51 @@ MapClusters <- function (DistMatrixList, Reference = "TCGA") {
   # Loop over each number of centroids
   for (centroid in substr(names(DistMatrixList), 2, 2)) {
     
+    # Add to the result list
+    resultList[[paste('K', centroid, sep = "")]] <- list()
+    
     # Convert the correlation matrix to a dist object
     thisDistance <- DistMatrixList[[paste("K", centroid, sep = "")]]
-
-    # Perform hierarchical clusterhing
-    thisHC <- hclust(thisDistance)
     
-    # Group the subtypes into k groups
-    thisGroups <- as.data.frame(cutree(thisHC, k = centroid))
+    # Subset to only consider correlations with the reference dataset
+    correlation_subset <- thisDistance[grep(Reference, thisDistance[,1]), ]
     
-    result <- list()
-    # Determine the group ID for each of the reference subtypes
-    for (hclusts in 1:as.numeric(centroid)) {
-      pattern <- paste(Reference, ".*_", hclusts, sep = "")
-      rowID <- grep(pattern, rownames(thisGroups))
-      oldGroupLabel <- thisGroups[rowID, 1]
+    # Remove Reference compared to Reference
+    correlation_subset <- correlation_subset[!grepl(Reference, correlation_subset[ ,2]), ]
+    
+    # Now, compare the already mapped reference clusters one by one to each dataset
+    reference_clus <- as.character(unique(correlation_subset[, 1]))
+    
+    # Make sure the reference clusters are in order
+    reference_clus <- reference_clus[order(reference_clus)]
+    
+    for (clus in 1:length(reference_clus)) {
+      # Keep adding to resultList
+      resultList[[paste('K', centroid, sep = "")]][[clus]] <- c(reference_clus[clus])
       
-      result[[hclusts]] <- rownames(thisGroups)[thisGroups[ ,1] == oldGroupLabel]
+      clus_subset <- correlation_subset[correlation_subset[ ,1] == reference_clus[clus], ]
+      for (dataset in dataset_names) {
+        clus_cor <- clus_subset[grep(dataset, clus_subset[ ,2]), ]
+        other_clus <- as.character(unique(clus_cor[, 2]))
+        max_cor <- -1
+        for (cur_clus in other_clus) {
+          cur_val <- clus_cor$value[clus_cor[,2] == cur_clus]
+          if (cur_val > max_cor) {
+            max_cor <- cur_val
+            max_clus <- cur_clus
+          }
+        }
+        # After this logic you have the cluster with the highest correlation
+        # Add it to the result list
+        resultList[[paste('K', centroid, sep = "")]][[clus]] <- c(resultList[[paste('K', centroid, sep = "")]][[clus]],
+                                                                  max_clus)
+        # Remove it from correlation_subset to never be considered again
+        correlation_subset <- correlation_subset[!grepl(max_clus, correlation_subset[, 2]), ]
+      }
     }
-    resultList[[paste("K", centroid, sep = "")]] <- result
   }
   return(resultList)
 }
-
 
 
 runNMF <- function (Data, k, fname, KClusterAssign, nruns = 10, coph = F, coph_range = 2:8) {
@@ -462,7 +489,7 @@ runNMF <- function (Data, k, fname, KClusterAssign, nruns = 10, coph = F, coph_r
     return(as.character(clusterMemb))
     
   } else {
-    estim.coeff <- nmf(Data, coph_range, nrun = 10, seed = 123456)
+    estim.coeff <- nmf(Data, coph_range, nrun = nruns, seed = 123456)
     return(estim.coeff)
   }
 

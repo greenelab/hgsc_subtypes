@@ -278,22 +278,9 @@ for (centroids in krange) {
   }
   NewDlist.cor[[paste("K", centroids, sep = "")]] <- dataUse
 }
-
-# Un-melt the tables and use the hierarchichal clustering to find new labels
-NewDlist.cor.dist <- list()
-for(p in 1:length(NewDlist.cor)) {
-  uniqueIndeces <- !duplicated(paste(NewDlist.cor[[p]]$Var1, NewDlist.cor[[p]]$Var2))
-  thisCorrelationDataFrame <- NewDlist.cor[[p]][uniqueIndeces,]
-  tmp.matrix <- dcast(thisCorrelationDataFrame, Var1 ~ Var2)
-  rownames(tmp.matrix) <- tmp.matrix[,1]
-  tmp.matrix <- tmp.matrix[,-1]
-  NewDlist.cor.dist[[p]] <- as.dist(-1 * tmp.matrix)
-}
-
-names(NewDlist.cor.dist) <- names(NewDlist.cor)
   
 # Map the rest of the clusters, after the reference clusters are in place
-newClus <- MapClusters(NewDlist.cor.dist, Reference = "TCGA") 
+newClus <- MapClusters(NewDlist.cor, dataset_names = names(ExpData), Reference = "TCGA")
 
 # Output a final cluster mappings list
 MapList <- list()

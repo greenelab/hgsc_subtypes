@@ -10,6 +10,8 @@
 args <- commandArgs(trailingOnly=TRUE)
 # args <- c("TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset")
 
+library(curatedOvarianData)
+
 # How many centroids assigned to k means algorithm
 clus <- c(3, 4)
 

@@ -10,12 +10,12 @@
 # Install Libraries
 ####################################
 cranLib <- c("reshape2", "outliers", "grid", "gplots", "RColorBrewer", "ggplot2", "cluster", "NMF", 
-             "GGally", "sfsmisc", "survival", "plyr", "smr", "mnormt", "phylobase", "devtools")
+             "GGally", "sfsmisc", "survival", "plyr", "Rcpp", "phylobase", "devtools")
 bioCLib <- c("curatedOvarianData", "siggenes", "BiocParallel", "sva", "impute", "limma")
 customLib <- "1.DataInclusion/doppelgangR-master/"
 
 # Install CRAN libraries
-install.packages(cranLib)
+install.packages(cranLib, repos = "http://cran.us.r-project.org")
 
 # Install Bioconductor libraries
 source("http://bioconductor.org/biocLite.R")
@@ -44,14 +44,8 @@ library(siggenes)
 library(GGally)
 library(sfsmisc)
 library(survival)
+library(mnormt)
+library(phylobase)
+library(devtools)
 
 sessionInfo()
-####################################
-# View Citations
-####################################
-Citations <- c(cranLib, bioCLib, customLib)
-for (package in Citations) {
-  cat("\n", package)
-  citation(package)
-  cat("\n\n\n")
-}
