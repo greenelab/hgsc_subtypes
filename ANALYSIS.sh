@@ -17,7 +17,7 @@
 # PART ZERO: 
 # Install Packages and Download Mayo data
 #################
-#Rscript INSTALL.R  # Note: refer to the README for version control
+Rscript INSTALL.R  # Note: refer to the README for version control
 
 # COMBAT adjust Mayo data
 Rscript 1.DataInclusion/Scripts/processMayoEset/Agilent1and2and3_COMBAT_datamerge.R
