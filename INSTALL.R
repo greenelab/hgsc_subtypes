@@ -7,7 +7,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~
 # This script will ensure reproducibility of workflow
 ############################################
-USAGE: This script is to be run upon docker image build
+# USAGE: This script is to be run upon docker image build
 
 mirror <- "http://cran.us.r-project.org"
 
