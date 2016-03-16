@@ -7,6 +7,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~
 # This script will ensure reproducibility of workflow
 ############################################
+USAGE: This script is to be run upon docker image build
 
 mirror <- "http://cran.us.r-project.org"
 
@@ -43,6 +44,7 @@ bioc_pkgs <- c(
   'affy',
   'Biobase',
   'BiocParallel',
+  'biomaRt',
   'sva',
   'impute',
   'siggenes',
@@ -54,10 +56,13 @@ biocLite(bioc_pkgs, suppressUpdates = TRUE)
 ######################
 # Install source packages
 ######################
+# These packages must remain version controlled locally.
+# See docker/dockerfile for instructions on how to install
+
 # doppelgangR
 customLib <- "hgsc_subtypes/1.DataInclusion/doppelgangR-master/"
 install.packages(customLib, repos = NULL, type = "source")
 
 # curatedOvarianData
-customLib <- "curatedOvarianData"
+customLib <- "curatedOvarianData/"
 install.packages(customLib, repos = NULL, type = "source")

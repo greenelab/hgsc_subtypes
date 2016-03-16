@@ -58,7 +58,7 @@ if(identical(all.equal(map[ ,2], rownames(mayo.exprs)), TRUE)) {
   # Map to gene IDs.  Requires the Normalizer function from the Sleipnir library.
   expr.withmap <- cbind(map, mayo.exprs)
   
-  write.table(expr.withmap, row.names = FALSE, file = "MayoDataWithMap.txt", sep = "\t")
+  write.table(expr.withmap, row.names = FALSE, file = "1.DataInclusion/Data/Mayo/MayoDataWithMap.txt", sep = "\t")
   
   # run the Normalizer tool from the Sleipnir library
   tmp.fn.in  <- tempfile("NormalizerIn")
