@@ -79,6 +79,7 @@ mayo.exprs.normalized <- read.delim(GeneLevelExpressionOutputLocation)
 
 # Restrict expression data to only those samples for which we have phenotype data
 mayo.exprs <- mayo.exprs.normalized[ ,rownames(mayo.pheno)]
+rownames(mayo.exprs) <- mayo.exprs.normalized[, 1]
 
 # Convert the phenotype data.frame into an annotated data.frame
 mayo.pheno.ADF <- new("AnnotatedDataFrame", data = mayo.pheno)

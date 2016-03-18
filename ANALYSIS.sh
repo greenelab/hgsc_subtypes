@@ -1,6 +1,6 @@
 #!/bin/bash
 
-exec 1>hgsc_analysis.out 
+exec &>hgsc_analysis.out 
 
 ############################################
 # Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes 

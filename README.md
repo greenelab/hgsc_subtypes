@@ -1,6 +1,6 @@
 
 ############################################
-# Analytical Code for "Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes"
+# Analytical Code for "Cross-population analysis of high-grade serous ovarian cancer does not support four subtypes"
 
 #### Way, G., Rudd, J., Wang, C., Hamidi, H., Fridley, B., Konecny, G., Goode, E., Greene, C., Doherty, J. 
 
@@ -19,28 +19,44 @@ Please report all bugs and direct coding questions to:
 GregWay@mail.med.upenn.edu
 
 Please direct questions regarding the analysis or other correspondence to:
-Jennifer.A.Doherty@dartmouth.edu
+Jennifer.A.Doherty@dartmouth.edu and/or CSGreene@mail.med.upenn.edu
 
 #######################
 # ANALYSIS
 #######################
-All scripts are intended to be run in sequential order as defined by the ANALYSIS.sh file. The bash script can be run directly in the terminal to replicate the findings, but this is not recommended since there are elements that require heavy computational resources that are not suitable to be performed on a standard personal computer. We do recommend to follow the bash script line by line to replicate the findings and to reproduce the figures and tables included in the manuscript. 
+For ease of use and to ensure reproducibility, all analyses should be performed in our Docker image <https://hub.docker.com/r/gregway/hgsc_subtypes/>
+To install docker, please follow the friendly instructions provided here: <https://docs.docker.com/linux/>
 
+After installing Docker, install our docker image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-e.g.
-# Define Constants
-DATASETS="TCGA_eset Mayo GSE32062.GPL6480_eset GSE9891_eset"
-KMIN=3
-KMAX=4
-SEED=123
-NSTARTS=100
-
-# Perform k-means and SAM (args: kmin, kmax, nstarts, seed, bNMF) (Also, this outputs Figure 3)
-R --no-save --args $KMIN $KMAX $NSTARTS $SEED $DATASETS FALSE < 2.Clustering_DiffExprs/Scripts/A.runKMeans_SAM.R
+$docker pull gregway/hgsc_subtypes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Build docker image
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$docker build -it gregway/hgsc_subtypes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Run docker image
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$docker run -it gregway/hgsc_subtypes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Note: many more figures and tables are included in this repository than in the manuscript.
+Inside the docker container, perform the following to reproduce all analyses
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/#cd hgsc_subtypes
+hgsc_subtypes/#./ANALYSIS.sh
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Alternatively, we provide a fully built docker image with all analyses completed
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$docker pull gregway/hgsc_subtypes_fullbuild
+$docker build -it gregway/hgsc_subtypes_fullbuild
+$docker run -it gregway/hgsc_subtypes_fullbuild
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To retrieve the full build without installing docker:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$wget -nv https://zenodo.org/record/32803/files/hgsc_subtypes_fullbuild
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #######################
 # Data
 #######################
@@ -49,49 +65,10 @@ All data was retrieved from curatedOvarianData except for the Mayo data (GSE7435
 #######################
 # DEPENDENCIES
 #######################
-To install all required CRAN and bioconductor packages, please run the INSTALL.R script
+All dependencies are pre-installed in the Docker image. 
 
-~~~~~~~~~~
-Rscript INSTALL.R
-~~~~~~~~~~
-
-#######################
-# VERSIONS TESTED
-#######################
-
-# R Version
-* R 3.1.2
-
-# R Packages
-* affy_1.44.0
-* Biobase_2.26.0
-* BiocGenerics_0.12.0 
-* BiocParallel_1.0.3
-* cluster_1.15.3
-* doppelgangR_0.10.3
-* GGally_0.5.0
-* ggplot2_1.0.1
-* gplots_2.17.0
-* limma_3.22.1
-* multtest_2.220
-* NMF_0.20.6
-* RColorBrewer_1.1-2
-* registry_0.2
-* reshape_0.8.5
-* reshape2_1.4.1
-* rngtools_1.2.4
-* sfsmisc_1.0-27
-* survival_2.38-1
-
-# Python Version
-* Python 2.7.6
-
-# Tested on Operating System
-* Ubuntu 14.04.2 LTS
-* Windows 8
-
-# Other
-* Sleipner (Normalizer version 1.0)
+* For specific R package installations, view INSTALL.R. 
+* The analysis also requires the Sleipnir Normalizer function
 
 #######################
 # ACKNOWLEDGEMENTS
