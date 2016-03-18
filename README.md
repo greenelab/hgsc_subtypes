@@ -42,8 +42,8 @@ $docker run -it gregway/hgsc_subtypes
 
 Inside the docker container, perform the following to reproduce all analyses
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/#cd hgsc_subtypes
-hgsc_subtypes/#./ANALYSIS.sh
+#cd hgsc_subtypes
+hgsc_subtypes#./ANALYSIS.sh
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Alternatively, we provide a fully built docker image with all analyses completed
