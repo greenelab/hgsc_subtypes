@@ -61,7 +61,7 @@ RUN cd sleipnir && ./configure --with-svm-perf=~/svmperf/ && make && make instal
 # docker build -t gregway/hgsc_subtypes --build-arg CACHEBUST=$CACHEBUST .
 # ARG CACHEBUST=1
 # Install git repository
-RUN git clone https://github.com/gwaygenomics/hgsc_subtypes.git
+RUN git clone https://github.com/greenelab/hgsc_subtypes.git
 
 # Install curatedOvarianData_1.8.0 from cached download
 RUN wget -nv https://bitbucket.org/gwaygenomics/download/raw/\
