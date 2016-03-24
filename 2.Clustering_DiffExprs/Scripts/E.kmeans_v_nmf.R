@@ -15,6 +15,7 @@ args <- commandArgs(trailingOnly=TRUE)
 library(reshape2)
 library(ggplot2)
 library(gridExtra)
+library(grid)
 
 ############################################
 # Load Data
