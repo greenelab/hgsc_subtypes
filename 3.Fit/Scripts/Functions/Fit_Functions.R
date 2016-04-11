@@ -124,19 +124,20 @@ RunSilhouette <- function (dataset, Name, MADgenes) {
                                              "ClusterMembership", "kmeans", membfile), row.names = 1)
   
   # Perform silhouette width analyses for k = 3 and k = 4
+  K2_sil <- silhouette(as.numeric(paste(ClusterAssign$ClusterK2)), dataDist)
   K3_sil <- silhouette(as.numeric(paste(ClusterAssign$ClusterK3)), dataDist)
   K4_sil <- silhouette(as.numeric(paste(ClusterAssign$ClusterK4)), dataDist)
   
   # Output figures
-  tiff(file.path("3.Fit/", "Figures", "Silhouette", paste(Name, "_Silhouette.tiff", sep="")), 
-       width = 1500, height = 1600)
+  png(file.path("3.Fit/", "Figures", "Silhouette", paste(Name, "_Silhouette.png", sep="")), 
+       width = 1100, height = 800)
   
   # Get appropriate margins
-  par(mfrow = c(1, 2))
-  par(mar = rep(5, 4))
-  par(cex.axis = 0.7, cex = 3, cex.main = 3)
-  
-  plot(K3_sil, main = "", xlab = "", sub = "", col = c("blue", "red", "green"), do.col.sort = T, do.n.k = F)
-  plot(K4_sil, main = "",  xlab = "", sub = "", col = c("blue", "red", "green", "purple"), do.col.sort = T, do.n.k = F)
+  par(mfrow = c(1, 3))
+  par(mar = c(2, 1.5, 1, 1.5))
+  par(cex.axis = 0.7, cex = 2, cex.main = 2)
+  plot(K2_sil, main = "", xlab = "", sub = "", col = c('skyblue1', 'tomato'), do.col.sort = T, do.n.k = F)
+  plot(K3_sil, main = "", xlab = "", sub = "", col = c('skyblue1', 'tomato', 'springgreen'), do.col.sort = T, do.n.k = F)
+  plot(K4_sil, main = "",  xlab = "", sub = "", col = c('skyblue1', 'tomato', 'springgreen', 'violet'), do.col.sort = T, do.n.k = F)
   dev.off()
 }

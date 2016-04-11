@@ -1,5 +1,5 @@
 ############################################
-# Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes
+# Cross-population analysis of high-grade serous ovarian cancer does not support four subtypes
 # 
 # Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
 # Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
@@ -62,11 +62,11 @@ for (dataset in 1:length(SAMList)) {
     for(cluster in 1:(ncol(useData) / 2)) { # Divide by two because each cluster has two columns
 
       # We are interested in cluster specific moderated t scores and p values
-      useCols <- ((cluster*2)-1):(cluster*2)
+      useCols <- ((cluster * 2) - 1):(cluster * 2)
       SAMdataSub <- useData[ ,useCols]
       
       # Get the genes that meet the cutoff
-      explanatoryGenes <- SAMdataSub[SAMdataSub[ ,2] < sig_alpha, ]
+      explanatoryGenes <- SAMdataSub[SAMdataSub[ , 2] < sig_alpha, ]
       
       # Store these genes into the temporary explanatory genes list
       tmp_ExpGene_list[[paste(dataname_cluster, cluster, sep = "_")]] <- explanatoryGenes
@@ -80,7 +80,7 @@ for (dataset in 1:length(SAMList)) {
 # Compare cluster genes
 ############################################
 # The second filtering step is to observe cluster specific overlaps 
-# across the 4 main datasets separately for k = 3 and k = 4
+# across the 4 main datasets separately for k = 2, k = 3, and k = 4
 subtypeOverlapingList <- centroidOverlapingList <- list()
 
 #Loop over the different numbers of centroids in the "TCGA_eset" gene list to begin
@@ -126,12 +126,14 @@ for (centroid in 1:length(ExplanatoryGenesList[["TCGA_eset"]])) {
 ############################################
 # Get data in format to write to file
 ############################################
-SigGeneMatrix <- matrix("", nrow = 800, ncol = 14)
+SigGeneMatrix <- matrix("", nrow = 800, ncol = 18)
+set_columns <- list(c(1,2), c(3, 4), c(5, 6), c(7, 8))
 for (centroid in 1:length(centroidOverlapingList)) {
   
   # Get Centroid Specific Data
   CentroidSpecific <- centroidOverlapingList[[centroid]]
   
+  data_matrix <- matrix("", nrow = 800, ncol = length(CentroidSpecific) * 2)
   for (clus in 1:length(CentroidSpecific)) {
     
     # Get Cluster Specific Data
@@ -145,19 +147,21 @@ for (centroid in 1:length(centroidOverlapingList)) {
       exprsSpecific <- ClusterSpecific[[regdir]]
       tmpMatrix[1:length(exprsSpecific), regdir] <- exprsSpecific
     }
-    
-    # Append these matrices into a full summary of pos and neg genes across clusters
-    if (length(CentroidSpecific) == 3) {
-      useColsMat <- ((clus * 2) - 1):(clus * 2)
-      SigGeneMatrix[ ,useColsMat] <- tmpMatrix
-    } else {
-      useColsMat <- (((clus * 2) - 1) + 6):((clus * 2) + 6)
-      SigGeneMatrix[ ,useColsMat] <- tmpMatrix
-    }
+    data_matrix[, c(set_columns[[clus]])] <- tmpMatrix
+  }
+  
+  # Append these matrices into a full summary of pos and neg genes across clusters
+  if (length(CentroidSpecific) == 2) {
+    SigGeneMatrix[ ,1:4] <- data_matrix
+  } else if(length(CentroidSpecific) == 3)  {
+    SigGeneMatrix[ ,5:10] <- data_matrix
+  } else {
+    SigGeneMatrix[ ,11:18] <- data_matrix
   }
 }
 
-colnames(SigGeneMatrix) <- c("K3Cluster1_Pos", "K3Cluster1_Neg", "K3Cluster2_Pos", "K3Cluster2_Neg", 
+colnames(SigGeneMatrix) <- c("K2Cluster1_Pos", "K2Cluster1_Neg", "K2Cluster2_Pos", "K2Cluster2_Neg",
+                             "K3Cluster1_Pos", "K3Cluster1_Neg", "K3Cluster2_Pos", "K3Cluster2_Neg", 
                              "K3Cluster3_Pos", "K3Cluster3_Neg", "K4Cluster1_Pos", "K4Cluster1_Neg", 
                              "K4Cluster2_Pos", "K4Cluster2_Neg", "K4Cluster3_Pos", "K4Cluster3_Neg", 
                              "K4Cluster4_Pos", "K4Cluster4_Neg")
@@ -169,43 +173,55 @@ write.table(SigGeneMatrix, file = "5.Pathway/Tables/Overlappling_Signinficant_Ge
 ############################################
 # Write Cluster Specific Genes to File
 ############################################
-k3_one_genes <- c(SigGeneMatrix[ , 1], SigGeneMatrix[ , 2])
+k2_one_genes <- c(SigGeneMatrix[ , 1], SigGeneMatrix[ , 2])
+k2_one_genes <- k2_one_genes[k2_one_genes != ""]
+k2_one_genes <- as.matrix(k2_one_genes)
+colnames(k2_one_genes) <- "Gene symbol"
+write.table(k2_one_genes, "5.Pathway/Gene_lists/K2_Cluster1_genes.csv", sep = ",", row.names = F, quote = F)
+
+k2_two_genes <- c(SigGeneMatrix[ , 3], SigGeneMatrix[ , 4])
+k2_two_genes <- k2_two_genes[k2_two_genes != ""]
+k2_two_genes <- as.matrix(k2_two_genes)
+colnames(k2_two_genes) <- "Gene symbol"
+write.table(k2_two_genes, "5.Pathway/Gene_lists/K2_Cluster2_genes.csv", sep = ",", row.names = F, quote = F)
+
+k3_one_genes <- c(SigGeneMatrix[ , 5], SigGeneMatrix[ , 6])
 k3_one_genes <- k3_one_genes[k3_one_genes != ""]
 k3_one_genes <- as.matrix(k3_one_genes)
 colnames(k3_one_genes) <- "Gene symbol"
 write.table(k3_one_genes, "5.Pathway/Gene_lists/K3_Cluster1_genes.csv", sep = ",", row.names = F, quote = F)
 
-k3_two_genes <- c(SigGeneMatrix[ , 3], SigGeneMatrix[ , 4])
+k3_two_genes <- c(SigGeneMatrix[ , 7], SigGeneMatrix[ , 8])
 k3_two_genes <- k3_two_genes[k3_two_genes != ""]
 k3_two_genes <- as.matrix(k3_two_genes)
 colnames(k3_two_genes) <- "Gene symbol"
 write.table(k3_two_genes, "5.Pathway/Gene_lists/K3_Cluster2_genes.csv", sep = ",", row.names = F, quote = F)
 
-k3_three_genes <- c(SigGeneMatrix[ , 5], SigGeneMatrix[ , 6])
+k3_three_genes <- c(SigGeneMatrix[ , 9], SigGeneMatrix[ , 10])
 k3_three_genes <- k3_three_genes[k3_three_genes != ""]
 k3_three_genes <- as.matrix(k3_three_genes)
 colnames(k3_three_genes) <- "Gene symbol"
 write.table(k3_three_genes, "5.Pathway/Gene_lists/K3_Cluster3_genes.csv", sep = ",", row.names = F, quote = F)
 
-k4_one_genes <- c(SigGeneMatrix[ , 7], SigGeneMatrix[ , 8])
+k4_one_genes <- c(SigGeneMatrix[ , 11], SigGeneMatrix[ , 12])
 k4_one_genes <- k4_one_genes[k4_one_genes != ""]
 k4_one_genes <- as.matrix(k4_one_genes)
 colnames(k4_one_genes) <- "Gene symbol"
 write.table(k4_one_genes, "5.Pathway/Gene_lists/K4_Cluster1_genes.csv", sep = ",", row.names = F, quote = F)
 
-k4_two_genes <- c(SigGeneMatrix[ , 9], SigGeneMatrix[ , 10])
+k4_two_genes <- c(SigGeneMatrix[ , 13], SigGeneMatrix[ , 14])
 k4_two_genes <- k4_two_genes[k4_two_genes != ""]
 k4_two_genes <- as.matrix(k4_two_genes)
 colnames(k4_two_genes) <- "Gene symbol"
 write.table(k4_two_genes, "5.Pathway/Gene_lists/K4_Cluster2_genes.csv", sep = ",", row.names = F, quote = F)
 
-k4_three_genes <- c(SigGeneMatrix[ , 11], SigGeneMatrix[ , 12])
+k4_three_genes <- c(SigGeneMatrix[ , 15], SigGeneMatrix[ , 16])
 k4_three_genes <- k4_three_genes[k4_three_genes != ""]
 k4_three_genes <- as.matrix(k4_three_genes)
 colnames(k4_three_genes) <- "Gene symbol"
 write.table(k4_three_genes, "5.Pathway/Gene_lists/K4_Cluster3_genes.csv", sep = ",", row.names = F, quote = F)
 
-k4_four_genes <- c(SigGeneMatrix[ , 13], SigGeneMatrix[ , 14])
+k4_four_genes <- c(SigGeneMatrix[ , 17], SigGeneMatrix[ , 18])
 k4_four_genes <- k4_four_genes[k4_four_genes != ""]
 k4_four_genes <- as.matrix(k4_four_genes)
 colnames(k4_four_genes) <- "Gene symbol"

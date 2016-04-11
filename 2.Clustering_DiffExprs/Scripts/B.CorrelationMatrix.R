@@ -1,5 +1,5 @@
 ############################################
-# Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes
+# Cross-population analysis of high-grade serous ovarian cancer does not support four subtypes
 # 
 # Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
 # Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
@@ -8,7 +8,7 @@
 # correlation matrix heatmaps
 
 args <- commandArgs(trailingOnly=TRUE)
-#args <- c(3, 4, 123, "Figures/CorrelationMatrix/", "TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset")
+#args <- c(2, 4, 123, "Figures/CorrelationMatrix/", "TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset")
 ###########################################
 # Load Libraries
 ############################################
@@ -121,16 +121,20 @@ for (dataset in 1:length(ExpData)) {
     # Reorder the gene expression dataset
     dataclustertmp <- CorMatrixOrder(ExpData[[dataset]], ClusterAssign, as.numeric(paste(centroid)))   
     
-    # Store side color information for k = 3
-    colorPool <- c("blue", "red", "green")
+    # Store side color information depending on cluster num
+    colorPool <- c('skyblue1', 'tomato')
     if (centroid == 2) {
-      colorPool <- c(colorPool, "purple")
+      colorPool <- c(colorPool, "springgreen")
+    } else if (centroid == 3) {
+      colorPool <- c(colorPool, "springgreen", "violet")
     }
     
     # The side colors are different in Bonome since the clusters are not similar
     if (name == "GSE26712_eset" & centroid == 1) {
-      colorPool <- c("gray75", "gray60", "gray45")
+      colorPool <- c("gray75", "gray60")
     } else if (name == "GSE26712_eset" & centroid == 2) {
+      colorPool <- c("gray75", "gray60", "gray45")
+    } else if (name == "GSE26712_eset" & centroid == 3) {
       colorPool <- c("gray75", "gray60", "gray45", "gray30")
     }
     

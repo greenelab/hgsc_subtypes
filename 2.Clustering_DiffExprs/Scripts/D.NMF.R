@@ -1,5 +1,5 @@
 ############################################
-# Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes
+# Cross-population analysis of high-grade serous ovarian cancer does not support four subtypes
 # 
 # Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
 # Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
@@ -7,7 +7,7 @@
 # This script will input a series of datasets and perform Non-negative Matrix Factorization (NMF)
 
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c(3, 4, 100, 123, "TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset")
+# args <- c(2, 4, 100, 123, "TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset")
 ################################
 # Load Libraries
 ################################
@@ -59,11 +59,11 @@ for (dataset in 1:length(ExpData)) {
   rownames(newMatrix) <- rownames(ClusterAssign)
   
   # For each centroid assignment, perform NMF and assign cluster membership files to newMatrix
-  for (centroid in rank1:rank2) {
-    fname <- paste("NMF_Clusters_", names(ExpData)[dataset], "_K", centroid, sep = "")
+  for (centroid in 1:length(rank1:rank2)) {
+    fname <- paste("NMF_Clusters_", names(ExpData)[dataset], "_K", centroid + 1, sep = "")
     
-    # Run custom NMF function with 100 runs for both k = 3 and k = 4
-    newMatrix[ ,(centroid-2)] <- runNMF(ExpData[[dataset]], k = centroid, nrun = nruns, 
+    # Run custom NMF function with 100 runs for k = 2, 3, and 4
+    newMatrix[ , centroid] <- runNMF(ExpData[[dataset]], k = centroid + 1, nrun = nruns, 
                                         KClusterAssign = ClusterAssign, fname = fname)
   }
   

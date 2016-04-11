@@ -31,7 +31,8 @@ cran_pkgs <- c(
   'gplots',
   'NMF',
   'outliers',
-  'survival'
+  'survival',
+  'VennDiagram'
 )
 
 install.packages(cran_pkgs, repos = mirror)
