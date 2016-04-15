@@ -737,11 +737,11 @@ if (!shuffle) {
       eval(parse(text = plot_eval))
       
       if (!bNMF) {
-        png(file.path("2.Clustering_DiffExprs/", "Figures", "DScoreHeatMaps", fName))
+        png(file.path("2.Clustering_DiffExprs", "Figures", "DScoreHeatMaps", fName))
         eval(parse(text = plot_eval))
         dev.off()
       } else {
-        png(file.path("2.Clustering_DiffExprs/", "Figures", "nmf", "DScoreHeatMaps", fName))
+        png(file.path("2.Clustering_DiffExprs", "Figures", "nmf", "DScoreHeatMaps", fName))
         eval(parse(text = plot_eval))
         dev.off()  
       }

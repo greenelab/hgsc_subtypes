@@ -50,7 +50,7 @@ SHUFFLE=TRUE
 # for use in downstream analyses
 # ~~~~~~~~~~~~~~~~~~~~~
 
-# We are using data from curatedOvarianData version 1.8
+# We are using data from curatedOvarianData version 1.8.0
 # NOTE: The Mayo Clinic Data is not currently in curatedOvarianData.
 
 # Output the samples for each dataset that pass the inclusion criteria
@@ -148,8 +148,8 @@ R --no-save --args 2 8 20 $NSTARTS $SEED $DATASETS < \
 
 # Determine gap statistic
 # NOTE: This step was performed on the Discovery Cluster at Dartmouth College
-R --no-save --args 8 250 20 50 $SEED $DATSETS < 3.Fit/Scripts/\
-B.GAP_GoodnessFit.R
+# R --no-save --args 8 250 20 50 $SEED $DATSETS < 3.Fit/Scripts/\
+# B.GAP_GoodnessFit.R
 
 #################
 # PART FOUR: 
