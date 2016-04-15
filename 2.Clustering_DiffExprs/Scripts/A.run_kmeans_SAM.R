@@ -1,5 +1,5 @@
 ############################################
-# Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes
+# Cross-population analysis of high-grade serous ovarian cancer does not support four subtypes
 # 
 # Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
 # Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
@@ -9,7 +9,7 @@
 # correlations
 
 args <- commandArgs(trailingOnly=TRUE)
-#args <- c(3, 4, 20, 123, TRUE, "TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset")
+#args <- c(2, 4, 20, 123, FALSE, TRUE, "TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset")
 ############################################
 # Load Libraries
 ############################################
@@ -20,9 +20,12 @@ library(RColorBrewer)
 library(siggenes)
 library(GGally)
 library(reshape2)
+library(gridExtra)
+library(grid)
 
 # The script holds custom functions to run kmeans and SAM
 source("2.Clustering_DiffExprs/Scripts/Functions/kmeans_SAM_functions.R")
+source("2.Clustering_DiffExprs/Scripts/Functions/heatmap3.R")
 
 # The script loads the ovarian cancer datasets
 source("1.DataInclusion/Scripts/Functions/LoadOVCA_Data.R")
@@ -31,10 +34,11 @@ source("1.DataInclusion/Scripts/Functions/LoadOVCA_Data.R")
 # Constants
 ############################################
 k <- as.numeric(paste(args[1])) 
-k2 <- as.numeric(paste(args[2]))  # Number of clusters 
+k2 <- as.numeric(paste(args[2]))
 kStarts <- as.numeric(paste(args[3])) 
 kSEED <- as.numeric(paste(args[4])) 
 bNMF <- as.logical(args[5])
+shuffle <- as.logical(args[6])
 
 # Separate the eset arguments from the rest of the commandArgs
 argsCurated <- args[grep("eset", args)]
@@ -51,7 +55,7 @@ if("Mayo" %in% args) {
 }
 
 # Use the LoadOVCA_Data function to read in the datasets subset by commongenes
-ExpData <- LoadOVCA_Data(datasets = argsCurated, genelist_subset = "commongenes")
+ExpData <- LoadOVCA_Data(datasets = argsCurated, genelist_subset = "commongenes", shuffle = shuffle)
 
 # Read in common genes csv file. The csv was generated as an intersection of the genes in 
 # TCGA, Yoshihara, Mayo, Tothill, and Bonome
@@ -88,7 +92,7 @@ if (!bNMF) {
     file <- NMF_files[grepl(dataset, NMF_files)]
     NMFclusterMemb <- read.csv(paste("2.Clustering_DiffExprs/Tables/ClusterMembership/nmf/", 
                                      file, sep = ""), sep = ",", row.names = 1, header = T)
-    colnames(NMFclusterMemb) <- c("ClusterK3", "ClusterK4")
+    colnames(NMFclusterMemb) <- c("ClusterK2", "ClusterK3", "ClusterK4")
     Clusters[[dataset]] <- NMFclusterMemb
   }
 }
@@ -125,7 +129,7 @@ for (dataset in argsCurated) {
     # Find the d score vector indices
     indeces <- grep("D", colnames(SamList[[listIndex]]))
     tmpSam <- SamList[[listIndex]][indeces]
-    colnames(tmpSam) <- paste(names(SamList)[listIndex], colnames(tmpSam),sep="_")
+    colnames(tmpSam) <- paste(names(SamList)[listIndex], colnames(tmpSam), sep="_")
     if (elem == 1) {
       tmpSAMdata <- tmpSam
     } else {
@@ -201,7 +205,8 @@ if (bNMF) {
                                      nmf_Dlist = Dlist, nmf_cluster_list = Clusters,
                                      Reference = "TCGA") 
 } else {
-  NewClusters <- AssignReference("TCGA", Cluster = "ClusterK3", Cor = WithinDatasetCor)
+  NewClusters <- AssignReference("TCGA", Cluster = "ClusterK3", Cor = WithinDatasetCor, 
+                                 ClusterList = Clusters)
 }
 
 # Run SAM again but with TCGA clusters assigned as a reference
@@ -264,7 +269,7 @@ for (centroids in krange) {
       tmpcor <- cor(corData, use = "p")
       
       # Remove upper triangle of correlation matrix
-      tmpcor[upper.tri(tmpcor, diag=TRUE)] <- NA
+      tmpcor[upper.tri(tmpcor, diag = TRUE)] <- NA
       
       # Melt the correlation matrix for a vector by vector correlation
       tmpcor <- melt(tmpcor)
@@ -329,19 +334,21 @@ for (centroid in 1:length(NewClusters)) {
 names(Clusters.mapped) <- names(NewClusters)
 
 # Write the cluster re-assignments
-if (!bNMF) {
-  for (i in 1:length(Clusters.mapped)) {
-    fName <- paste("KMembership_", names(ExpData)[i], ".csv", sep="")
-    write.csv(Clusters.mapped[[i]], file = file.path("2.Clustering_DiffExprs", 
-                                                     "Tables", "ClusterMembership", 
-                                                     "kmeans", fName), row.names = TRUE)
-  }
-} else {
-  for (i in 1:length(Clusters.mapped)) {
-    fName <- paste("KMembership_", names(ExpData)[i], "_mapped.csv", sep = "")
-    write.csv(Clusters.mapped[[i]], file = file.path("2.Clustering_DiffExprs/", 
-                                                     "Tables", "ClusterMembership",
-                                                     "nmf", fName), row.names = TRUE)
+if(!shuffle) {
+  if (!bNMF) {
+    for (i in 1:length(Clusters.mapped)) {
+      fName <- paste("KMembership_", names(ExpData)[i], ".csv", sep="")
+      write.csv(Clusters.mapped[[i]], file = file.path("2.Clustering_DiffExprs", 
+                                                       "Tables", "ClusterMembership", 
+                                                       "kmeans", fName), row.names = TRUE)
+    }
+  } else {
+    for (i in 1:length(Clusters.mapped)) {
+      fName <- paste("KMembership_", names(ExpData)[i], "_mapped.csv", sep = "")
+      write.csv(Clusters.mapped[[i]], file = file.path("2.Clustering_DiffExprs/", 
+                                                       "Tables", "ClusterMembership",
+                                                       "nmf", fName), row.names = TRUE)
+    }
   }
 }
 
@@ -352,22 +359,26 @@ if (!bNMF) {
 FDR <- 0.05 / nrow(CommonGenes)
 
 # Run SAM one last time with all the clusters mapped
-SamList.mapped <- RunSam(ExpData, Clusters.mapped, d.stat, type = "Delta", kFDR = FDR)
-
-Deltas <- SamList.mapped[[2]]
-
-SamList.mapped <- SamList.mapped[[1]]
+if (!shuffle) {
+  SamList.mapped <- RunSam(ExpData, Clusters.mapped, d.stat, type = "Delta", kFDR = FDR)
+  Deltas <- SamList.mapped[[2]]
+  SamList.mapped <- SamList.mapped[[1]]
+} else {
+  SamList.mapped <- RunSam(ExpData, Clusters.mapped, d.stat)
+}
 
 # We are only interested in the SAM results using k-means
-if (!bNMF) {
-  write.table(Deltas, "2.Clustering_DiffExprs/Tables/SAM_Deltas.csv", sep = ",") 
-  
-  # Write the results of the SAM to a folder
-  for (i in 1:length(SamList.mapped)) {
-    file.name <- paste("2.Clustering_DiffExprs/Tables/SAM_results/SAM_pVal-Stat_", 
-                       names(SamList.mapped)[i], ".csv", sep = "")
-    write.table(SamList.mapped[[i]], file = file.name, sep = ",", row.names = T, 
-                col.names = NA)
+if (!shuffle) {
+  if (!bNMF) {
+    write.table(Deltas, "2.Clustering_DiffExprs/Tables/SAM_Deltas.csv", sep = ",") 
+    
+    # Write the results of the SAM to a folder
+    for (i in 1:length(SamList.mapped)) {
+      file.name <- paste("2.Clustering_DiffExprs/Tables/SAM_results/SAM_pVal-Stat_", 
+                         names(SamList.mapped)[i], ".csv", sep = "")
+      write.table(SamList.mapped[[i]], file = file.name, sep = ",", row.names = T, 
+                  col.names = NA)
+    }
   }
 }
 
@@ -401,16 +412,18 @@ for (dtaset in 1:length(argsCurated)) {
   
   # Write to the disk the dataframe of dataset specific moderated t score vectors and 
   # specify if nmf or not
-  if (!bNMF) {
-    write.table(tmpData, file = paste("2.Clustering_DiffExprs/Tables/DScores/", 
-                                      argsCurated[dtaset], "_kmeans_DScoreVectors.csv", sep = ""), 
-                sep = ",", row.names = T, col.names = NA)
-  } else {
-    write.table(tmpData, file = paste("2.Clustering_DiffExprs/Figures/nmf/DscoreVectors/", 
-                                      argsCurated[dtaset], "_nmf_DScoreVectors.csv", sep = ""), 
-                sep = ",", row.names = T, col.names = NA)
+  if (!shuffle) {
+    if (!bNMF) {
+      write.table(tmpData, file = paste("2.Clustering_DiffExprs/Tables/DScores/", 
+                                        argsCurated[dtaset], "_kmeans_DScoreVectors.csv", sep = ""), 
+                  sep = ",", row.names = T, col.names = NA)
+    } else {
+      write.table(tmpData, file = paste("2.Clustering_DiffExprs/Figures/nmf/DscoreVectors/", 
+                                        argsCurated[dtaset], "_nmf_DScoreVectors.csv", sep = ""), 
+                  sep = ",", row.names = T, col.names = NA)
+    }
   }
- 
+
   Dlist.mapped[[argsCurated[dtaset]]] <- tmpData
 }
 
@@ -462,14 +475,16 @@ for (centroid in 1:length(Dlist.mapped)) {
   tmpCor <- cor(Dlist.mapped[[centroid]], use = "p")
   WithinDatasetCor[[centroid]] <- tmpCor
   names(WithinDatasetCor)[centroid] <- names(Dlist.mapped)[centroid]
-  if (!bNMF) {
-    write.table(WithinDatasetCor[[centroid]], file = 
-                  paste("2.Clustering_DiffExprs/Tables/WithinCor/", names(WithinDatasetCor)[centroid],
-                        "WithinDatasetCorrelations.csv", sep = ""), row.names = T, col.names = NA, sep = ",")
-  } else {
-    write.table(WithinDatasetCor[[centroid]], file = 
-                  paste("2.Clustering_DiffExprs/Figures/nmf/WithinCor/", names(WithinDatasetCor)[centroid],
-                        "nmf_WithinDatasetCorrelations.csv", sep = ""), row.names = T, col.names = NA, sep = ",")
+  if (!shuffle) {
+    if (!bNMF) {
+      write.table(WithinDatasetCor[[centroid]], file = 
+                    paste("2.Clustering_DiffExprs/Tables/WithinCor/", names(WithinDatasetCor)[centroid],
+                          "WithinDatasetCorrelations.csv", sep = ""), row.names = T, col.names = NA, sep = ",")
+    } else {
+      write.table(WithinDatasetCor[[centroid]], file = 
+                    paste("2.Clustering_DiffExprs/Figures/nmf/WithinCor/", names(WithinDatasetCor)[centroid],
+                          "nmf_WithinDatasetCorrelations.csv", sep = ""), row.names = T, col.names = NA, sep = ",")
+    }
   }
 }
 
@@ -478,12 +493,14 @@ for (centroid in 1:length(Dlist.mapped.cor)) {
   tmpCor <- dcast(Dlist.mapped.cor[[centroid]], Var1~Var2, mean, value = value)
   rownames(tmpCor) <- tmpCor[ ,1]
   tmpCor <- tmpCor[ ,-1]
-  if (!bNMF) {
-    write.table(tmpCor, file = paste("2.Clustering_DiffExprs/Tables/AcrossCor/AcrossDatasetCor_K",
-                                     krange[centroid], ".csv", sep = ""), sep = ",", row.names = T, col.names = NA)
-  } else {
-    write.table(tmpCor, file = paste("2.Clustering_DiffExprs/Figures/nmf/AcrossCor/AcrossDatasetCor_nmf_K",
-                                     krange[centroid], ".csv", sep = ""), sep = ",", row.names = T, col.names = NA)
+  if (!shuffle) {
+    if (!bNMF) {
+      write.table(tmpCor, file = paste("2.Clustering_DiffExprs/Tables/AcrossCor/AcrossDatasetCor_K",
+                                       krange[centroid], ".csv", sep = ""), sep = ",", row.names = T, col.names = NA)
+    } else {
+      write.table(tmpCor, file = paste("2.Clustering_DiffExprs/Figures/nmf/AcrossCor/AcrossDatasetCor_nmf_K",
+                                       krange[centroid], ".csv", sep = ""), sep = ",", row.names = T, col.names = NA)
+    }
   }
 }
 
@@ -496,73 +513,280 @@ for (cor.list in 1:length(Dlist.mapped.cor)) {
   }
 }
 
+datasets <- argsCurated[-grep("GSE26712_eset", argsCurated)]
+
 ############################################
 # Plot Re-Assigned Heatmaps
 ############################################
-for (plot in 1:length(Dlist.mapped.cor)) {
-  if (!bNMF) {
-      fName <- paste(paste("AssignedDScoreHeatMap_K", krange[plot], sep=""), 
-                     "FilteredSamples.png", sep="_")
-    } else {
-      fName <- paste(paste("AssignedDScoreHeatMap_nmf_K", krange[plot], sep=""), 
-                     "FilteredSamples.png", sep="_")
+if (!shuffle) {
+  for (plot in 1:length(Dlist.mapped.cor)) {
+    if (!bNMF) {
+        fName <- paste(paste("AssignedDScoreHeatMap_K", krange[plot], sep=""), 
+                       "FilteredSamples", sep="_")
+      } else {
+        fName <- paste(paste("AssignedDScoreHeatMap_nmf_K", krange[plot], sep=""), 
+                       "FilteredSamples_sepPlot", sep="_")
+      }
+
+    num_clus <- krange[plot]
+    
+    # Build indeces for plot comparisions
+    all_centroid_plots <- list()
+    data_iter <- 1
+    x_axis_labels <- c(3, 6, 9)
+    y_axis_labels <- c(1, 2, 3)
+    for (i in datasets[1:(length(datasets) - 1)]) {
+      other_comparisons <- Dlist.mapped.cor[[plot]][grepl(i, Dlist.mapped.cor[[plot]][, 1]), ]
+      for (j in datasets[2:length(datasets)]) {
+        builder <- paste(i, j, sep = '-')
+        print(builder)
+        
+        final_comparison <- other_comparisons[grepl(j, other_comparisons[, 2]), ]
+        final_comparison <- final_comparison[1:(nrow(final_comparison) / 2), ]
+        if (data_iter == 1) {
+          blank_glob <- ggplot(data = data.frame(final_comparison), aes(x = Var1, y = Var2, fill = as.numeric(paste(value)))) + 
+            geom_blank() + xlab("") + ylab("") + 
+            theme(axis.line = element_blank(),
+                  axis.text.x = element_blank(),
+                  axis.text.y = element_blank(),
+                  axis.ticks = element_blank(), 
+                  panel.background = element_blank(),
+                  panel.border = element_blank(), 
+                  panel.grid.major = element_blank(),
+                  panel.grid.minor = element_blank(), 
+                  plot.background = element_blank(), 
+                  legend.position = "none")
+        }
+        g <- ggplot(data = data.frame(final_comparison), aes(x = Var1, y = Var2, fill = as.numeric(paste(value))))
+        g <- g + 
+          geom_tile(color = "white") + 
+          scale_fill_gradient2(high = "red", low = "blue", mid = "white", midpoint = 0, limit = c(-1, 1)) + 
+          xlab("") + 
+          ylab("") + 
+          scale_x_discrete(labels = paste(1:num_clus)) + 
+          scale_y_discrete(labels = paste(1:num_clus)) +
+          theme(axis.line = element_blank(),
+                axis.ticks = element_blank(), 
+                panel.background = element_blank(),
+                panel.border = element_blank(), 
+                panel.grid.major = element_blank(),
+                panel.grid.minor = element_blank(), 
+                plot.background = element_blank(), 
+                legend.position = "none")
+        
+        # Axis Labels do not appear on all plots
+        if (data_iter %in% x_axis_labels) {
+          g <- g + theme(axis.text.x = element_text(face = 'bold', size = 18, colour = 'black'),
+                         axis.text.y = element_text(face = 'bold', size = 18, angle = 90, hjust = 0.4, colour = 'white'),
+                         plot.margin = unit(c(-0.3, -0.3, 0, -0.3), 'cm'))
+        }
+        if (data_iter %in% y_axis_labels) {
+          g <- g + theme(axis.text.y = element_text(face = 'bold', size = 18, angle = 90, hjust = 0.4, colour = 'black'),
+                         axis.text.x = element_text(face = 'bold', size = 18, angle = 90, hjust = 0.4, colour = 'white'),
+                         plot.margin = unit(c(-0.3, -0.3, -0.3, 0), 'cm'))
+        }
+        if (!(data_iter %in% c(x_axis_labels, y_axis_labels))) {
+          g <- g + theme(axis.text.x = element_text(face = 'bold', size = 18, angle = 90, hjust = 0.4, colour = 'white'), 
+                         axis.text.y = element_text(face = 'bold', size = 18, angle = 90, hjust = 0.4, colour = 'white'),
+                         plot.margin = unit(c(-0.3, -0.3, -0.3, -0.3), 'cm'))
+        }
+        if (data_iter %in% intersect(x_axis_labels, y_axis_labels)) {
+          g <- g + theme(axis.text.y = element_text(face = 'bold', size = 18, angle = 90, hjust = 0.4, colour = 'black'),
+                         axis.text.x = element_text(face = 'bold', size = 18, angle = 0, colour = 'black'),
+                         plot.margin = unit(c(-0.3, -0.3, 0, 0), 'cm'))
+        }
+        if (data_iter == 1) {
+          g <- g + theme(plot.margin = unit(c(0, -0.3, -0.3, 0), 'cm'))
+        }
+        
+        if (data_iter == 9) {
+          g <- g + theme(plot.margin = unit(c(-0.3, 0, 0, -0.3), 'cm'))
+        }
+        all_centroid_plots[[data_iter]] <- g
+        data_iter = data_iter + 1
+      }
     }
   
-  ggplot(data = Dlist.mapped.cor[[plot]], aes(x = Var1, y = Var2, fill = value)) + 
-  geom_tile(color = "white") + scale_fill_gradient2(high = "red", low = "blue", mid = "white", midpoint = 0, 
-                                                    limit = c(-1, 1), name = 
-                                                      "Moderated t Score\nPearson\nCorrelation") + 
-    xlab("") + ylab("") + theme(axis.line = element_blank(), axis.text.x = element_blank(), 
-                                axis.text.y = element_blank(), axis.ticks = element_blank(), 
-                                panel.background = element_blank(), panel.border = element_blank(), 
-                                panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
-                                plot.background = element_blank(), legend.position = "none")
+    # We are only interested in certain plots in a specific order
+    plot_order <- list(all_centroid_plots[[1]], blank_glob, blank_glob, all_centroid_plots[[2]],
+                       all_centroid_plots[[5]], blank_glob, all_centroid_plots[[3]],
+                       all_centroid_plots[[6]], all_centroid_plots[[9]])
     
-  if (!bNMF) {
-      ggsave(file.path("2.Clustering_DiffExprs/", "Figures", "DScoreHeatMaps", fName),
-             width = 11, height = 11)
+    # Build a string to evaluate
+    plot_eval <- 'full_grobs <- grid.arrange('
+    for (p in 1:length(plot_order)) {
+      plot_eval <- paste0(plot_eval, 'plot_order[[', p, ']]', ', ')
+    }
+    plot_eval <- paste0(plot_eval, 'ncol = 3', ',nrow = 3, heights = rep(0.1, 3) )')
+    eval(parse(text = plot_eval))
+  
+    if (!bNMF) {
+      png(file.path("2.Clustering_DiffExprs/", "Figures", "DScoreHeatMaps", fName))
+      eval(parse(text = plot_eval))
+      dev.off()
+    } else {
+      png(file.path("2.Clustering_DiffExprs/", "Figures", "nmf", "DScoreHeatMaps", fName))
+      eval(parse(text = plot_eval))
+      dev.off()  
+    }
+  }
+  # Make a different plot for the shuffled data
   } else {
-      ggsave(file.path("2.Clustering_DiffExprs/", "Figures", "nmf", "DScoreHeatMaps", fName),
-             width = 11, height = 11)
-  }  
-} 
+    
+    for (plot in 1:length(Dlist.mapped.cor)) {
+      if (!bNMF) {
+        fName <- paste(paste("AssignedDScoreHeatMap_K", krange[plot], sep=""), 
+                       "FilteredSamples_shuffle.png", sep="_")
+      } else {
+        fName <- paste(paste("AssignedDScoreHeatMap_nmf_K", krange[plot], sep=""), 
+                       "FilteredSamples_sepPlot_shuffle.png", sep="_")
+      }
+      
+      num_clus <- krange[plot]
+      
+      # Build indeces for plot comparisions
+      all_centroid_plots <- list()
+      data_iter <- 1
+      x_axis_labels <- c(4, 8, 12, 16)
+      y_axis_labels <- c(1, 2, 3, 4)
+      for (i in datasets[1:length(datasets)]) {
+        other_comparisons <- Dlist.mapped.cor[[plot]][grepl(i, Dlist.mapped.cor[[plot]][, 1]), ]
+        for (j in datasets[1:length(datasets)]) {
+          builder <- paste(i, j, sep = '-')
+          print(builder)
+          
+          final_comparison <- other_comparisons[grepl(j, other_comparisons[, 2]), ]
+          final_comparison <- final_comparison[1:(nrow(final_comparison) / 2), ]
+          if (data_iter == 1) {
+            blank_glob <- ggplot(data = data.frame(final_comparison), aes(x = Var1, y = Var2, 
+                                                                          fill = as.numeric(paste(value)))) + 
+              geom_blank() + xlab("") + ylab("") + 
+              theme(axis.line = element_blank(),
+                    axis.text.x = element_blank(),
+                    axis.text.y = element_blank(),
+                    axis.ticks = element_blank(), 
+                    panel.background = element_blank(),
+                    panel.border = element_blank(), 
+                    panel.grid.major = element_blank(),
+                    panel.grid.minor = element_blank(), 
+                    plot.background = element_blank(), 
+                    legend.position = "none")
+          }
+          g <- ggplot(data = data.frame(final_comparison), aes(x = Var1, y = Var2, fill = as.numeric(paste(value))))
+          g <- g + 
+            geom_tile(color = "white") + 
+            scale_fill_gradient2(high = "red", low = "blue", mid = "white", midpoint = 0, limit = c(-1, 1)) + 
+            xlab("") + 
+            ylab("") + 
+            scale_x_discrete(labels = paste(1:num_clus)) + 
+            scale_y_discrete(labels = paste(1:num_clus)) +
+            theme(axis.line = element_blank(),
+                  axis.ticks = element_blank(), 
+                  panel.background = element_blank(),
+                  panel.border = element_blank(), 
+                  panel.grid.major = element_blank(),
+                  panel.grid.minor = element_blank(), 
+                  plot.background = element_blank(), 
+                  legend.position = "none")
+          
+          # Axis Labels do not appear on all plots
+          if (data_iter %in% x_axis_labels) {
+            g <- g + theme(axis.text.x = element_text(face = 'bold', size = 18, colour = 'black'),
+                           axis.text.y = element_text(face = 'bold', size = 18, angle = 90, hjust = 0.4, colour = 'white'),
+                           plot.margin = unit(c(-0.3, -0.3, 0, -0.3), 'cm'))
+          }
+          if (data_iter %in% y_axis_labels) {
+            g <- g + theme(axis.text.y = element_text(face = 'bold', size = 18, angle = 90, hjust = 0.4, colour = 'black'),
+                           axis.text.x = element_text(face = 'bold', size = 18, angle = 90, hjust = 0.4, colour = 'white'),
+                           plot.margin = unit(c(-0.3, -0.3, -0.3, 0), 'cm'))
+          }
+          if (!(data_iter %in% c(x_axis_labels, y_axis_labels))) {
+            g <- g + theme(axis.text.x = element_text(face = 'bold', size = 18, angle = 90, hjust = 0.4, colour = 'white'), 
+                           axis.text.y = element_text(face = 'bold', size = 18, angle = 90, hjust = 0.4, colour = 'white'),
+                           plot.margin = unit(c(-0.3, -0.3, -0.3, -0.3), 'cm'))
+          }
+          if (data_iter %in% intersect(x_axis_labels, y_axis_labels)) {
+            g <- g + theme(axis.text.y = element_text(face = 'bold', size = 18, angle = 90, hjust = 0.4, colour = 'black'),
+                           axis.text.x = element_text(face = 'bold', size = 18, angle = 0, colour = 'black'),
+                           plot.margin = unit(c(-0.3, -0.3, 0, 0), 'cm'))
+          }
+          if (data_iter == 1) {
+            g <- g + theme(plot.margin = unit(c(0, -0.3, -0.3, 0), 'cm'))
+          }
+          
+          if (data_iter == 16) {
+            g <- g + theme(plot.margin = unit(c(-0.3, 0, 0, -0.3), 'cm'))
+          }
+          all_centroid_plots[[data_iter]] <- g
+          data_iter = data_iter + 1
+        }
+      }
+      
+      # We are only interested in certain plots in a specific order
+      plot_order <- list(all_centroid_plots[[1]], blank_glob, blank_glob, blank_glob, 
+                         all_centroid_plots[[2]], all_centroid_plots[[6]], blank_glob, blank_glob,
+                         all_centroid_plots[[3]], all_centroid_plots[[7]], all_centroid_plots[[11]], blank_glob, 
+                         all_centroid_plots[[4]], all_centroid_plots[[8]], all_centroid_plots[[12]], all_centroid_plots[[16]])
+      
+      # Build a string to evaluate
+      plot_eval <- 'full_grobs <- grid.arrange('
+      for (p in 1:length(plot_order)) {
+        plot_eval <- paste0(plot_eval, 'plot_order[[', p, ']]', ', ')
+      }
+      plot_eval <- paste0(plot_eval, 'ncol = 4', ',nrow = 4, heights = rep(0.1, 4) )')
+      eval(parse(text = plot_eval))
+      
+      if (!bNMF) {
+        png(file.path("2.Clustering_DiffExprs", "Figures", "DScoreHeatMaps", fName))
+        eval(parse(text = plot_eval))
+        dev.off()
+      } else {
+        png(file.path("2.Clustering_DiffExprs", "Figures", "nmf", "DScoreHeatMaps", fName))
+        eval(parse(text = plot_eval))
+        dev.off()  
+      }
+    }
+}
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~DEPRECATED~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ############################################
 # Plot ScatterPlots to append to Heatmaps
 ############################################
 # Build a list that will hold the moderated t score vectors for the datasets
-ggPairsFigureList <- list()
-for (centroid in 1:length(krange)) {
-  ggPairsFigure <- c()
-  for (dtaset in 1:(length(Dlist.mapped) - 1)) {
-    tmp <- Dlist.mapped[[dtaset]][ ,grepl(paste("K", krange[centroid], sep = ""), 
-                                    colnames(Dlist.mapped[[dtaset]]))]
-    if (dtaset == 1) {
-      ggPairsFigure <- tmp
-    } else {
-      ggPairsFigure <- cbind(ggPairsFigure, tmp)
-    }
-  }
-  ggPairsFigureList[[paste("K", krange[centroid], sep = "")]] <- ggPairsFigure
-}
-
-# Loop over the centroids to output the ggpairs plots to append to heatmaps
-for (centroid in 1:length(krange)) {
-    if (!bNMF) {
-      ggName <- paste("2.Clustering_DiffExprs", "Figures", "DScoreHeatMaps", 
-                      paste("AssignedScatterPlots", paste("K", krange[centroid], sep= ""),
-                            "FilteredSamples.png", sep="_"), sep = "/")
-    } else {
-      ggName <- paste("2.Clustering_DiffExprs", "Figures", "nmf", "DScoreHeatMaps", 
-                      paste("AssignedScatterPlots_nmf", paste("K", krange[centroid], sep= ""),
-                            "FilteredSamples.png", sep="_"), sep = "/")
-    }
-    pm <- ggpairs(ggPairsFigureList[[centroid]], title = "", diag = "blank", upper = "blank", 
-                  lower = list(continuous = "points", combo = "dot"), axisLabels = "none", 
-                  columnLabels = rep("", ncol(ggPairsFigureList[[centroid]])), verbose = F)
-    
-    png(ggName, width = 1100, height = 1100, bg = "transparent")
-    pm <- pm + theme(panel.grid = element_blank(), panel.background = element_blank())
-    print(pm)
-    dev.off()
-}
+# ggPairsFigureList <- list()
+# for (centroid in 1:length(krange)) {
+#   ggPairsFigure <- c()
+#   for (dtaset in 1:(length(Dlist.mapped) - 1)) {
+#     tmp <- Dlist.mapped[[dtaset]][ ,grepl(paste("K", krange[centroid], sep = ""), 
+#                                     colnames(Dlist.mapped[[dtaset]]))]
+#     if (dtaset == 1) {
+#       ggPairsFigure <- tmp
+#     } else {
+#       ggPairsFigure <- cbind(ggPairsFigure, tmp)
+#     }
+#   }
+#   ggPairsFigureList[[paste("K", krange[centroid], sep = "")]] <- ggPairsFigure
+# }
+# 
+# # Loop over the centroids to output the ggpairs plots to append to heatmaps
+# for (centroid in 1:length(krange)) {
+#     if (!bNMF) {
+#       ggName <- paste("2.Clustering_DiffExprs", "Figures", "DScoreHeatMaps", 
+#                       paste("AssignedScatterPlots", paste("K", krange[centroid], sep= ""),
+#                             "FilteredSamples.png", sep="_"), sep = "/")
+#     } else {
+#       ggName <- paste("2.Clustering_DiffExprs", "Figures", "nmf", "DScoreHeatMaps", 
+#                       paste("AssignedScatterPlots_nmf", paste("K", krange[centroid], sep= ""),
+#                             "FilteredSamples.png", sep="_"), sep = "/")
+#     }
+#     pm <- ggpairs(ggPairsFigureList[[centroid]], title = "", diag = "blank", upper = "blank", 
+#                   lower = list(continuous = "points", combo = "dot"), axisLabels = "none", 
+#                   columnLabels = rep("", ncol(ggPairsFigureList[[centroid]])), verbose = F)
+#     
+#     png(ggName, width = 1100, height = 1100, bg = "transparent")
+#     pm <- pm + theme(panel.grid = element_blank(), panel.background = element_blank())
+#     print(pm)
+#     dev.off()
+# }

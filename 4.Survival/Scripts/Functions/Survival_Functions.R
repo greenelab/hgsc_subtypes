@@ -161,29 +161,35 @@ doCoxPH_KM <- function (coxphdata, fname) {
   # ~~~~~~~~~~~~~~
   
   # Get a survfit object and save it to a list
+  tmpsurvfit2 <- survfit(Surv(days_to_death, vital_status) ~ ClusterK2, data = coxphdata)
   tmpsurvfit3 <- survfit(Surv(days_to_death, vital_status) ~ ClusterK3, data = coxphdata)
   tmpsurvfit4 <- survfit(Surv(days_to_death, vital_status) ~ ClusterK4, data = coxphdata)
-  survlist <- list(K3 = tmpsurvfit3, K4 = tmpsurvfit4)
+  survlist <- list(K2 = tmpsurvfit2, K3 = tmpsurvfit3, K4 = tmpsurvfit4)
   
   # Store sample size variable
   n <- nrow(coxphdata)
   
   # Initialize graphics device
-  png(paste("4.Survival/Figures/", fname, "KM_survival.png", sep = ""), width = 525, height = 900)
+  png(paste("4.Survival/Figures/", fname, "KM_survival.png", sep = ""), width = 280, height = 600)
   
   # Obtain appropriate plotting margins
-  par(mfrow=c(2,1))
-  par(mar = c(5,5,5,2) + 0.1)
-  
-  # K = 3 plot and legend
-  plot(survlist[[1]], main = "", col = c("blue", "red", "green"), lwd = 3, cex = 2, cex.lab = 2, 
+  par(mfrow=c(3,1))
+  par(mar = rep(2.5, 4))
+
+  # K = 2 plot and legend
+  plot(survlist[[1]], main = "", col = c('skyblue1', 'tomato'), lwd = 3, cex = 2, cex.lab = 2, 
        cex.axis = 1.75, lty = c(4, 5), xlab = "", ylab = "") 
   legend("topright", legend = paste("Survival\nn = ", n), bty = "n", cex = 2)
   
+  # K = 3 plot and legend
+  plot(survlist[[2]], main = "", col = c('skyblue1', 'tomato', 'springgreen'), lwd = 3, cex = 2, cex.lab = 2, 
+       cex.axis = 1.75, lty = c(4, 5), xlab = "", ylab = "") 
+  #legend("topright", legend = paste("Survival\nn = ", n), bty = "n", cex = 2)
+  
   # K = 4 plot and legend
-  plot(survlist[[2]], main = "", col = c("blue", "red", "green", "purple"), lwd = 3, cex = 2, 
-       cex.lab = 2, cex.axis = 1.75, lty = c(4,5), xlab = "", ylab = "") 
-  legend("topright", legend = paste("Survival\nn = ", n), bty = "n", cex = 2)
+  plot(survlist[[3]], main = "", col = c('skyblue1', 'tomato', 'springgreen', 'violet'), lwd = 3, cex = 2, 
+       cex.lab = 2, cex.axis = 1.75, lty = c(4, 5), xlab = "", ylab = "") 
+  #legend("topright", legend = paste("Survival\nn = ", n), bty = "n", cex = 2)
   dev.off()
 }
 

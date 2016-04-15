@@ -1,5 +1,5 @@
 ############################################
-# Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes
+# Cross-population analysis of high-grade serous ovarian cancer does not support four subtypes
 # 
 # Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
 # Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
@@ -38,7 +38,7 @@ KmeansSub <- TCGAClusterAssign[commonSamples, ]
 
 # Combine the two assignments
 withTCGAAssignments <- cbind(KmeansSub, TCGA_Nature[commonSamples, ])
-withTCGAAssignments <- withTCGAAssignments[ ,c(1,2,4)]
+withTCGAAssignments <- withTCGAAssignments[ ,c(1,2,3,5)]
 
 # Look at what was not mapped to the cluster assignments
 whatsleft <- TCGAClusterAssign[setdiff(rownames(TCGAClusterAssign), commonSamples), ]
@@ -47,14 +47,18 @@ whatsleft <- TCGAClusterAssign[setdiff(rownames(TCGAClusterAssign), commonSample
 # Analyze concordance
 ############################################
 # Look at which of our clusters map to the TCGA assigned clusters
+K2 <- table(withTCGAAssignments$ClusterK2, withTCGAAssignments$Patient.characteristics)
 K3 <- table(withTCGAAssignments$ClusterK3, withTCGAAssignments$Patient.characteristics)
 K4 <- table(withTCGAAssignments$ClusterK4, withTCGAAssignments$Patient.characteristics)
 
 # What samples did not map?
+K2NA <- table(whatsleft$ClusterK2)
 K3NA <- table(whatsleft$ClusterK3)
 K4NA <- table(whatsleft$ClusterK4)
 
 # Reorder the table
+reorderK2 <-cbind(K2[ ,3], K2[ ,4], K2[ ,2], K2[ ,1], K2NA)
+colnames(reorderK2) <- c("Mesenchymal", "Proliferative", "Immunoreactive", "Differentiated", "NotMapped")
 reorderK3 <- cbind(K3[ ,3], K3[ ,4], K3[ ,2], K3[ ,1], K3NA)
 colnames(reorderK3) <- c("Mesenchymal", "Proliferative", "Immunoreactive", "Differentiated", "NotMapped")
 reorderK4 <- cbind(K4[ ,3], K4[ ,4], K4[ ,2], K4[ ,1], K4NA)
@@ -63,6 +67,8 @@ colnames(reorderK4) <- c("Mesenchymal", "Proliferative", "Immunoreactive", "Diff
 ############################################
 # Write to File
 ############################################
+write.table(reorderK2, "2.Clustering_DiffExprs/Tables/Data_Concordance/TCGA_KmeansClusterK2.csv", 
+            row.names = T, col.names = NA, sep = ",")
 write.table(reorderK3, "2.Clustering_DiffExprs/Tables/Data_Concordance/TCGA_KmeansClusterK3.csv", 
             row.names = T, col.names = NA, sep = ",")
 write.table(reorderK4, "2.Clustering_DiffExprs/Tables/Data_Concordance/TCGA_KmeansClusterK4.csv", 
@@ -101,14 +107,19 @@ Kon_Comp <- cbind(KonecnyClusterAssign[match(OvNumberDict[ ,1],rownames(KonecnyC
 
 # Investigate the samples that were not mapped by the original publication
 whatsleft <- KonecnyClusterAssign[setdiff(rownames(KonecnyClusterAssign), rownames(Kon_Comp)), ]
+K2NA <- table(whatsleft$ClusterK2)
 K3NA <- table(whatsleft$ClusterK3)
 K4NA <- table(whatsleft$ClusterK4)
 
 # Observe concordance
+K2_kon <- table(Kon_Comp$ClusterK2, Kon_Comp$MAYO.C4)
 K3_kon <- table(Kon_Comp$ClusterK3, Kon_Comp$MAYO.C4)
 K4_kon <- table(Kon_Comp$ClusterK4, Kon_Comp$MAYO.C4)
 
 # Prepare files for output
+k2Ready <- cbind(K2_kon, K2NA)
+colnames(k2Ready)[ncol(k2Ready)] <- "NotMapped"
+
 k3Ready <- cbind(K3_kon, K3NA)
 colnames(k3Ready)[ncol(k3Ready)] <- "NotMapped"
 
@@ -118,6 +129,8 @@ colnames(k4Ready)[ncol(k4Ready)] <- "NotMapped"
 ############################################
 # Write to file
 ############################################
+write.table(k2Ready, "2.Clustering_DiffExprs/Tables/Data_Concordance/Konecny_KmeansClusterK2.csv", 
+            row.names = T, col.names = NA, sep = ",")
 write.table(k3Ready, "2.Clustering_DiffExprs/Tables/Data_Concordance/Konecny_KmeansClusterK3.csv", 
             row.names = T, col.names = NA, sep = ",")
 write.table(k4Ready, "2.Clustering_DiffExprs/Tables/Data_Concordance/Konecny_KmeansClusterK4.csv", 
@@ -142,7 +155,10 @@ index <- cbind(rownames(Tothill)[match(Tot_Sup$ID, Tothill$alt_sample_name)], To
 
 # Combine our kmeans cluster assignments versus the assignments presented by Tothill et al. 2008
 Comparison <- cbind(index, TothillClusterAssign[match(index[,1], rownames(TothillClusterAssign)), ])
-colnames(Comparison) <- c("Sample", "Alt", "Tothill_C", "ClusterK3", "ClusterK4")
+colnames(Comparison) <- c("Sample", "Alt", "Tothill_C", "ClusterK2", "ClusterK3", "ClusterK4")
+
+K2_tot <- table(Comparison$Tothill_C, Comparison$ClusterK2)
+rownames(K2_tot) <- c(paste("C", 1:6, sep = ""), "NotMapped")
 
 K3_tot <- table(Comparison$Tothill_C, Comparison$ClusterK3)
 rownames(K3_tot) <- c(paste("C", 1:6, sep = ""), "NotMapped")
@@ -153,6 +169,8 @@ rownames(K4_tot) <- c(paste("C", 1:6, sep = ""), "NotMapped")
 ############################################
 #Write to File
 ############################################
+write.table(t(K2_tot), "2.Clustering_DiffExprs/Tables/Data_Concordance/Tothill_KmeansClusterK2.csv", 
+            row.names = T, col.names = NA, sep = ",")
 write.table(t(K3_tot), "2.Clustering_DiffExprs/Tables/Data_Concordance/Tothill_KmeansClusterK3.csv", 
             row.names = T, col.names = NA, sep = ",")
 write.table(t(K4_tot), "2.Clustering_DiffExprs/Tables/Data_Concordance/Tothill_KmeansClusterK4.csv", 
@@ -161,9 +179,12 @@ write.table(t(K4_tot), "2.Clustering_DiffExprs/Tables/Data_Concordance/Tothill_K
 ############################################
 # Combine all tables together to create table 4
 ############################################
+k2 <- cbind(reorderK2, t(K2_tot), k2Ready)
 k3 <- cbind(reorderK3, t(K3_tot), k3Ready)
 k4 <- cbind(reorderK4, t(K4_tot), k4Ready)
 
+write.table(k2, "2.Clustering_DiffExprs/Tables/Data_Concordance/TotalConcordance_KmeansClusterK2.csv", 
+            row.names = T, col.names = NA, sep = ",")
 write.table(k3, "2.Clustering_DiffExprs/Tables/Data_Concordance/TotalConcordance_KmeansClusterK3.csv", 
             row.names = T, col.names = NA, sep = ",")
 write.table(k4, "2.Clustering_DiffExprs/Tables/Data_Concordance/TotalConcordance_KmeansClusterK4.csv", 

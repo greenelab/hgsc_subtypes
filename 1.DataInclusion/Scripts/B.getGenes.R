@@ -1,5 +1,5 @@
 ############################################
-# Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes
+# Cross-population analysis of high-grade serous ovarian cancer does not support four subtypes
 #  
 # Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
 # Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
@@ -12,15 +12,29 @@ args <- commandArgs(trailingOnly = T)
 ################################
 # Load Libraries
 ################################
-library(limma) #Venn Diagram Functions
+library(limma)
 library(grid)
 library(curatedOvarianData)
+library(VennDiagram)
 
 # The script loads the ovarian cancer datasets
 source("1.DataInclusion/Scripts/Functions/LoadOVCA_Data.R")
 
 #Library has some important custom functions
 source("2.Clustering_DiffExprs/Scripts/Functions/kmeans_SAM_functions.R")
+
+# Load venn diagram function
+getvenn <- function(venngenes, data_set_column) {
+  venngenes <- as.data.frame(venngenes)
+  return_venn_count <- c()
+  getcolumn <- venngenes[ ,data_set_column]
+  for (g in 1:length(getcolumn)) {
+    if (getcolumn[g] == 1) {
+      return_venn_count <- c(return_venn_count, g)
+    }
+  }
+  return(return_venn_count)
+}
 
 ################################
 # PART I: Load Data
@@ -87,11 +101,22 @@ for (gene in 1:length(universe)) {
   venn[gene, ] <- vector
 }
 
-# Perform the limma functions to create the venn diagram
-# Supplementary Figure S1a
-S1a <- vennCounts(venn)
-
-# Write Plot to File
-tiff(filename = "1.DataInclusion/Figures/SuppFigS1_OverlappingGenesVenn.tiff", width = 1000, height = 1000)
-vennDiagram(S1a, main = "", cex = c(3, 2, 1.4), lwd = 2)
-dev.off()
+# Generate and output Venn Diagram
+TCGA_venn <- getvenn(venn, 1)
+Mayo_venn <- getvenn(venn, 2)
+Yoshihara_venn <- getvenn(venn, 3)
+Tothill_venn <- getvenn(venn, 4)
+Bonome_venn <- getvenn(venn, 5)
+venn.plot <- venn.diagram(x = list('TCGA' = TCGA_venn,
+                                   'Mayo' = Mayo_venn,
+                                   'Yoshihara' = Yoshihara_venn,
+                                   'Tothill' = Tothill_venn,
+                                   'Bonome' = Bonome_venn),
+                          filename = "1.DataInclusion/Figures/SuppFigS1_OverlappingGenesVenn",
+                          height = 3000, width = 3000,
+                          fill = c("red", "green", "yellow", "blue", "purple"),
+                          cat.cex = rep(1.6, 5),
+                          cat.pos = c(0, -20, 20, -20, 20),
+                          cat.dist = c(.19, .21, -.18, -.2, .21),
+                          margin = .1, cex = 0.8,
+                          main.cex = 2)

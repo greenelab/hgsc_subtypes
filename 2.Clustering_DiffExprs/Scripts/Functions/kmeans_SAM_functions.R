@@ -1,5 +1,5 @@
 ############################################
-# Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes
+# Cross-population analysis of high-grade serous ovarian cancer does not support four subtypes
 # 
 # Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
 # Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
@@ -40,7 +40,7 @@ MADgenes <- function (Dataset, numGenes = 1500) {
 }
 
 
-KmeansGlobal <- function (Dataset, FilteredGenes, kmin = 3, kmax = 4, starts = 20) {
+KmeansGlobal <- function (Dataset, FilteredGenes, kmin = 2, kmax = 4, starts = 20) {
   # ~~~~~~~~~~~~~~
   # Performs k-means clustering for a given Dataset over a given k-range
   #
@@ -55,27 +55,26 @@ KmeansGlobal <- function (Dataset, FilteredGenes, kmin = 3, kmax = 4, starts = 2
   # A dataframe of cluster membership for each sample in the dataset
   # ~~~~~~~~~~~~~~
   
-  #transpose the dataset after filtering a defined set of genes
+  # Transpose the dataset after filtering a defined set of genes
   FilteredGenes <- intersect(rownames(Dataset), FilteredGenes)
   DataSet_Global <- t(Dataset[FilteredGenes,])
   
-  #run kmeans over each number of clusters inputted from kmin to kmax
+  # Run kmeans over each number of clusters inputted from kmin to kmax
   krange <- seq(kmin, kmax)
   DataSetClusterMembership <- data.frame()
   for (clusterK in 1:length(krange)) {
-    #Print status to screen
+    # Print status to screen
     cat("Clustering...", paste("k = ", krange[clusterK], sep = ""), "\n")
     
-    #run the kmeans function
+    # Run the kmeans function
     dta_k <- kmeans(DataSet_Global, krange[clusterK], nstart = starts)
     
-    #Save the cluster membership info
+    # Save the cluster membership info
     if (clusterK == 1) {
       DataSetClusterMembership <- as.data.frame(dta_k$cluster)
     } else {
       DataSetClusterMembership <- cbind(DataSetClusterMembership, as.data.frame(dta_k$cluster))
     }
-     
   }
   DataSetClusterMembership <- data.frame(DataSetClusterMembership)
   colnames(DataSetClusterMembership) <- paste("ClusterK", seq(kmin, kmax), sep = "")
@@ -83,8 +82,7 @@ KmeansGlobal <- function (Dataset, FilteredGenes, kmin = 3, kmax = 4, starts = 2
 }
 
 
-getSamNames <- function (krange)
-{
+getSamNames <- function (krange) {
   # ~~~~~~~~~~~~~~
   # Retrieves column names from the SAM results
   #
@@ -105,7 +103,7 @@ getSamNames <- function (krange)
   # Output custom column names based on krange
   samColNames <- c()
   for (gridrow in 1:nrow(krange_grid)) {
-    samColNames <- c(samColNames, paste(krange_grid[gridrow,1], krange_grid[gridrow,2], sep="_"))
+    samColNames <- c(samColNames, paste(krange_grid[gridrow, 1], krange_grid[gridrow, 2], sep="_"))
   }
   
   return(samColNames) 
@@ -130,7 +128,7 @@ RunSam <- function (DataList, ClusterList, Method = "d.stat", type = "normal", k
   # If type = "Delta" then the second element of the SAM list holds delta values
   # ~~~~~~~~~~~~~~
   
-  #Determine the number of clusters were considered from kmeans
+  # Determine the number of clusters were considered from kmeans
   numClusts <- ncol(ClusterList[[1]])
   
   SamList <- list()
@@ -138,8 +136,7 @@ RunSam <- function (DataList, ClusterList, Method = "d.stat", type = "normal", k
   for (dataset in 1:length(DataList)) {
     cat("Running SAM on:", names(DataList)[dataset], "\n")
     
-    for (centroid in 1:ncol(ClusterList[[dataset]]))
-    {
+    for (centroid in 1:ncol(ClusterList[[dataset]])) {
       # Determine how many different cluster assignments there are
       uniqueIDs <- sort(unique(ClusterList[[dataset]][ ,centroid]))
       thisCol <- colnames(ClusterList[[dataset]])[centroid]
@@ -155,7 +152,7 @@ RunSam <- function (DataList, ClusterList, Method = "d.stat", type = "normal", k
         
         # Run the sam function
         cat("      For k =", length(uniqueIDs), ", Control: Cluster", kclus, "\n")
-        tmpsam <- sam(DataList[[dataset]], comparisonVector, method=Method)
+        tmpsam <- sam(DataList[[dataset]], comparisonVector, method = Method)
         
         # Extract the delta required to observe a given fdr threshhold
         if (type == "Delta") {
@@ -163,7 +160,7 @@ RunSam <- function (DataList, ClusterList, Method = "d.stat", type = "normal", k
           delta <- findDelta(tmpsam, fdr = kFDR, prec = 15)
           
           if (is.matrix(delta)) {
-            d <- delta[1,1]
+            d <- delta[1, 1]
           } else {
             d <- delta[1]
           }
@@ -184,7 +181,7 @@ RunSam <- function (DataList, ClusterList, Method = "d.stat", type = "normal", k
       SamList[[listIndex]] <- SamD
       
       # Name the list
-      thisName <- paste(names(DataList)[dataset], thisCol, sep="_")
+      thisName <- paste(names(DataList)[dataset], thisCol, sep = "_")
       names(SamList)[length(SamList)] <- thisName
     }
   }  
@@ -197,14 +194,14 @@ RunSam <- function (DataList, ClusterList, Method = "d.stat", type = "normal", k
 }
 
 
-AssignReference <- function (Reference, Cluster, Cor, ClusterList = Clusters) {
+AssignReference <- function (Reference, Cluster, Cor, ClusterList) {
   # ~~~~~~~~~~~~~~
   # This piece of code below will assign the appropriate clusters to a reference 
   # cluster. (for us, "TCGA" is the reference)
   #
   # Args: 
   # Reference: a string identifier for the dataset of interest to map clusters
-  # Cluster: Either "ClusterK3" or "ClusterK4" to begin mapping
+  # Cluster: Either "ClusterK3" or "ClusterK4" to begin mapping from
   # Cor: A list of correlation matrices of within cluster correlations
   # ClusterList: A list of cluster membership dataframes
   # 
@@ -237,8 +234,15 @@ AssignReference <- function (Reference, Cluster, Cor, ClusterList = Clusters) {
     }
   }
   
-  # Observe the top six correlating clusters
-  topCorClusters <- newCorframe[1:6, 1:3]
+  # Observe the top correlating clusters
+  unique_clusters <- as.character(unique(newCorframe$Var1))
+  
+  # Find top correlating cluster for each unique cluster
+  topCorClusters = c()
+  for (uniq_clus in unique_clusters) {
+    subset_cor = newCorframe[newCorframe$Var1 == uniq_clus, ]
+    topCorClusters <- rbind(topCorClusters, subset_cor[1, ])
+  }
   
   # Split the cluster names and store in list
   splitClusterA <- strsplit(as.character(topCorClusters$Var1), "_")
@@ -247,31 +251,41 @@ AssignReference <- function (Reference, Cluster, Cor, ClusterList = Clusters) {
   # Initialize the new mapping based on decreasing correlation
   clusMap <- c()
   for (ID in 1:length(splitClusterA)) {
-    clusA <- splitClusterA[[ID]][3] #ClusterK3 or ClusterK4
+    clusA <- splitClusterA[[ID]][3]  # Cluster K
     clusB <- splitClusterB[[ID]][3]
-    numA <- splitClusterA[[ID]][5] #1, 2, 3, or 4
+    numA <- splitClusterA[[ID]][5] # 1, 2, 3, or 4
     numB <- splitClusterB[[ID]][5]
     newAssgn <- cbind(clusA, numA, clusB, numB)
     clusMap <- rbind(clusMap, newAssgn)
   }
   
-  # Focus on mapping the given Cluster (Either ClusterK3 or ClusterK4)
-  NewMapping <- clusMap[clusMap[,1] == Cluster,]
+  # Focus on mapping the given Cluster (given as an argument)
+  NewMapping <- clusMap[clusMap[ ,3] == Cluster, ]
+  
+  # Split the multiple comparisons with the input cluster
+  Comparisons <- c()
+  for(i in unique(NewMapping[, 1])) {
+    Comparisons[[i]] <- NewMapping[NewMapping[, 1] == i, ]
+  }
   
   # Obtain the original cluster membership dataframe for the given reference dataset
   ref <- ClusterList[[grep(Reference, names(ClusterList))]]
-  for (map in 1:nrow(NewMapping)) {
+  
+  # Focus on K = 3 vs. K = 4 first
+  for (map in 1:length(unique(Comparisons[[1]][, 4]))) {
     # Temporarily replace original cluster assignments
-    ref[ ,1][ref[ ,1] == as.integer(NewMapping[map,2])] <- paste(map, "tmp", sep = "")
-    ref[ ,2][ref[ ,2] == as.integer(NewMapping[map,4])] <- paste(map, "tmp", sep = "")
+    ref[ ,2][ref[ ,2] == as.integer(Comparisons[[1]][map, 4])] <- paste(map, "tmp", sep = "")
+    ref[ ,3][ref[ ,3] == as.integer(Comparisons[[1]][map, 2])] <- paste(map, "tmp", sep = "")
   }
   
   # If there is no "tmp" found in the column, make it cluster 4
-  ref[ ,2][!grepl("tmp", ref[ ,2])] <- 4
+  ref[ ,3][!grepl("tmp", ref[ ,3])] <- 4
+  
+  # The Clusters assigned to K = 2 are mapped automatically
   
   # Return all cluster assignments to numeric values
-  ref[ ,1] <- as.integer(unlist(strsplit(ref[ ,1], "tmp")))
   ref[ ,2] <- as.integer(unlist(strsplit(ref[ ,2], "tmp")))
+  ref[ ,3] <- as.integer(unlist(strsplit(ref[ ,3], "tmp")))
   
   # Reassign the ClusterList and return new assignments
   ClusterList[[grep(Reference, names(ClusterList))]] <- ref
@@ -314,6 +328,9 @@ AssignReference_NMF <- function (kmeans_dscore_dir, nmf_Dlist, nmf_cluster_list,
   cor_matrix_melted <- cor_matrix_melted[order(cor_matrix_melted$value, decreasing = T),]
   
   # Get cluster specific matrices
+  cor_matrix_k2 <- cor_matrix_melted[grep("K2", cor_matrix_melted$Var1), ]
+  cor_matrix_k2 <- cor_matrix_k2[grep("K2", cor_matrix_k2$Var2), ]
+  
   cor_matrix_k3 <- cor_matrix_melted[grep("K3", cor_matrix_melted$Var1), ]
   cor_matrix_k3 <- cor_matrix_k3[grep("K3", cor_matrix_k3$Var2), ]
   
@@ -321,6 +338,16 @@ AssignReference_NMF <- function (kmeans_dscore_dir, nmf_Dlist, nmf_cluster_list,
   cor_matrix_k4 <- cor_matrix_k4[grep("K4", cor_matrix_k4$Var2), ]
   
   # Make Maps
+  k2_maps <- c()
+  for (row in 1:2) {
+    nmf_mapping <- unlist(strsplit(as.character(cor_matrix_k2$Var1)[row], "_"))
+    nmf_mapping <- nmf_mapping[length(nmf_mapping)]
+    
+    k_mapping <- unlist(strsplit(as.character(cor_matrix_k2$Var2)[row], "_"))
+    k_mapping <- k_mapping[length(k_mapping)]
+    k2_maps <- rbind(k2_maps, c(as.numeric(paste(nmf_mapping)), as.numeric(paste(k_mapping))))
+  }
+  
   k3_maps <- c()
   for (row in 1:3) {
     nmf_mapping <- unlist(strsplit(as.character(cor_matrix_k3$Var1)[row], "_"))
@@ -333,7 +360,7 @@ AssignReference_NMF <- function (kmeans_dscore_dir, nmf_Dlist, nmf_cluster_list,
   
   # We only care about the top three highest correlations
   k4_maps <- c()
-  for (row in 1:3) {
+  for (row in 1:4) {
     nmf_mapping <- unlist(strsplit(as.character(cor_matrix_k4$Var1)[row], "_"))
     nmf_mapping <- nmf_mapping[length(nmf_mapping)]
     
@@ -342,24 +369,32 @@ AssignReference_NMF <- function (kmeans_dscore_dir, nmf_Dlist, nmf_cluster_list,
     k4_maps <- rbind(k4_maps, c(as.numeric(paste(nmf_mapping)), as.numeric(paste(k_mapping))))
   }
   
+  # Map labels
+  for (assgn in 1:nrow(k2_maps)) {
+    map <- k2_maps[assgn, 1]
+    clus_memb$ClusterK2[grep(paste("^", map, "$", sep = ""), clus_memb$ClusterK2)] <- paste(k2_maps[assgn, 2], "tmp", sep = "_")
+  }
+  
   for(assgn in 1:nrow(k3_maps)) {
     map <- k3_maps[assgn, 1]
-    mapk4 <- k4_maps[assgn, 1]
     clus_memb$ClusterK3[grep(paste("^", map, "$", sep = ""), clus_memb$ClusterK3)] <- paste(k3_maps[assgn, 2], "tmp", sep = "_")
-    clus_memb$ClusterK4[grep(paste("^", mapk4, "$", sep = ""), clus_memb$ClusterK4)] <- paste(k4_maps[assgn, 2], "tmp", sep = "_")
+  }
+  
+  for (assgn in 1:nrow(k4_maps)) {
+    map <- k4_maps[assgn, 1]
+    clus_memb$ClusterK4[grep(paste("^", map, "$", sep = ""), clus_memb$ClusterK4)] <- paste(k4_maps[assgn, 2], "tmp", sep = "_")
   }
 
-  # If there is no "tmp" found in the column, make it cluster 4
-  clus_memb[ ,2][!grepl("tmp", clus_memb[ ,2])] <- 4
-  
   # Return all cluster assignments to numeric values
   clus_memb[ ,1] <- as.integer(unlist(strsplit(clus_memb[ ,1], "_tmp")))
   clus_memb[ ,2] <- as.integer(unlist(strsplit(clus_memb[ ,2], "_tmp")))
+  clus_memb[ ,3] <- as.integer(unlist(strsplit(clus_memb[ ,3], "_tmp")))
   
   # Reassign the clusters and return
   nmf_cluster_list[[grep(Reference, names(nmf_cluster_list))]] <- clus_memb
   return(nmf_cluster_list)
 }
+
 
 MapClusters <- function (DistMatrixList, dataset_names, Reference = "TCGA") {
   # ~~~~~~~~~~~~~~
@@ -419,6 +454,7 @@ MapClusters <- function (DistMatrixList, dataset_names, Reference = "TCGA") {
             max_clus <- cur_clus
           }
         }
+        
         # After this logic you have the cluster with the highest correlation
         # Add it to the result list
         resultList[[paste('K', centroid, sep = "")]][[clus]] <- c(resultList[[paste('K', centroid, sep = "")]][[clus]],
@@ -472,18 +508,11 @@ runNMF <- function (Data, k, fname, KClusterAssign, nruns = 10, coph = F, coph_r
     png(paste("2.Clustering_DiffExprs/Figures/nmf/ConsensusMaps/",fname, ".png", sep = ""), 
         width = 700, height = 570)
     
-    # The plot colors are different according to the number of clusters
-    if (k == 3) {
-      consensusmap(clus.nmf, labCol = NA, labRow = NA, tracks = c("silhouette:"), 
-                   annCol = list("kmeans" = as.character(paste(KClusterAssign$ClusterK3))), 
-                   annColors = list("kmeans" = c("blue", "red", "green")), main = "", 
-                   fontsize = 20, treeheight = 60)
-    } else {
-      consensusmap(clus.nmf, labCol = NA, labRow = NA, tracks = c("silhouette:"), 
-                   annCol = list("kmeans" = as.character(paste(KClusterAssign$ClusterK4))), 
-                   annColors = list("kmeans" = c("blue", "red", "green", "purple")), main = "", 
-                   fontsize = 20, treeheight = 60)
-    }
+    # Show a plot of k = 4 k means clusters overlayed with the NMF clusters
+    consensusmap(clus.nmf, labCol = NA, labRow = NA, tracks = c("silhouette:"), 
+                 annCol = list("kmeans" = as.character(paste(KClusterAssign$ClusterK4))), 
+                 annColors = list("kmeans" = c('skyblue1', 'tomato', "springgreen", "violet")), main = "", 
+                 fontsize = 20, treeheight = 60)
     dev.off()
     
     return(as.character(clusterMemb))
@@ -492,6 +521,5 @@ runNMF <- function (Data, k, fname, KClusterAssign, nruns = 10, coph = F, coph_r
     estim.coeff <- nmf(Data, coph_range, nrun = nruns, seed = 123456)
     return(estim.coeff)
   }
-
 }
 

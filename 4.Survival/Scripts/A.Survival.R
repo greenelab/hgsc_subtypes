@@ -1,5 +1,5 @@
 ############################################
-# Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes
+# Cross-population analysis of high-grade serous ovarian cancer does not support four subtypes
 # 
 # Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
 # Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
@@ -68,7 +68,9 @@ for (phenoset in 1:length(args)) {
 # This loop will pull all cluster membership files and load them into a list 
 # according to the order of the datasets passed as arguments
 ClusterMembershipList <- list()
+ClusterMembershipList_NMF <- list()
 datasetMembers <- list.files(path = "2.Clustering_DiffExprs/Tables/ClusterMembership/kmeans/")
+datasetMembers_NMF <- list.files(path = "2.Clustering_DiffExprs/Tables/ClusterMembership/nmf/") 
 for (dataset in 1:length(args)) {
   holder <- args[dataset]
   ClusMember <- datasetMembers[grep(holder, datasetMembers)]
@@ -78,18 +80,29 @@ for (dataset in 1:length(args)) {
   
   ClusterMembershipList[[dataset]] <- ClusData
   names(ClusterMembershipList)[dataset] <- args[dataset]
+  
+  # NMF cluster membership
+  ClusMember <- datasetMembers_NMF[grep(holder, datasetMembers_NMF)]
+  ClusMember <- ClusMember[grepl("mapped", ClusMember)]
+  ClusData <- read.csv(paste("2.Clustering_DiffExprs/Tables/ClusterMembership/nmf/", 
+                             ClusMember, sep = ""), row.names = 1)
+  
+  ClusterMembershipList_NMF[[dataset]] <- ClusData
+  names(ClusterMembershipList_NMF)[dataset] <- args[dataset]
 }
 
 ############################################
 # Get data frames ready for CoxPh
 ############################################
 CoxPHdata <- GetCoxPHready(phenoData, ClusterMembershipList)
+CoxPHdata_NMF <- GetCoxPHready(phenoData, ClusterMembershipList_NMF)
 
 ############################################
 # Kaplan Meier curves
 ############################################
 for (coxmodel in 1:length(CoxPHdata)) {
   doCoxPH_KM(CoxPHdata[[coxmodel]], as.character(paste(names(CoxPHdata)[coxmodel])))
+  doCoxPH_KM(CoxPHdata_NMF[[coxmodel]], paste0(as.character(paste(names(CoxPHdata_NMF)[coxmodel])), '_NMF_'))
 }
 
 ############################################

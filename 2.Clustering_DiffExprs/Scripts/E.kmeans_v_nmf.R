@@ -41,7 +41,8 @@ for (dataset in 1:length(args)) {
   # Load and process NMF file
   NMFfile <- read.table(paste("2.Clustering_DiffExprs/Figures/nmf/DscoreVectors/", DMembershipNMF, sep = ""), 
                      sep = ",", row.names = 1, header = T)
-  colnames(NMFfile) <- c(paste(args[dataset], "_ClusterK3_1_NMF", sep = ""), paste(args[dataset], "_ClusterK3_2_NMF", sep = ""), 
+  colnames(NMFfile) <- c(paste(args[dataset], "_ClusterK2_1_NMF", sep = ""), paste(args[dataset], "_ClusterK2_2_NMF", sep = ""),
+                         paste(args[dataset], "_ClusterK3_1_NMF", sep = ""), paste(args[dataset], "_ClusterK3_2_NMF", sep = ""), 
                          paste(args[dataset], "_ClusterK3_3_NMF", sep = ""), paste(args[dataset], "_ClusterK4_1_NMF", sep = ""), 
                          paste(args[dataset], "_ClusterK4_2_NMF", sep = ""), paste(args[dataset], "_ClusterK4_3_NMF", sep = ""), 
                          paste(args[dataset], "_ClusterK4_4_NMF", sep = ""))
@@ -54,22 +55,66 @@ for (dataset in 1:length(args)) {
 # Across Method Correlations within Datasets
 ############################################
 Method_Cor <- list()
+k_list <- c('K2', 'K3', 'K4')
+all_centroid_plots <- list()
 for (dataset in 1:length(DScoreList_kmeans)) {
   
   # Get within dataset correlation matrix between kmeans and NMF methods
   Method_Cor[[args[dataset]]] <- cor(DScoreList_kmeans[[dataset]], DScoreList_nmf[[dataset]])
   
   # Name the output plot
-  fName <- paste(args[dataset],"_kmeansVnmf.tiff")
+  fName <- paste(args[dataset],"_kmeansVnmf.png")
   
-  # Plot a correlation heatmap
-  ggplot(data = melt(Method_Cor[[dataset]]), aes(x = Var1, y = Var2, fill = value)) + geom_tile(color = "white") + 
-    scale_fill_gradient2(high = "red", low = "blue", mid = "white", midpoint = 0, limit = c(-1, 1), 
-                         name = "Moderated t Score\nPearson\nCorrelation") +
-    theme_minimal() + theme(legend.position = "none", axis.text.x = element_blank(), 
-                            axis.text.y = element_blank()) + coord_fixed() +
-    labs(x = "", y = "", title = "") + theme(plot.margin = unit(rep(0.1, 4), "cm"))
+  # Melt the dataset and extract centroid specific data
+  melted_cor <- melt(Method_Cor[[dataset]])
   
-  # Save plot to file (Figure 4)
-  ggsave(file.path("2.Clustering_DiffExprs/", "Figures", "kmeans_v_nmf", "datasets", fName), width=8.25, height=8.25)
+  # Make a glob for each centroid assignment
+  data_iter <- 1
+  for (k in k_list) {
+    melted_cor_sub <- melted_cor[grepl(k, melted_cor[, 1]), ]
+    melted_cor_sub <- melted_cor_sub[grepl(k, melted_cor_sub[, 2]), ]
+    
+    num_clus <- gsub('K', '', k)
+    
+    # Plot a correlation heatmap
+    g <- ggplot(data = melted_cor_sub, aes(x = Var1, y = Var2, fill = value)) + 
+      geom_tile(color = "white") + 
+      scale_fill_gradient2(high = "red", low = "blue", mid = "white", midpoint = 0, limit = c(-1, 1)) +
+      scale_x_discrete(labels = paste(1:num_clus)) + 
+      scale_y_discrete(labels = paste(1:num_clus)) +
+      xlab("") + 
+      ylab("") +
+      theme(axis.line = element_blank(),
+            axis.ticks = element_blank(), 
+            panel.background = element_blank(),
+            panel.border = element_blank(), 
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(), 
+            plot.background = element_blank(), 
+            legend.position = "none",
+            axis.text.y = element_text(face = 'bold', size = 18, angle = 90, hjust = 0.4, colour = 'black'),
+            axis.text.x = element_text(face = 'bold', size = 18, colour = 'black'),
+            plot.margin = unit(c(0, -0.3, -0.3, -0.3), 'cm'))
+    
+    if (dataset %in% c(1, 3)) {
+      g <- g + theme(axis.text.y = element_text(face = 'bold', size = 18, angle = 90, hjust = 0.4, colour = 'black'),
+                     axis.text.x = element_text(face = 'bold', size = 18, colour = 'white'),
+                     plot.margin = unit(c(0, -0.3, -0.3, -0.3), 'cm'))
+    }
+    
+    all_centroid_plots[[data_iter]] <- g
+    data_iter <- data_iter + 1
+  }
+  
+  # Build a string to evaluate
+  plot_eval <- 'full_grobs <- grid.arrange('
+  for (p in 1:length(all_centroid_plots)) {
+    plot_eval <- paste0(plot_eval, 'all_centroid_plots[[', p, ']]', ', ')
+  }
+  plot_eval <- paste0(plot_eval, 'ncol = 3', ',nrow = 1)')
+
+  png(file.path("2.Clustering_DiffExprs/", "Figures", "kmeans_v_nmf", "datasets", fName), width = 800, height = 280)
+  eval(parse(text = plot_eval))
+  dev.off()
+  all_centroid_plots <- list()
 }

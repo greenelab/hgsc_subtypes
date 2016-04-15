@@ -1,5 +1,5 @@
 ############################################
-# Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes
+# Cross-population analysis of high-grade serous ovarian cancer does not support four subtypes
 # 
 # Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
 # Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
@@ -54,6 +54,9 @@ for (dataset in 1:length(args)) {
     clusterMembership <- rbind(clusterMembership, datasetMemb)
   }
 }
+
+colnames(clusterMembership) <- c('Dataset', 'ClusterK2_kmeans', 'ClusterK3_kmeans', 'ClusterK4_kmeans',
+                                 'ClusterK2_NMF', 'ClusterK3_NMF', 'ClusterK4_NMF')
 
 # This is a supplemental table, write it to file
 write.table(clusterMembership, "2.Clustering_DiffExprs/Tables/ClusterMembership/FullClusterMembership.csv", 
