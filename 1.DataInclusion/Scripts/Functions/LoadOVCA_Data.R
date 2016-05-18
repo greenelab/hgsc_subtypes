@@ -1,5 +1,5 @@
 ############################################
-# Cross-population analysis of high-grade serous ovarian cancer does not support four subtypes
+# Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes
 #
 # Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
 # Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
@@ -20,7 +20,8 @@ LoadOVCA_Data <- function(datasets, goodsample_subset_dir = "1.DataInclusion/Dat
                           commongenes_dir = "1.DataInclusion/Data/Genes/CommonGenes_genelist.csv",
                           madgenes_dir = "1.DataInclusion/Data/Genes/GlobalMAD_genelist.csv",
                           mayo_exprs_file = "1.DataInclusion/Data/Mayo/MayoEset.Rda",
-                          genelist_subset = "commongenes") {
+                          genelist_subset = "commongenes",
+                          shuffle = F) {
   # ~~~~~~~~~~~~~~
   # Loads ovarian cancer data from curatedOvarianData
   #
@@ -32,6 +33,7 @@ LoadOVCA_Data <- function(datasets, goodsample_subset_dir = "1.DataInclusion/Dat
   # madgenes_dir: the file location of the mad (median absolute deviation) genes .txt file
   # mayo_exprs_file: the file location of the rdata file from the Mayo Clinic
   # genelist_subset: the genelist to subset each dataset
+  # shuffle: determines if the genelists should be shuffled in the final expression matrix
   #
   # Returns:
   # A list object holding the gene expression data for the
@@ -90,6 +92,14 @@ LoadOVCA_Data <- function(datasets, goodsample_subset_dir = "1.DataInclusion/Dat
     } else {
       ExpData[[eset_exprs]] <- dta[ ,goodSamples]
     }
+    
+    if (shuffle) {
+      for (gene in 1:nrow(ExpData[[eset_exprs]])) {
+        random_vec <- sample(ExpData[[eset_exprs]][gene, ], ncol(ExpData[[eset_exprs]]))
+        ExpData[[eset_exprs]][gene, ] <- random_vec
+      }
+    }
+    
   }
   #Return a list of subsetted gene expression data.frames for all input datasets
   return(ExpData)

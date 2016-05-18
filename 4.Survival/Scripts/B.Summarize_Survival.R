@@ -1,5 +1,5 @@
 ############################################
-# Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes
+# Cross-population analysis of high-grade serous ovarian cancer does not support four subtypes
 # 
 # Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
 # Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
@@ -13,7 +13,7 @@ args <- commandArgs(trailingOnly=TRUE)
 library(curatedOvarianData)
 
 # How many centroids assigned to k means algorithm
-clus <- c(3, 4)
+clus <- c(2, 3, 4)
 
 ############################################
 # Load Results
@@ -134,7 +134,7 @@ for (dataset in 1:length(survivalData)) {
   clusterM <- ClusterMembershipList[[dataset]]
   
   # Initialize a matrix that will hold the survival information
-  survMatrix <- matrix(NA, nrow = 7, ncol = 7)
+  survMatrix <- matrix(NA, nrow = 9, ncol = 7)
   
   for (centroid in 1:length(clus)) {
     subset <- survtmp[grepl(paste("K", clus[centroid], sep = ""), names(survtmp))]
@@ -179,21 +179,31 @@ for (dataset in 1:length(survivalData)) {
       if (type == 1 & centroid == 1) {
         # the first row will be cluster 1 (which is the reference category in each model)
         modMatrix[1, 1:2] <- c("1.0 (ref.)", "")
-        modMatrix[2:3, 3:4] <- clusterInfo
+        modMatrix[2, 3:4] <- clusterInfo
         
-      } else if (type == 2 & centroid ==1) {
+      } else if (type == 2 & centroid == 1) {
         modMatrix[1, 3:4] <- c("1.0 (ref.)", "")
-        modMatrix[2:3, 1:2] <- clusterInfo
-        survMatrix[1:3, 4:7] <- modMatrix
+        modMatrix[2, 1:2] <- clusterInfo
+        survMatrix[1:2, 4:7] <- modMatrix
         
       } else if (type == 1 & centroid == 2) {
+        # the first row will be cluster 1 (which is the reference category in each model)
+        modMatrix[1, 1:2] <- c("1.0 (ref.)", "")
+        modMatrix[2:3, 3:4] <- clusterInfo
+        
+      } else if (type == 2 & centroid == 2) {
+        modMatrix[1, 3:4] <- c("1.0 (ref.)", "")
+        modMatrix[2:3, 1:2] <- clusterInfo
+        survMatrix[3:5, 4:7] <- modMatrix
+        
+      } else if (type == 1 & centroid == 3) {
         modMatrix[1, 1:2] <- c("1.0 (ref.)", "")
         modMatrix[2:4, 3:4] <- clusterInfo  
         
-      } else if (type == 2 & centroid == 2 ) {
+      } else if (type == 2 & centroid == 3) {
         modMatrix[1, 3:4] <- c("1.0 (ref.)", "")
         modMatrix[2:4, 1:2] <- clusterInfo
-        survMatrix[4:7, 4:7] <- modMatrix
+        survMatrix[6:9, 4:7] <- modMatrix
       }
     }
   }
@@ -223,11 +233,14 @@ for (dataset in 1:length(survivalData)) {
       
       # Store survival information to extract later
       if (memb == 1) {
-        survMatrix[subtype,  2] <- paste(num, "/", numT, sep = "")
+        survMatrix[subtype, 2] <- paste(num, "/", numT, sep = "")
         survMatrix[subtype, 3] <- mtdvector
+      } else if (memb == 2) {
+        survMatrix[(subtype + 2), 2] <- paste(num, "/", numT, sep = "")
+        survMatrix[(subtype + 2), 3] <- mtdvector
       } else {
-        survMatrix[(subtype + 3), 2] <- paste(num, "/", numT, sep = "")
-        survMatrix[(subtype + 3), 3] <- mtdvector
+        survMatrix[(subtype + 5), 2] <- paste(num, "/", numT, sep = "")
+        survMatrix[(subtype + 5), 3] <- mtdvector
       }
     }
   }
@@ -239,7 +252,8 @@ for (dataset in 1:length(survivalData)) {
   
   colnames(survMatrix) <- c("Total Median Survival", "Events", "Median Survival (95% CI)", 
                             "Partial: HR (95% CI)", "Partial: Wald's P", "Full: HR (95% CI)", "Full: Wald's P")
-  rownames(survMatrix) <- c("k=3: Cluster 1", "k=3: Cluster 2", "k=3: Cluster 3", "k=4: Cluster 1", 
+  rownames(survMatrix) <- c("k=2: Cluster 1", "k=2: Cluster 2", "k=3: Cluster 1",
+                            "k=3: Cluster 2", "k=3: Cluster 3", "k=4: Cluster 1", 
                             "k=4: Cluster 2", "k=4: Cluster 3", "k=4: Cluster 4")
   
   write.table(survMatrix, file = paste("4.Survival/Summary/", names(survivalData)[dataset], "_", 

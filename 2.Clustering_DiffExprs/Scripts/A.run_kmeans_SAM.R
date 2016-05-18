@@ -432,6 +432,7 @@ for (dtaset in 1:length(argsCurated)) {
 ############################################
 # Obtain the correlated list for the remapped clusters
 Dlist.mapped.cor <- list()
+confidence_data <- c()
 for (centroid in 1:length(krange)) {
   dataUse <- c()
   ptrn <- paste("K", krange[centroid], sep = "")
@@ -455,6 +456,20 @@ for (centroid in 1:length(krange)) {
       # Get ready to observe Pearson correlations
       corData <- cbind(dataSub, data1Sub)
       tmpcor <- cor(corData, use = "p")
+      
+      # Obtain Confidence Limits for each comparison
+      for (vect_A in 1:ncol(corData)) {
+        for (vect_B in 1:ncol(corData)) {
+          comp_name <- paste0(colnames(corData)[vect_A], ':', colnames(corData)[vect_B])
+          clus_A <- corData[, vect_A]
+          clus_B <- corData[, vect_B]
+          cor_result <- cor.test(clus_A, clus_B)
+          confidence_int <- cor_result$conf.int
+          output_result <- c(comp_name, cor_result$estimate[[1]],
+                             cor_result$conf.int[[1]], cor_result$conf.int[[2]])
+          confidence_data <- rbind(confidence_data, output_result)
+        }
+      }
       
       # Melt the correlation matrix for a vector by vector correlation
       tmpcor <- melt(tmpcor)
@@ -488,7 +503,28 @@ for (centroid in 1:length(Dlist.mapped)) {
   }
 }
 
+############################################
+# Write Confidence Limits to File
+############################################
+if (!shuffle && !bNMF) {
+  confidence_matrix <- matrix('', nrow = 27, ncol = 27)
+  for (row in 1:nrow(confidence_data)) {
+    confidence_row <- confidence_data[row, ]
+    matrix_entry <- organize_confidence(confidence_row)
+    placement <- matrix_entry[[2]]
+    if (!is.na(placement)) {
+      place_row <- placement[[1]]
+      place_col <- placement[[2]]
+      confidence_matrix[place_row, place_col] <- matrix_entry[[1]]
+    }
+  }
+  
+  write.table(confidence_matrix, file = '2.Clustering_DiffExprs/Tables/kmeans_confidence_intervals.tsv', sep = '\t')
+}
+
+############################################
 # Recast melted correlation dataframes for across dataset comparisons
+############################################
 for (centroid in 1:length(Dlist.mapped.cor)) {
   tmpCor <- dcast(Dlist.mapped.cor[[centroid]], Var1~Var2, mean, value = value)
   rownames(tmpCor) <- tmpCor[ ,1]
@@ -674,7 +710,7 @@ if (!shuffle) {
           }
           g <- ggplot(data = data.frame(final_comparison), aes(x = Var1, y = Var2, fill = as.numeric(paste(value))))
           g <- g + 
-            geom_tile(color = "white") + 
+            geom_tile(color = "black") + 
             scale_fill_gradient2(high = "red", low = "blue", mid = "white", midpoint = 0, limit = c(-1, 1)) + 
             xlab("") + 
             ylab("") + 

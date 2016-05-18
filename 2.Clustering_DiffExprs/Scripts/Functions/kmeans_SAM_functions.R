@@ -523,3 +523,274 @@ runNMF <- function (Data, k, fname, KClusterAssign, nruns = 10, coph = F, coph_r
   }
 }
 
+
+# Organize confidence limits table for pearson correlations
+organize_confidence <- function(confidence_row) {
+  # ~~~~~~~~~~~~~~
+  # This function will return a character string with information about confidence correlations
+  #
+  # Args: 
+  # confidence_row - a row of the confidence dataframe that stores correlation info
+  #
+  # Returns: a list with two elements
+  # 1) The character string of the entry
+  # 2) The row and column of the matrix belonging to the entry
+  # ~~~~~~~~~~~~~~
+  
+  return_list <- list()
+  name <- confidence_row[1]
+  r <- sprintf("%.2f", round(as.numeric(paste(confidence_row[2])), 2))
+  up <- sprintf("%.2f", round(as.numeric(paste(confidence_row[3])), 2))
+  down <- sprintf("%.2f", round(as.numeric(paste(confidence_row[4])), 2))
+  entry_output <- paste0(r, ' (', up, ' to ', down, ')')
+  
+  # Split the name
+  first_comp <- unlist(strsplit(name, ':'))[1]
+  second_comp <- unlist(strsplit(name, ':'))[2]
+  
+  # Split each of the clusters
+  first_comp_info <- unlist(strsplit(first_comp, '_'))
+  second_comp_info <- unlist(strsplit(second_comp, '_'))
+  
+  # Logic to determine where each entry should go
+  first_cluster <- first_comp_info[grepl('Cluster', first_comp_info)]
+  second_cluster <- second_comp_info[grepl('Cluster', second_comp_info)]
+  
+  if (first_cluster != second_cluster) {
+    entry_result <- NA
+    return(return_list)
+  } else {
+    k <- substr(first_cluster, 9, 10)
+  }
+  
+  # Get the dataset
+  first_dataset <- first_comp_info[1]
+  second_dataset <- second_comp_info[1]
+  
+  # Get the subtype
+  first_subtype <- first_comp_info[length(first_comp_info)]
+  second_subtype <- second_comp_info[length(second_comp_info)]
+  
+  # Get dataset entry
+  if (first_dataset == second_dataset) {
+    entry_result <- NA
+  } else {
+    entry_result <- dataset_entry(first_dataset, first_subtype, second_dataset, second_subtype, k)
+  }
+  
+  return_list <- list('conf' = entry_output, 'entry' = entry_result)
+  
+  return(return_list)
+}
+
+
+# Determine Dataset entry 
+dataset_entry <- function(dataset_one, one_subtype, dataset_two, two_subtype, clus) {
+  # ~~~~~~~~~~~~~~
+  # This function will return a number depending on the dataset_name input
+  #
+  # Args: 
+  # dataset_one - the name of the first dataset to consider
+  # one_subtype - the subtype of the first dataset
+  # dataset_two - the name of the second dataset to consider
+  # two_subtype - the subtype of the second dataset
+  # clus - the k that is currently being compared
+  #
+  # Returns:
+  # two numbers indicating the row and column of interest
+  # ~~~~~~~~~~~~~~
+ 
+  if (dataset_one == 'TCGA' | dataset_two == 'GSE9891' | dataset_one == 'GSE26712' | dataset_two == 'GSE26712') {
+    return(NA)
+  } else if (dataset_one == 'Mayo' && dataset_two == 'GSE32062.GPL6480') {
+    return(NA)
+  }
+  
+  
+  if (clus == '2') {
+    if (dataset_one == 'Mayo') {
+      if (one_subtype == '1') {
+        row <- 1
+      } else {
+        row <- 2
+      }
+    }
+    
+    if (dataset_one == 'GSE32062.GPL6480') {
+      if (one_subtype == '1') {
+        row <- 3
+      } else {
+        row <- 4
+      }
+    }
+    
+    if (dataset_one == 'GSE9891') {
+      if (one_subtype == '1') {
+        row <- 5
+      } else {
+        row <- 6
+      }
+    }
+    
+    if (dataset_two == 'TCGA') {
+      if (two_subtype == '1') {
+        column <- 1
+      } else {
+        column <- 2
+      }
+    }
+      
+    if (dataset_two == 'Mayo') {
+      if (two_subtype == '1') {
+        column <- 3
+      } else {
+        column <- 4
+      }
+    }
+      
+    if (dataset_two == 'GSE32062.GPL6480') {
+      if (two_subtype == '1') {
+        column <- 5
+      } else {
+        column <- 6
+      }
+    }
+  } else if (clus == '3') {
+    
+    if (dataset_one == 'Mayo') {
+      if (one_subtype == '1') {
+        row <- 7
+      } else if (one_subtype == '2') {
+        row <- 8
+      } else {
+        row <- 9
+      }
+    }
+    
+    if (dataset_one == 'GSE32062.GPL6480') {
+      if (one_subtype == '1') {
+        row <- 10
+      } else if (one_subtype == '2') {
+        row <- 11
+      } else {
+        row <- 12
+      }
+    }
+    
+    if (dataset_one == 'GSE9891') {
+      if (one_subtype == '1') {
+        row <- 13
+      } else if (one_subtype == '2') {
+        row <- 14
+      } else {
+        row <- 15
+      }
+    }
+    
+    if (dataset_two == 'TCGA') {
+      if (two_subtype == '1') {
+        column <- 7
+      } else if (two_subtype == '2'){
+        column <- 8
+      } else {
+        column <- 9
+      }
+    }
+    
+    if (dataset_two == 'Mayo') {
+      if (two_subtype == '1') {
+        column <- 10
+      } else if (two_subtype == '2') {
+        column <- 11
+      } else {
+        column <- 12
+      }
+    }
+    
+    if (dataset_two == 'GSE32062.GPL6480') {
+      if (two_subtype == '1') {
+        column <- 13
+      } else if (two_subtype == '2') {
+        column <- 14
+      } else {
+        column <- 15
+      }
+    }
+  } else {
+    
+    if (dataset_one == 'Mayo') {
+      if (one_subtype == '1') {
+        row <- 16
+      } else if (one_subtype == '2') {
+        row <- 17
+      } else if (one_subtype == '3') {
+        row <- 18
+      } else {
+        row <- 19
+      }
+    }
+    
+    if (dataset_one == 'GSE32062.GPL6480') {
+      if (one_subtype == '1') {
+        row <- 20
+      } else if (one_subtype == '2') {
+        row <- 21
+      } else if (one_subtype == '3') {
+        row <- 22
+      } else {
+        row <- 23
+      }
+    }
+    
+    if (dataset_one == 'GSE9891') {
+      if (one_subtype == '1') {
+        row <- 24
+      } else if (one_subtype == '2') {
+        row <- 25
+      } else if (one_subtype == '3') {
+        row <- 26
+      } else {
+        row <- 27
+      }
+    }
+    
+    if (dataset_two == 'TCGA') {
+      if (two_subtype == '1') {
+        column <- 16
+      } else if (two_subtype == '2'){
+        column <- 17
+      } else if (two_subtype == '3') {
+        column <- 18
+      } else {
+        column <- 19
+      }
+    }
+    
+    if (dataset_two == 'Mayo') {
+      if (two_subtype == '1') {
+        column <- 20
+      } else if (two_subtype == '2') {
+        column <- 21
+      } else if (two_subtype == '3') {
+        column <- 22
+      } else {
+        column <- 23
+      }
+    }
+    
+    if (dataset_two == 'GSE32062.GPL6480') {
+      if (two_subtype == '1') {
+        column <- 24
+      } else if (two_subtype == '2') {
+        column <- 25
+      } else if (two_subtype == '3') {
+        column <- 26
+      } else {
+        column <- 27
+      }
+    }
+  }
+
+  return_list <- list('row' = row, 'column' = column)
+  return(return_list)
+}
