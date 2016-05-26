@@ -66,7 +66,7 @@ To retrieve the full build without installing docker:
 $wget -nv https://zenodo.org/record/32803/files/hgsc_subtypes_fullbuild
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #######################
-# Data
+# DATA
 #######################
 All data was retrieved from curatedOvarianData except for the Mayo data (GSE74357).
 
