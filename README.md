@@ -1,6 +1,6 @@
 
 ############################################
-# Analytical Code for "Cross-population analysis of high-grade serous ovarian cancer does not support four subtypes"
+# Analytical Code for "Comprehensive cross-population analysis of high-grade serous ovarian cancer supports no more than three subtypes"
 
 #### Way, G., Rudd, J., Wang, C., Hamidi, H., Fridley, B., Konecny, G., Goode, E., Greene, C., Doherty, J. 
 
@@ -33,7 +33,7 @@ $docker pull gregway/hgsc_subtypes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Build docker image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$docker build -it gregway/hgsc_subtypes
+$docker build -t gregway/hgsc_subtypes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Run docker image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,7 +45,15 @@ Inside the docker container, perform the following to reproduce all analyses
 #cd hgsc_subtypes
 hgsc_subtypes#./ANALYSIS.sh
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Note, runtime is about 24 hours.
 
+To save the contents of the docker image and view tables and figures
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+mkdir hgsc_subtypes_analysis
+docker save gregway/hgsc_subtypes | gzip > hgsc_subtypes_analysis.tar.gz
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+####  FULL BUILD
 Alternatively, we provide a fully built docker image with all analyses completed
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $docker pull gregway/hgsc_subtypes_fullbuild
