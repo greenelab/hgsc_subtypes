@@ -33,7 +33,7 @@ $docker pull gregway/hgsc_subtypes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Build docker image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$docker build -t gregway/hgsc_subtypes
+$docker build -t gregway/hgsc_subtypes .
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Run docker image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,7 +57,7 @@ $docker save gregway/hgsc_subtypes | gzip > hgsc_subtypes_analysis/analysis.tar.
 Alternatively, we provide a fully built docker image with all analyses completed
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $docker pull gregway/hgsc_subtypes_fullbuild
-$docker build -it gregway/hgsc_subtypes_fullbuild
+$docker build -t gregway/hgsc_subtypes_fullbuild .
 $docker run -it gregway/hgsc_subtypes_fullbuild
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
