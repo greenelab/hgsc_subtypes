@@ -50,7 +50,7 @@ Note, runtime is about 24 hours.
 To save the contents of the docker image and view tables and figures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 mkdir hgsc_subtypes_analysis
-docker save gregway/hgsc_subtypes | gzip > hgsc_subtypes_analysis.tar.gz
+docker save gregway/hgsc_subtypes | gzip > hgsc_subtypes_analysis/analysis.tar.gz
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ####  FULL BUILD
