@@ -49,8 +49,8 @@ Note, runtime is on the order of hours.
 
 To save the contents of the docker image and view tables and figures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$mkdir hgsc_subtypes_analysis
-$docker save gregway/hgsc_subtypes | gzip > hgsc_subtypes_analysis/analysis.tar.gz
+$files=$(docker create gregway/hgsc_subtypes)
+$docker cp $files:hgsc_subtypes - > hgsc_analysis.tar
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ####  FULL BUILD
