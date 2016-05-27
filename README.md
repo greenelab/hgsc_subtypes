@@ -45,7 +45,7 @@ Inside the docker container, perform the following to reproduce all analyses
 #cd hgsc_subtypes
 hgsc_subtypes#./ANALYSIS.sh
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Note, runtime is about 24 hours.
+Note, runtime is on the order of hours.
 
 To save the contents of the docker image and view tables and figures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
