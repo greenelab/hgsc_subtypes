@@ -35,25 +35,14 @@ Build docker image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $docker build -t gregway/hgsc_subtypes .
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Run docker image
+Clone this github repository and run docker container to perform analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$docker run -it gregway/hgsc_subtypes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Inside the docker container, perform the following to reproduce all analyses
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#cd hgsc_subtypes
-hgsc_subtypes#./ANALYSIS.sh
+$git clone greenelab/hgsc_subtypes
+$docker run -d -v ~/PATH/TO/GIT/hgsc_subtypes/:/hgsc_subtypes/ -p 5000:80 -i gregway/hgsc_subtypes sh hgsc_subtypes/docker/docker_command.sh
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Note, runtime is on the order of hours.
 
 ####  FULL BUILD
-Alternatively, we provide a fully built docker image with all analyses completed
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$docker pull gregway/hgsc_subtypes_fullbuild
-$docker build -t gregway/hgsc_subtypes_fullbuild .
-$docker run -it gregway/hgsc_subtypes_fullbuild
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To retrieve the full build without installing docker:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
