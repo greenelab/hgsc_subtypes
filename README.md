@@ -46,7 +46,7 @@ Note, runtime is on the order of hours.
 
 To retrieve the full build without installing docker:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$wget -nv https://zenodo.org/record/32803/files/hgsc_subtypes_fullbuild
+$wget -nv https://zenodo.org/record/53990
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #######################
 # DATA
