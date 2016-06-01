@@ -44,11 +44,7 @@ Note, runtime is on the order of hours.
 
 ####  FULL BUILD
 
-To retrieve the full build without installing docker:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$wget -nv https://zenodo.org/record/53990
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#######################
+To retrieve the full build without installing docker download from <https://zenodo.org/record/53990>
 # DATA
 #######################
 All data was retrieved from curatedOvarianData except for the Mayo data (GSE74357).
