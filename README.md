@@ -31,14 +31,11 @@ After installing Docker, install our docker image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $docker pull gregway/hgsc_subtypes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Build docker image
+
+Clone this github repository and run docker to perform analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$docker build -t gregway/hgsc_subtypes .
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Clone this github repository and run docker container to perform analysis
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$git clone greenelab/hgsc_subtypes
-$docker run -d -v ~/PATH/TO/GIT/hgsc_subtypes/:/hgsc_subtypes/ -p 5000:80 -i gregway/hgsc_subtypes sh hgsc_subtypes/docker/docker_command.sh
+$git clone https://github.com/greenelab/hgsc_subtypes.git
+$docker run -d -v hgsc_subtypes/:/hgsc_subtypes/ -p 5000:80 -i gregway/hgsc_subtypes sh hgsc_subtypes/docker/docker_command.sh
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Note, runtime is on the order of hours.
 
