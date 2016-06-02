@@ -1,6 +1,6 @@
 
 ############################################
-# Analytical Code for "Cross-population analysis of high-grade serous ovarian cancer does not support four subtypes"
+# Analytical Code for "Comprehensive cross-population analysis of high-grade serous ovarian cancer supports no more than three subtypes"
 
 #### Way, G., Rudd, J., Wang, C., Hamidi, H., Fridley, B., Konecny, G., Goode, E., Greene, C., Doherty, J. 
 
@@ -31,34 +31,18 @@ After installing Docker, install our docker image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $docker pull gregway/hgsc_subtypes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Build docker image
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$docker build -it gregway/hgsc_subtypes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Run docker image
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$docker run -it gregway/hgsc_subtypes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Inside the docker container, perform the following to reproduce all analyses
+Clone this github repository and run docker to perform analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#cd hgsc_subtypes
-hgsc_subtypes#./ANALYSIS.sh
+$git clone https://github.com/greenelab/hgsc_subtypes.git
+$docker run -d -v ~/<PATH>/hgsc_subtypes/:/hgsc_subtypes/ -p 5000:80 -i gregway/hgsc_subtypes sh hgsc_subtypes/docker/docker_command.sh
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Where <PATH> is the directory structure where the github repo is cloned. Note, runtime is on the order of several hours.
 
-Alternatively, we provide a fully built docker image with all analyses completed
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$docker pull gregway/hgsc_subtypes_fullbuild
-$docker build -it gregway/hgsc_subtypes_fullbuild
-$docker run -it gregway/hgsc_subtypes_fullbuild
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+####  FULL BUILD
 
-To retrieve the full build without installing docker:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$wget -nv https://zenodo.org/record/32803/files/hgsc_subtypes_fullbuild
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#######################
-# Data
+To retrieve the full build without installing docker download from <https://zenodo.org/record/53990>
+# DATA
 #######################
 All data was retrieved from curatedOvarianData except for the Mayo data (GSE74357).
 
