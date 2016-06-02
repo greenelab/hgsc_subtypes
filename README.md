@@ -37,7 +37,7 @@ Clone this github repository and run docker to perform analysis
 $git clone https://github.com/greenelab/hgsc_subtypes.git
 $docker run -d -v ~/<PATH>/hgsc_subtypes/:/hgsc_subtypes/ -p 5000:80 -i gregway/hgsc_subtypes sh hgsc_subtypes/docker/docker_command.sh
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Where <PATH> is the directory structure where the github repo is cloned. Note, runtime is on the order of several hours.
+Where PATH is the directory structure where the github repo is cloned. Note, runtime is on the order of several hours.
 
 ####  FULL BUILD
 
