@@ -1,7 +1,5 @@
 # High-Grade Serous Ovarian Cancer Subtypes - Why has the field settled on four?
 
-**(C) Trustees of the University of Pennsylvania**
-
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.32906.svg)](http://dx.doi.org/10.5281/zenodo.32906)
 
 ## Summary
@@ -46,7 +44,6 @@ docker run \
 --volume ~/<PATH>/hgsc_subtypes/:hgsc_subtypes/ \
 --publish 5000:80
 --interactive gregway/hgsc_subtypes bash hgsc_subtypes/docker/docker_command.sh
-
 ```
 
 Where PATH is the local directory structure where the github repo is cloned. The
