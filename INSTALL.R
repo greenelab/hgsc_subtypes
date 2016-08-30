@@ -9,11 +9,19 @@
 ############################################
 # USAGE: This script is to be run upon docker image build
 
+library('methods')
+
 mirror <- "http://cran.us.r-project.org"
+install.packages('checkpoint', repos = mirror)
+
+library('checkpoint')
 
 ######################
 # Install CRAN packages 
 ######################
+dir.create('.checkpoint')
+checkpoint('2016-03-01', checkpointLocation = '.')
+
 cran_pkgs <- c(
   'plyr',
   'gridExtra',
@@ -32,10 +40,11 @@ cran_pkgs <- c(
   'NMF',
   'outliers',
   'survival',
-  'VennDiagram'
+  'VennDiagram',
+  'mnormt'
 )
 
-install.packages(cran_pkgs, repos = mirror)
+install.packages(cran_pkgs)
 
 ######################
 # Install bioconductor packages
@@ -61,7 +70,7 @@ biocLite(bioc_pkgs, suppressUpdates = TRUE)
 # See docker/dockerfile for instructions on how to install
 
 # doppelgangR
-customLib <- "hgsc_subtypes/1.DataInclusion/doppelgangR-master/"
+customLib <- "1.DataInclusion/doppelgangR-master/"
 install.packages(customLib, repos = NULL, type = "source")
 
 # curatedOvarianData
