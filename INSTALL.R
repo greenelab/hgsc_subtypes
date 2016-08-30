@@ -74,5 +74,5 @@ customLib <- "1.DataInclusion/doppelgangR-master/"
 install.packages(customLib, repos = NULL, type = "source")
 
 # curatedOvarianData
-customLib <- "curatedOvarianData/"
+customLib <- "../curatedOvarianData/"
 install.packages(customLib, repos = NULL, type = "source")
