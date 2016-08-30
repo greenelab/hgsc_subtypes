@@ -40,6 +40,7 @@ SEED=123
 NSTARTS=20
 NO_SHUFFLE=FALSE
 SHUFFLE=TRUE
+SAM_SUBSET='commongenes'
 
 #################
 # PART ONE: 
@@ -54,7 +55,7 @@ SHUFFLE=TRUE
 # NOTE: The Mayo Clinic Data is not currently in curatedOvarianData.
 
 # Output the samples for each dataset that pass the inclusion criteria
-R --no-save --args < 1.DataInclusion/Scripts/A.getInclusion.R  # (Table 1)
+Rscript 1.DataInclusion/Scripts/A.getInclusion.R  # (Table 1)
 
 # Output the common genes and the MAD (Median Absolute Deviation) genes to be 
 # used in developing moderated t score vectors and in clustering, respectively. 
@@ -77,11 +78,19 @@ B.getGenes.R
 # ~~~~~~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~
-# k means & SAM
+# SAM with MAD genes
 # ~~~~~~~~~~~~~
-# Perform k means and SAM (args: kmin, kmax, nstarts, seed, bNMF) (Figure 1)
-R --no-save --args $KMIN $KMAX $NSTARTS $SEED FALSE $NO_SHUFFLE $DATASETS \
-"GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/A.run_kmeans_SAM.R
+# Output across dataset correlations for MAD genes
+# NOTE: common genes used in downstream analyses
+R --no-save --args $KMIN $KMAX $NSTARTS $SEED FALSE $NO_SHUFFLE "madgenes" \
+$DATASETS "GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/A.run_kmeans_SAM.R
+
+# ~~~~~~~~~~~~~
+# k means & SAM (with common genes)
+# ~~~~~~~~~~~~~
+# Perform k means and SAM (Figure 1)
+R --no-save --args $KMIN $KMAX $NSTARTS $SEED FALSE $NO_SHUFFLE $SAM_SUBSET \
+$DATASETS "GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/A.run_kmeans_SAM.R
 
 # Output correlation matrices (Sup. Fig. S2)	
 R --no-save --args $KMIN $KMAX $SEED Figures/CorrelationMatrix/ $DATASETS \
@@ -92,8 +101,8 @@ R --no-save --args $KMIN $KMAX $DATASETS < 2.Clustering_DiffExprs/Scripts/\
 C.KMeansBarCharts.R
 
 # Shuffle genes to compare across population correlations in real data
-R --no-save --args $KMIN $KMAX $NSTARTS $SEED FALSE $SHUFFLE $DATASETS \
-"GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/A.run_kmeans_SAM.R
+R --no-save --args $KMIN $KMAX $NSTARTS $SEED FALSE $SHUFFLE $SAM_SUBSET \
+$DATASETS "GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/A.run_kmeans_SAM.R
 
 # ~~~~~~~~~~~~~
 # NMF
@@ -104,8 +113,8 @@ R --no-save --args $KMIN $KMAX $NSTARTS $SEED $DATASETS "GSE26712_eset" \
 < 2.Clustering_DiffExprs/Scripts/D.NMF.R
 
 # Run SAM on NMF clusters (TRUE argument forces NMF analysis)
-R --no-save --args $KMIN $KMAX $NSTARTS $SEED TRUE $NO_SHUFFLE $DATASETS \
-"GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/A.run_kmeans_SAM.R
+R --no-save --args $KMIN $KMAX $NSTARTS $SEED TRUE $NO_SHUFFLE $SAM_SUBSET \
+$DATASETS "GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/A.run_kmeans_SAM.R
 
 # ~~~~~~~~~~~~~
 # k means vs. NMF
@@ -125,7 +134,7 @@ F.clusterMembership.R
 R --no-save < 2.Clustering_DiffExprs/Scripts/G.Dataset_concordance.R
 
 # ~~~~~~~~~~~~~
-#  Tothill LMP  #
+# Tothill LMP
 # ~~~~~~~~~~~~~
 # Observe consensus matrices and cophenetic coefficients for Tothill dataset if 
 # LMP samples are not removed. This is similar to the results presented by TCGA 
