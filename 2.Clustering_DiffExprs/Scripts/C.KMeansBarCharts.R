@@ -6,6 +6,9 @@
 # ~~~~~~~~~~~~~~~~~~~~~
 # This script will input a series of datasets and output bar charts
 
+suppressMessages(library(checkpoint))
+suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
+
 args <- commandArgs(trailingOnly=TRUE)
 # args <- c("2", "4", "TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset")
 
