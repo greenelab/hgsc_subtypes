@@ -6,6 +6,9 @@
 # ~~~~~~~~~~~~~~~~~~~~~
 # This script will output kaplan-meier curves and survival assessments for all input datasets
 
+suppressMessages(library(checkpoint))
+suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
+
 args <- commandArgs(trailingOnly=TRUE)
 
 # args <- c("TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset")
