@@ -27,6 +27,8 @@ Jennifer.A.Doherty@dartmouth.edu and/or CSGreene@mail.med.upenn.edu
 
 ## Analysis
 
+[![](https://images.microbadger.com/badges/version/gregway/hgsc_subtypes.svg)](http://microbadger.com/images/gregway/hgsc_subtypes) [![](https://images.microbadger.com/badges/image/gregway/hgsc_subtypes.svg)](http://microbadger.com/images/gregway/hgsc_subtypes)
+
 For ease of use and to ensure reproducibility, all analyses should be performed
 in our [Docker image](https://hub.docker.com/r/gregway/hgsc_subtypes/)
 To install docker, please follow these
