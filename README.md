@@ -2,6 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.32906.svg)](http://dx.doi.org/10.5281/zenodo.32906)
 
+[![](https://images.microbadger.com/badges/version/gregway/hgsc_subtypes.svg)](http://microbadger.com/images/gregway/hgsc_subtypes) [![](https://images.microbadger.com/badges/image/gregway/hgsc_subtypes.svg)](http://microbadger.com/images/gregway/hgsc_subtypes) 
 ## Summary
 
 The repository contains instructions to replicate the analysis of identifying
