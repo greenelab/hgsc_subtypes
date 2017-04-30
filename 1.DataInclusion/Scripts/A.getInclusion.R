@@ -1,4 +1,6 @@
 ############################################
+# Amy Campbell
+# Updated from:
 # Cross-population analysis of high-grade serous ovarian cancer does not support four subtypes
 #
 # Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
@@ -17,7 +19,7 @@ library(outliers)
 
 # This R script holds custom inclusion functions
 source("1.DataInclusion/Scripts/Functions/Inclusion_functions.R")
-
+# <aaces expression path>
 ####################################
 # Load Constants
 ####################################
@@ -36,21 +38,45 @@ excludeEsets <- c("PMID17290060_eset", "E.MTAB.386_eset")
 # All the datasets within the curatedOvarianData package
 esets <- getAllDataSets("curatedOvarianData")
 
-# load the Konecny data (If an eset is not given here, please skip this step)
-load("1.DataInclusion/Data/Mayo/MayoEset.Rda")
+# Load the Konecny data (If an eset is not given here, please skip this step)
+mayo.eset <- GEOquery::getGEO("GSE74357", getGPL = FALSE)
+mayo.eset <- mayo.eset[[1]]
+ 
+# Process mayo.eset to include only high-grade serous ovarian tumor samples
+mayo.pheno <- readr::read_csv(file.path("1.DataInclusion", "Data", "Mayo", "Mayo_Pheno_Data.csv"))
+p <- pData(mayo.eset)
+
+mapper <- data.frame(p$geo_accession)
+mapper["unique_patient_ID"] <- unlist(lapply(p$title, function(x) strsplit(toString(x), split="  ")[[1]][2]))
+
+pheno.map <- dplyr::inner_join(mayo.pheno, mapper, by="unique_patient_ID")
+pheno.map.inclusion <- dplyr::filter(pheno.map, histological_type == "ser", grade == 3)
+
+included.geo <- unlist(pheno.map.inclusion["p.geo_accession"])
+mayo.eset <- mayo.eset[, sampleNames(mayo.eset) %in% included.geo]
+
+# Load the AACES expression data
+aaces.exprs <- readr::read_tsv("expression.tsv")
+aaces.eset <- ExpressionSet(assayData = as.matrix(aaces.exprs))
 
 # Use the inclusion/exclusion decision tree to filter samples in all curatedOvarainData datasets
 inclusionTable <- exclusionTable(esets)
 
 # Use the inclusion/exclusion decision tree on the Mayo data
-inclusionTable.mayo <- simpleExclusion(mayo.eset)
+inclusionTable.mayo <- names(mayo.eset)
+
+# Use the inclusion/exclusion decision tree on aaces data
+inclusionTable.aaces <- names(aaces.eset)
 
 # Combine the inclusion results from curatedOvarianData and Mayo
-inclusionTable[[1]] <- cbind(inclusionTable[[1]], inclusionTable.mayo[[1]])
+
+inclusionTable[[1]] <- cbind(inclusionTable[[1]], inclusionTable.mayo[[1]], inclusionTable.aaces[[1]])
 
 # The first list element in the inclusionTable is the data.frame which details the 
 # creation of the analytic set and how many samples were excluded and why
-colnames(inclusionTable[[1]])[ncol(inclusionTable[[1]])] <- "Mayo.eset"
+
+colnames(inclusionTable[[1]])[(ncol(inclusionTable[[1]])-1)] <- "Mayo.eset"
+colnames(inclusionTable[[1]])[(ncol(inclusionTable[[1]]))] <- "aaces.eset"
 
 # Save the data.frame to the harddrive
 write.csv(inclusionTable[[1]], "1.DataInclusion/Data/Inclusions.csv")
@@ -65,71 +91,97 @@ goodSamples <- goodSamples[-1 * grep("rna|RNA", names(goodSamples))]
 # Only consider the esets with the minimum number of samples
 esetList.chosen <- list()
 goodSamples.chosen <- list()
+
 for (i in 1:(length(goodSamples))) {
+  print(head(goodSamples[[i]]))
   if (length(goodSamples[[i]]) >= minimumSamples & !(names(goodSamples)[i] %in% excludeEsets)) {
+
     goodSamples.chosen[[names(goodSamples)[i]]] <- goodSamples[[i]]  # get the samples
+
     exprs <- paste("data(",names(goodSamples)[i],")",sep="")  # load the eset
+
     eval(parse(text=exprs))
-    
+
     rm(exprs)
-    
+
     # Limit it to only the good samples
     exprsString <- paste(names(goodSamples)[i], " <- ",names(goodSamples)[i],"[,goodSamples[[i]]]",sep="" )
+
     eval(parse(text=exprsString))
-    
+
     # add the eset to the eset List
     exprsString <- paste("esetList.chosen[[",length(goodSamples.chosen),"]] <- ",names(goodSamples)[i], sep="")
     eval(parse(text=exprsString))
-    
+
     # delete the eset
     exprsString <- paste("rm(",names(goodSamples)[i],")",sep="")
+
     eval(parse(text=exprsString))
   }
 }
+
 names(esetList.chosen) <- names(goodSamples.chosen)
 
-# Add the Mayo data to the esetList.chosen and goodSamples.chosen
-esetList.chosen[[length(esetList.chosen)+1]] <- mayo.eset[,inclusionTable.mayo[[2]]]
-goodSamples.chosen[[length(esetList.chosen)]] <- inclusionTable.mayo[[2]]
-names(esetList.chosen)[length(esetList.chosen)] <- names(goodSamples.chosen)[length(esetList.chosen)] <- "mayo.eset"
 
-# Pre-process the esets to improve matching
-testesets <- lapply(esetList.chosen, function(X){  
+esetList.chosen[[length(esetList.chosen)+1]] <- mayo.eset
+esetList.chosen[[length(esetList.chosen)+1]] <- aaces.eset
+
+goodSamples.chosen[[(length(esetList.chosen)-1)]] <- sampleNames(mayo.eset)
+goodSamples.chosen[[length(esetList.chosen)]] <- sampleNames(aaces.eset)
+
+
+names(esetList.chosen)[(length(esetList.chosen) - 1)] <- names(goodSamples.chosen)[(length(esetList.chosen) - 1)] <- "mayo.eset"
+names(esetList.chosen)[length(esetList.chosen)] <- names(goodSamples.chosen)[length(esetList.chosen)] <- "aaces.eset"
+
+#dresult <- doppelgangR::doppelgangR(esetList.chosen, corFinder.args = list(use.ComBat=TRUE), cache.dir = NULL)
+
+#####################################################################################################################
+
+# # Pre-process the esets to improve matching
+
+# for every entry in esetList.chosen, 
+# so, for example, tcga.eset, make:
+# tcga.eset$alt_sample_name <- gsub("[^0-9]", "", x)
+esetList.chosen$mayo.eset$sample_type
+
+lapply(esetList.chosen[1:(length(esetList.chosen)-2)], function(X){
+ X$alt_sample_name <- paste(X$sample_type, gsub("[^0-9]", "", X$alt_sample_name), sep="_")
+ pData(X) <- pData(X)[, !grepl("uncurated_author_metadata", colnames(pData(X)))]
+ return(X)}
+ )
+testesets <- esetList.chosen
+testesets[1:(length(esetList.chosen)-2)] <- lapply(testesets[1:(length(testesets)-2)], function(X){  
   X$alt_sample_name <- paste(X$sample_type, gsub("[^0-9]", "", X$alt_sample_name), sep="_")
   pData(X) <- pData(X)[, !grepl("uncurated_author_metadata", colnames(pData(X)))]
-  return(X) })
+  return(X)})
+#
+#
+# View(esetList.chosen[length(esetList.chosen)])
+# doppelgangR(exprs(eset))phenotype/clinical data (pData(eset))
+# and "smoking guns" - supposedly unique identifiers found in pData(eset).
 
 # Use doppelgangR to find similar sample pairs accross datasets except for mayo
 # this code assumes that the Mayo data is the last eset in the list
-doppelResult <- doppelgangR(testesets[-1 * length(testesets)], corFinder.args = list(use.ComBat=TRUE), 
-                            cache.dir = NULL)
+# doppelResult <- doppelgangR(testesets[-1 * length(testesets)], corFinder.args = list(use.ComBat=TRUE),
+#                             cache.dir = NULL)
+dresult <- doppelgangR::doppelgangR(testesets, corFinder.args = list(use.ComBat=TRUE), cache.dir = NULL)
 
-# Process the doppelgangR results into data.frames and write to the harddrive
-doppelResult_sum <- summary(doppelResult)
-doppelResult.full <- doppelResult@fullresults
+################################################################################################################
 
-# Write the doppelgangR results to the harddrive
-doppelResult.full_out <- c()
-for (i in 1:length(doppelResult.full)) {
-  tmp <- merge(doppelResult.full[[i]][["expr.doppels"]][["outlierFinder.res"]], 
-               doppelResult.full[[i]][["pheno.doppels"]][["outlierFinder.res"]], 
-               by = c("sample1", "sample2"))
-  
-  colnames(tmp) <- c("sample1", "sample2", "expr.similarity", "expr.doppel", 
-                     "pheno.similarity", "pheno.doppel")
-  
-  doppelResult.full_out <- rbind(doppelResult.full_out, tmp)
-}
+# # Process the doppelgangR results into data.frames and write to the harddrive
+# doppelResult_sum <- summary(doppelResult)
+# doppelResult.full <- doppelResult@fullresults
+#
+# # Write the doppelgangR results to the harddrive
+doppelResult.full <- summary(dresult)
+doppelResult.full_out <- doppelResult.full[c("sample1", "sample2", "expr.similarity", "expr.doppel", "pheno.similarity", "pheno.doppel")]
 
-write.table(doppelResult.full_out, file = "1.DataInclusion/Data/doppelgangR/pairwiseSampleComparisons.tsv", 
+write.table(doppelResult.full_out, file = "1.DataInclusion/Data/doppelgangR/pairwiseSampleComparisons.tsv",
             sep = "\t", quote = FALSE, row.names = FALSE)
 
-# Write the good samples to file
 for (i in 1:length(goodSamples.chosen)) {
-  if (names(goodSamples.chosen)[i] != "mayo.eset") {
-    # Investigate within Dataset Low Correlating Samples
-    sub <- doppelResult.full_out[lapply(strsplit(doppelResult.full_out$sample1, ":"), function(x){x[1]}) %in% 
-                             names(goodSamples.chosen)[i] & lapply(strsplit(doppelResult.full_out$sample2, ":"), 
+    sub <- (doppelResult.full_out)[lapply(strsplit(doppelResult.full_out$sample1, ":"), function(x){x[1]}) %in%
+                             names(goodSamples.chosen)[i] & lapply(strsplit(doppelResult.full_out$sample2, ":"),
                                                                    function(x){x[1]}) %in% names(goodSamples.chosen)[i], ]
     cut <- mean(sub$expr.similarity) - (2 * sd(sub$expr.similarity))
     inc <- sub[sub$expr.similarity > cut,]
@@ -139,28 +191,23 @@ for (i in 1:length(goodSamples.chosen)) {
       lowcorSamples <- unlist(strsplit(samp,":"))[seq(2, length(samp)*2, 2)]
       cat("Remove", length(lowcorSamples), "low-correlating samples from", names(goodSamples.chosen)[i], "\n")
     }
-    
-    doppelSamples <- c(sub$sample1[sub$expr.doppel & sub$expr.similarity > 0.95], 
+
+    doppelSamples <- c(sub$sample1[sub$expr.doppel & sub$expr.similarity > 0.95],
                        sub$sample2[sub$expr.doppel & sub$expr.similarity > 0.95])
-    
+
     if (length(doppelSamples) != 0) {
       doppelSamples <- unlist(strsplit(doppelSamples, ":"))[seq(2, length(doppelSamples)*2, 2)]
       doppelSamples <- unique(doppelSamples)
       doppelSamples <- c(doppelSamples, lowcorSamples)
-      
+
       sampleList <- setdiff(goodSamples.chosen[[i]], doppelSamples)
-      outFName <- paste("1.DataInclusion/Data/GoodSamples/", names(goodSamples.chosen)[i], 
+      outFName <- paste("1.DataInclusion/Data/GoodSamples/", names(goodSamples.chosen)[i],
                         "_samplesRemoved.csv", sep="")
       write.csv(sampleList, outFName)
     } else {
       sampleList <- setdiff(goodSamples.chosen[[i]], lowcorSamples)
-      outFName <- paste("1.DataInclusion/Data/GoodSamples/", names(goodSamples.chosen)[i], 
+      outFName <- paste("1.DataInclusion/Data/GoodSamples/", names(goodSamples.chosen)[i],
                         "_samplesRemoved.csv", sep="")
       write.csv(sampleList, outFName)
-    }
-  } else {
-    sampleList <- goodSamples.chosen[[i]]
-    outFName <- paste("1.DataInclusion/Data/GoodSamples/Mayo_samplesRemoved.csv", sep="")
-    write.csv(sampleList, outFName)
-  }
-}
+    }}
+
