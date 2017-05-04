@@ -42,32 +42,33 @@ excludeEsets <- c("PMID17290060_eset", "E.MTAB.386_eset")
 esets <- getAllDataSets("curatedOvarianData")
 
 # Load the Konecny data from GEO
-mayo.eset <- GEOquery::getGEO("GSE74357", getGPL = FALSE)
-mayo.eset <- mayo.eset[[1]]
+# mayo.eset <- GEOquery::getGEO("GSE74357", getGPL = FALSE)
+# mayo.eset <- mayo.eset[[1]]
  
 # Load the AACES expression data
-aaces.exprs <- readr::read_tsv("expression.tsv")
+aaces.exprs <- read.table("expression.tsv", sep = "\t", row.names = 1, header = TRUE)
 aaces.eset <- ExpressionSet(assayData = as.matrix(aaces.exprs))
-
 
 ##################################
 # ANALYSIS
 ##################################
+load("1.DataInclusion/Data/Mayo/MayoEset.Rda")
+
 # Process mayo.eset to include only high-grade serous ovarian tumor samples
-mayo.pheno <- readr::read_csv(file.path("1.DataInclusion", "Data", "Mayo",
-                                        "Mayo_Pheno_Data.csv"))
-p <- pData(mayo.eset)
-
-mapper <- data.frame(p$geo_accession)
-mapper["unique_patient_ID"] <-
-  unlist(lapply(p$title, function(x) strsplit(toString(x), split = "  ")[[1]][2]))
-
-pheno.map <- dplyr::inner_join(mayo.pheno, mapper, by = "unique_patient_ID")
-pheno.map.inclusion <- dplyr::filter(pheno.map, histological_type == "ser",
-                                     grade == 3)
-
-included.geo <- unlist(pheno.map.inclusion["p.geo_accession"])
-mayo.eset <- mayo.eset[, sampleNames(mayo.eset) %in% included.geo]
+# mayo.pheno <- readr::read_csv(file.path("1.DataInclusion", "Data", "Mayo",
+#                                         "Mayo_Pheno_Data.csv"))
+# p <- pData(mayo.eset)
+# 
+# mapper <- data.frame(p$geo_accession)
+# mapper["unique_patient_ID"] <-
+#   unlist(lapply(p$title, function(x) strsplit(toString(x), split = "  ")[[1]][2]))
+# 
+# pheno.map <- dplyr::inner_join(mayo.pheno, mapper, by = "unique_patient_ID")
+# pheno.map.inclusion <- dplyr::filter(pheno.map, histological_type == "ser",
+#                                      grade == 3)
+# 
+# included.geo <- unlist(pheno.map.inclusion["p.geo_accession"])
+# mayo.eset <- mayo.eset[, sampleNames(mayo.eset) %in% included.geo]
 
 
 # Use the inclusion/exclusion decision tree to filter samples in all
@@ -75,10 +76,12 @@ mayo.eset <- mayo.eset[, sampleNames(mayo.eset) %in% included.geo]
 inclusionTable <- exclusionTable(esets)
 
 # Use the inclusion/exclusion decision tree on the Mayo data
-inclusionTable.mayo <- sampleNames(mayo.eset)
+inclusionTable.mayo <- simpleExclusion(mayo.eset)
 
-# Use the inclusion/exclusion decision tree on aaces data
-inclusionTable.aaces <- sampleNames(aaces.eset)
+# Use the inclusion/exclusion decision tree on aaces data, 
+# manually add sample names
+inclusionTable.aaces <- simpleExclusion(aaces.eset)
+inclusionTable.aaces[[2]] <- sampleNames(aaces.eset)
 
 # Combine the inclusion results from curatedOvarianData and Mayo
 
@@ -141,11 +144,11 @@ for (i in 1:(length(goodSamples))) {
 names(esetList.chosen) <- names(goodSamples.chosen)
 
 
-esetList.chosen[[length(esetList.chosen) + 1]] <- mayo.eset
-esetList.chosen[[length(esetList.chosen) + 1]] <- aaces.eset
+esetList.chosen[[length(esetList.chosen) + 1]] <- mayo.eset[, inclusionTable.mayo[[2]]]
+esetList.chosen[[length(esetList.chosen) + 1]] <- aaces.eset[, inclusionTable.aaces[[2]]]
 
-goodSamples.chosen[[(length(esetList.chosen) - 1)]] <- sampleNames(mayo.eset)
-goodSamples.chosen[[length(esetList.chosen)]] <- sampleNames(aaces.eset)
+goodSamples.chosen[[(length(esetList.chosen) - 1)]] <- inclusionTable.mayo[[2]]
+goodSamples.chosen[[length(esetList.chosen)]] <- inclusionTable.aaces[[2]]
 
 
 names(esetList.chosen)[(length(esetList.chosen) - 1)] <- 
@@ -216,6 +219,7 @@ for (i in 1:length(goodSamples.chosen)) {
       outFName <- paste("1.DataInclusion/Data/GoodSamples/",
                         names(goodSamples.chosen)[i],
                         "_samplesRemoved.csv", sep = "")
+      sampleList <- sampleList[sampleList != "X1"]
       write.csv(sampleList, outFName)
     } else {
       sampleList <- setdiff(goodSamples.chosen[[i]], lowcorSamples)
@@ -224,4 +228,5 @@ for (i in 1:length(goodSamples.chosen)) {
                         "_samplesRemoved.csv", sep = "")
       write.csv(sampleList, outFName)
     }
-    }
+}
+
