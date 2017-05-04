@@ -42,8 +42,8 @@ excludeEsets <- c("PMID17290060_eset", "E.MTAB.386_eset")
 esets <- getAllDataSets("curatedOvarianData")
 
 # Load the Konecny data from GEO
-# mayo.eset <- GEOquery::getGEO("GSE74357", getGPL = FALSE)
-# mayo.eset <- mayo.eset[[1]]
+load("1.DataInclusion/Data/Mayo/MayoEset.Rda")
+
  
 # Load the AACES expression data
 aaces.exprs <- read.table("expression.tsv", sep = "\t", row.names = 1, header = TRUE)
@@ -52,7 +52,6 @@ aaces.eset <- ExpressionSet(assayData = as.matrix(aaces.exprs))
 ##################################
 # ANALYSIS
 ##################################
-load("1.DataInclusion/Data/Mayo/MayoEset.Rda")
 
 # Process mayo.eset to include only high-grade serous ovarian tumor samples
 # mayo.pheno <- readr::read_csv(file.path("1.DataInclusion", "Data", "Mayo",
