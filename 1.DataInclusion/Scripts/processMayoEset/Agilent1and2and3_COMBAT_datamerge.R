@@ -18,6 +18,9 @@
 ##  Modified date : 19 September 2015 12:00 PM EST
 ######################################################## 
 
+suppressMessages(library(checkpoint))
+suppressMessages(checkpoint("2016-03-01", checkpointLocation = "."))
+
 ######################## RUN under R version 2.15.0 (2012-03-30)
 ######################## TESTED under R version 3.1.2 (2014-10-31)
 ###################################################################
@@ -186,23 +189,5 @@ dim(comb.mtx2)
 sum(is.na(comb.mtx2))
 #[1] 29815
 
-# gene.map <- data.frame(readr::read_csv(file.path("1.DataInclusion", "Data", "Mayo", "efg_agilent_wholegenome_4x44k_v1.csv")))
-# head(gene.map)
-# comb.mtx2 <- data.frame(comb.mtx2)
-# comb.mtx2["probeset"] <- rownames(comb.mtx2)
-# d <- dplyr::inner_join(comb.mtx2, gene.map, by="probeset")
-# 
-# d <- na.omit(d) 
-# length(unique(d["probeset"][[1]]))
-# length(unique(d["hgnc"][[1]]))
-# 
-# length(row.names(d))
-# 
-# row.names(d) <- d["hgnc"][[1]]
-# 
-# 
-# length(unique(d["hgnc"][[1]]))
-
 # Write comb.mtx99 to file
 write.table(comb.mtx2, "1.DataInclusion/Data/Mayo/COMBATadj_withNAcy5cy3.tsv", sep = "\t")
-

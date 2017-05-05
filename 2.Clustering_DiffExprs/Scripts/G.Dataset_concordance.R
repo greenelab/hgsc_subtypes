@@ -9,6 +9,9 @@
 # identified in the 2008 Clin Cancer Research Paper, and the original Konecny 
 # subtypes identified in the 2014 JNCI paper
 
+suppressMessages(library(checkpoint))
+suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
+
 library(curatedOvarianData)
 
 ############################################
