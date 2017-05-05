@@ -53,13 +53,29 @@ library(sva)
 combatoutdir<-'1.DataInclusion/Data/Mayo/'
 
 # Input logic to import raw data from GEO HERE
-load(paste(combatoutdir, 'PreComBatAgilent3BatchesExpr.RData', sep = ''))
+#load(paste(combatoutdir, 'PreComBatAgilent3BatchesExpr.RData', sep = ''))
+mayo.GEO.entry <- GEOquery::getGEO("GSE74357", getGPL = FALSE)
+mayo.eset <- mayo.GEO.entry[[1]]
+mayo.p <- phenoData(mayo.eset)
+mayo.expression <- exprs(mayo.eset)
+
+# Map GEO sample accession IDs to "X" format
+mapper <- data.frame(geo.accession = mayo.p$geo_accession)
+mapper["unique_patient_ID"] <-
+  unlist(lapply(mayo.p$title,
+                function(x) strsplit(toString(x), split = "  ")[[1]][2]))
+
+set.order <- data.frame(geo.accession = colnames(mayo.expression))
+mapper <- dplyr::inner_join(set.order, mapper, by = "geo.accession")
+colnames(mayo.expression) <- unlist(mapper["unique_patient_ID"])
+
+
 load(paste(combatoutdir, 'PreComBatAgilent3BatchesInfo.RData', sep = ''))
 
 objects()
-#[1] "combatoutdir"    "r_batch4"        "supermerge.expr"
+#[1] "combatoutdir"    "r_batch4"        "mayo.expression"
 
-mch.batch.idx <- match(colnames(supermerge.expr), r_batch4$UniqueID)
+mch.batch.idx <- match(colnames(mayo.expression), r_batch4$UniqueID)
 r_batch_info <- r_batch4[mch.batch.idx, ]
 
 table(r_batch_info$AgilentPart)
@@ -76,20 +92,20 @@ table(r_batch_info$cy5cy3dates)
 
 
 merg_batch_vec <- paste(r_batch_info$cy5cy3dates)
-all(colnames(supermerge.expr) == r_batch_info$UniqueID)
+all(colnames(mayo.expression) == r_batch_info$UniqueID)
 #[1] TRUE
-sum(is.na(supermerge.expr))
+sum(is.na(mayo.expression))
 #[1] 98057
 
 #=== 04/22/2013: Chen decided to exclude both probes with low SD (SD<=0.05) and probes missing in more than 10% of the samples (>=52 samples)
 #=== Combat will fail if including probes with very small variance (equivalently very small SD)
-sd_vec <- apply(supermerge.expr, 1, sd,na.rm = TRUE)
+sd_vec <- apply(mayo.expression, 1, sd,na.rm = TRUE)
 
 sel.prb.idx <- which(!is.na(sd_vec) & sd_vec >= 0.05)
 length(sel.prb.idx)
 #[1] 37270
 
-combat.set3 <- supermerge.expr[sel.prb.idx, ]
+combat.set3 <- mayo.expression[sel.prb.idx, ]
 dim(combat.set3)
 #[1] 37270   529
 sum(is.na(combat.set3))
@@ -170,5 +186,23 @@ dim(comb.mtx2)
 sum(is.na(comb.mtx2))
 #[1] 29815
 
+# gene.map <- data.frame(readr::read_csv(file.path("1.DataInclusion", "Data", "Mayo", "efg_agilent_wholegenome_4x44k_v1.csv")))
+# head(gene.map)
+# comb.mtx2 <- data.frame(comb.mtx2)
+# comb.mtx2["probeset"] <- rownames(comb.mtx2)
+# d <- dplyr::inner_join(comb.mtx2, gene.map, by="probeset")
+# 
+# d <- na.omit(d) 
+# length(unique(d["probeset"][[1]]))
+# length(unique(d["hgnc"][[1]]))
+# 
+# length(row.names(d))
+# 
+# row.names(d) <- d["hgnc"][[1]]
+# 
+# 
+# length(unique(d["hgnc"][[1]]))
+
 # Write comb.mtx99 to file
 write.table(comb.mtx2, "1.DataInclusion/Data/Mayo/COMBATadj_withNAcy5cy3.tsv", sep = "\t")
+
