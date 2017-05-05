@@ -69,7 +69,6 @@ set.order <- data.frame(geo.accession = colnames(mayo.expression))
 mapper <- dplyr::inner_join(set.order, mapper, by = "geo.accession")
 colnames(mayo.expression) <- unlist(mapper["unique_patient_ID"])
 
-
 load(paste(combatoutdir, 'PreComBatAgilent3BatchesInfo.RData', sep = ''))
 
 objects()
@@ -186,23 +185,5 @@ dim(comb.mtx2)
 sum(is.na(comb.mtx2))
 #[1] 29815
 
-# gene.map <- data.frame(readr::read_csv(file.path("1.DataInclusion", "Data", "Mayo", "efg_agilent_wholegenome_4x44k_v1.csv")))
-# head(gene.map)
-# comb.mtx2 <- data.frame(comb.mtx2)
-# comb.mtx2["probeset"] <- rownames(comb.mtx2)
-# d <- dplyr::inner_join(comb.mtx2, gene.map, by="probeset")
-# 
-# d <- na.omit(d) 
-# length(unique(d["probeset"][[1]]))
-# length(unique(d["hgnc"][[1]]))
-# 
-# length(row.names(d))
-# 
-# row.names(d) <- d["hgnc"][[1]]
-# 
-# 
-# length(unique(d["hgnc"][[1]]))
-
 # Write comb.mtx99 to file
 write.table(comb.mtx2, "1.DataInclusion/Data/Mayo/COMBATadj_withNAcy5cy3.tsv", sep = "\t")
-

@@ -69,12 +69,10 @@ LoadOVCA_Data <- function(datasets, goodsample_subset_dir = "1.DataInclusion/Dat
       cat("Loading", eset_exprs, "...\n")
       mayo.eset <- get(load(mayo_exprs_file))
       dta <- exprs(mayo.eset)
-    } else if (grepl("aaces",eset_exprs)) {
+    } else if (grepl("aaces", eset_exprs)) {
       cat("Loading", eset_exprs, "...\n")
       # AACES eset
-      aaces.exprs <- read.table("expression.tsv", sep = "\t", row.names = 1, header = TRUE)
-      aaces.eset <- ExpressionSet(assayData = as.matrix(aaces.exprs))
-      dta <- exprs(aaces.eset)
+      dta <- read.table("expression.tsv", sep = "\t", row.names = 1, header = TRUE)
     } else {
       stop("Dataset does not exist in curatedOvarianData")
     }

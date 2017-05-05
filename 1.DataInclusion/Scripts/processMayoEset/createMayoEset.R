@@ -72,17 +72,6 @@ if(identical(all.equal(map[,2], rownames(mayo.exprs)), TRUE)) {
   expr.withmap <- WGCNA::collapseRows(mayo.exprs,
                                       rowGroup = expr.withmap$hgnc,
                                       rowID = rownames(expr.withmap))
-
-  # run the Normalizer tool from the Sleipnir library
-  # tmp.fn.in  <- tempfile("NormalizerIn")
-  # tmp.fn.out  <- tempfile("NormalizerOut")
-  # print(tmp.fn.in)
-  # expr.withmap <- expr.withmap[!is.na(expr.withmap[ ,1]), ]
-  # write.table(expr.withmap, row.names = FALSE, file = tmp.fn.in, sep = "\t")
-  # system(paste("Normalizer -t pcl -T medmult -s 1 -i", tmp.fn.in, "-o", tmp.fn.out))
-  # system(paste("grep -v EWEIGHT", tmp.fn.out , ">", GeneLevelExpressionOutputLocation))
-  # unlink(tmp.fn.in)
-  # unlink(tmp.fn.out)
 } else {
   stop("Could not match map IDs to expression IDs.")
 }
