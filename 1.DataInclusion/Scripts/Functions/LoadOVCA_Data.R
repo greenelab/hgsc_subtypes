@@ -1,4 +1,4 @@
-############################################
+ ############################################
 # Cross-population analysis of high-grade serous ovarian cancer reveals only two robust subtypes
 #
 # Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
@@ -19,10 +19,10 @@ library(plyr)
 LoadOVCA_Data <- function(datasets, goodsample_subset_dir = "1.DataInclusion/Data/GoodSamples/", 
                           commongenes_dir = "1.DataInclusion/Data/Genes/CommonGenes_genelist.csv",
                           madgenes_dir = "1.DataInclusion/Data/Genes/GlobalMAD_genelist.csv",
-                          mayo_exprs_file = "1.DataInclusion/Data/Mayo/MayoEset.Rda",
                           genelist_subset = "commongenes",
+                          mayo_exprs_file = "1.DataInclusion/Data/Mayo/MayoEset.Rda",
                           shuffle = F) {
-  # ~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~
   # Loads ovarian cancer data from curatedOvarianData
   #
   # Args: 
@@ -31,7 +31,6 @@ LoadOVCA_Data <- function(datasets, goodsample_subset_dir = "1.DataInclusion/Dat
   #                        if no sample subsetting is desired, set this argument to "None"
   # commongenes_dir: the file location of the common genes .txt file
   # madgenes_dir: the file location of the mad (median absolute deviation) genes .txt file
-  # mayo_exprs_file: the file location of the rdata file from the Mayo Clinic
   # genelist_subset: the genelist to subset each dataset
   # shuffle: determines if the genelists should be shuffled in the final expression matrix
   #
@@ -56,7 +55,7 @@ LoadOVCA_Data <- function(datasets, goodsample_subset_dir = "1.DataInclusion/Dat
       # The samples to use in the subset
       goodSamples <- c(paste(goodSamples$x))
     }
-    
+
     # Load the expression data
     dta <- c()
     if (eset_exprs %in% detailedData.names) {
@@ -66,14 +65,18 @@ LoadOVCA_Data <- function(datasets, goodsample_subset_dir = "1.DataInclusion/Dat
       ExpressionData <- get(eset_exprs)
       dta <- exprs(ExpressionData)
       # Mayo data is not in curatedOvarianData
-    } else if (grepl("Mayo", eset_exprs)) {
-      cat("Loading", eset_exprs, "from file...\n")
-      dta <- get(load(mayo_exprs_file))
-      dta <- exprs(dta)
+    } else if (grepl("mayo.eset", eset_exprs)) {
+      cat("Loading", eset_exprs, "...\n")
+      mayo.eset <- get(load(mayo_exprs_file))
+      dta <- exprs(mayo.eset)
+    } else if (grepl("aaces", eset_exprs)) {
+      cat("Loading", eset_exprs, "...\n")
+      # AACES eset
+      dta <- read.table("expression.tsv", sep = "\t", row.names = 1, header = TRUE)
     } else {
       stop("Dataset does not exist in curatedOvarianData")
     }
-    
+
     # Determine user defined method of subseting genes
     if (genelist_subset == "commongenes") {
       subset <- read.csv(commongenes_dir, header = T, stringsAsFactors = F)
@@ -104,3 +107,4 @@ LoadOVCA_Data <- function(datasets, goodsample_subset_dir = "1.DataInclusion/Dat
   #Return a list of subsetted gene expression data.frames for all input datasets
   return(ExpData)
 }
+

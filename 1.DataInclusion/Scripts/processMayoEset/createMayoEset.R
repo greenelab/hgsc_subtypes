@@ -55,40 +55,33 @@ map <- map[map[ ,2] %in% rownames(mayo.exprs), ]
 map <- map[match(rownames(mayo.exprs), map[ ,2]), ]
 map[ ,2] <- rownames(mayo.exprs)
 
-# Write the gene expresssion matrix to file
-if(identical(all.equal(map[ ,2], rownames(mayo.exprs)), TRUE)) { 
-  
-  # Map to gene IDs.  Requires the Normalizer function from the Sleipnir library.
+rnames <- rownames(mayo.exprs)
+mayo.exprs <- apply(mayo.exprs, 2, function(x) as.numeric(as.character(x)))
+rownames(mayo.exprs) <- rnames
+
+if(identical(all.equal(map[,2], rownames(mayo.exprs)), TRUE)) { 
+
+    # Map to gene IDs.  Requires the Normalizer function from the Sleipnir library.
   expr.withmap <- cbind(map, mayo.exprs)
+  expr.withmap <- na.omit(expr.withmap)
+  rownames(expr.withmap) <- expr.withmap$probeset
+  mayo.exprs <- na.omit(mayo.exprs)
+  expr.withmap["probeset"] <- NULL
   
   write.table(expr.withmap, row.names = FALSE, file = "1.DataInclusion/Data/Mayo/MayoDataWithMap.txt", sep = "\t")
-  
-  # run the Normalizer tool from the Sleipnir library
-  tmp.fn.in  <- tempfile("NormalizerIn")
-  tmp.fn.out  <- tempfile("NormalizerOut")
-  
-  expr.withmap <- expr.withmap[!is.na(expr.withmap[ ,1]), ]
-  write.table(expr.withmap, row.names = FALSE, file = tmp.fn.in, sep = "\t")
-  system(paste("Normalizer -t pcl -T medmult -s 1 -i", tmp.fn.in, "-o", tmp.fn.out))
-  system(paste("grep -v EWEIGHT", tmp.fn.out , ">", GeneLevelExpressionOutputLocation))
-  unlink(tmp.fn.in)
-  unlink(tmp.fn.out)
+  expr.withmap <- WGCNA::collapseRows(mayo.exprs,
+                                      rowGroup = expr.withmap$hgnc,
+                                      rowID = rownames(expr.withmap))
 } else {
   stop("Could not match map IDs to expression IDs.")
 }
-
-# Load the normalized data
-mayo.exprs.normalized <- read.delim(GeneLevelExpressionOutputLocation)
-
-# Restrict expression data to only those samples for which we have phenotype data
-mayo.exprs <- mayo.exprs.normalized[ ,rownames(mayo.pheno)]
-rownames(mayo.exprs) <- mayo.exprs.normalized[, 1]
 
 # Convert the phenotype data.frame into an annotated data.frame
 mayo.pheno.ADF <- new("AnnotatedDataFrame", data = mayo.pheno)
 
 # Create the expressionset object
-mayo.eset <- new("ExpressionSet", exprs = as.matrix(mayo.exprs), phenoData = mayo.pheno.ADF)
+mayo.eset <- new("ExpressionSet", exprs = expr.withmap$datETcollapsed, phenoData = mayo.pheno.ADF)
 
 # Save the expressionset to the harddrive
 save(mayo.eset, file=ExpressionSetOutputLocation)
+
