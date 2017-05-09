@@ -55,9 +55,6 @@ map <- map[map[ ,2] %in% rownames(mayo.exprs), ]
 map <- map[match(rownames(mayo.exprs), map[ ,2]), ]
 map[ ,2] <- rownames(mayo.exprs)
 
-# Write the gene expresssion matrix to file
-head(map)
-
 rnames <- rownames(mayo.exprs)
 mayo.exprs <- apply(mayo.exprs, 2, function(x) as.numeric(as.character(x)))
 rownames(mayo.exprs) <- rnames
