@@ -8,8 +8,11 @@
 # across k and across datasets, it will output cluster membership files and 
 # correlations
 
+suppressMessages(library(checkpoint))
+suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
+
 args <- commandArgs(trailingOnly=TRUE)
-#args <- c(2, 4, 20, 123, FALSE, TRUE, "TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset")
+#args <- c(2, 4, 20, 123, FALSE, FALSE, "madgenes", "TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset")
 ############################################
 # Load Libraries
 ############################################
@@ -39,6 +42,7 @@ kStarts <- as.numeric(paste(args[3]))
 kSEED <- as.numeric(paste(args[4])) 
 bNMF <- as.logical(args[5])
 shuffle <- as.logical(args[6])
+SAM_subset <- args[7]
 
 # Separate the eset arguments from the rest of the commandArgs
 argsCurated <- args[grep("eset", args)]
@@ -55,7 +59,7 @@ if("Mayo" %in% args) {
 }
 
 # Use the LoadOVCA_Data function to read in the datasets subset by commongenes
-ExpData <- LoadOVCA_Data(datasets = argsCurated, genelist_subset = "commongenes", shuffle = shuffle)
+ExpData <- LoadOVCA_Data(datasets = argsCurated, genelist_subset = SAM_subset, shuffle = shuffle)
 
 # Read in common genes csv file. The csv was generated as an intersection of the genes in 
 # TCGA, Yoshihara, Mayo, Tothill, and Bonome
@@ -494,11 +498,13 @@ for (centroid in 1:length(Dlist.mapped)) {
     if (!bNMF) {
       write.table(WithinDatasetCor[[centroid]], file = 
                     paste("2.Clustering_DiffExprs/Tables/WithinCor/", names(WithinDatasetCor)[centroid],
-                          "WithinDatasetCorrelations.csv", sep = ""), row.names = T, col.names = NA, sep = ",")
+                          '_', SAM_subset,  "_WithinDatasetCorrelations.csv", sep = ""),
+                  row.names = T, col.names = NA, sep = ",")
     } else {
       write.table(WithinDatasetCor[[centroid]], file = 
                     paste("2.Clustering_DiffExprs/Figures/nmf/WithinCor/", names(WithinDatasetCor)[centroid],
-                          "nmf_WithinDatasetCorrelations.csv", sep = ""), row.names = T, col.names = NA, sep = ",")
+                          '_', SAM_subset, "nmf_WithinDatasetCorrelations.csv", sep = ""),
+                  row.names = T, col.names = NA, sep = ",")
     }
   }
 }
@@ -532,10 +538,12 @@ for (centroid in 1:length(Dlist.mapped.cor)) {
   if (!shuffle) {
     if (!bNMF) {
       write.table(tmpCor, file = paste("2.Clustering_DiffExprs/Tables/AcrossCor/AcrossDatasetCor_K",
-                                       krange[centroid], ".csv", sep = ""), sep = ",", row.names = T, col.names = NA)
+                                       krange[centroid], "_", SAM_subset, ".csv", sep = ""),
+                  sep = ",", row.names = T, col.names = NA)
     } else {
       write.table(tmpCor, file = paste("2.Clustering_DiffExprs/Figures/nmf/AcrossCor/AcrossDatasetCor_nmf_K",
-                                       krange[centroid], ".csv", sep = ""), sep = ",", row.names = T, col.names = NA)
+                                       krange[centroid], "_", SAM_subset, ".csv", sep = ""),
+                  sep = ",", row.names = T, col.names = NA)
     }
   }
 }

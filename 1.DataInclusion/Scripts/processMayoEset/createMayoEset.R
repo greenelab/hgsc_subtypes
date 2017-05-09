@@ -7,6 +7,9 @@
 # This script will take the normalized matrix from the Mayo Data and output 
 # an eset to be used in subsequent analyses
 
+suppressMessages(library(checkpoint))
+suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
+
 ##########################
 # Load Libraries
 ##########################

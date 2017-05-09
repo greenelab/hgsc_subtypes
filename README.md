@@ -1,61 +1,81 @@
-
-############################################
-# Analytical Code for "Comprehensive cross-population analysis of high-grade serous ovarian cancer supports no more than three subtypes"
-
-#### Way, G., Rudd, J., Wang, C., Hamidi, H., Fridley, B., Konecny, G., Goode, E., Greene, C., Doherty, J. 
+# High-Grade Serous Ovarian Cancer Subtypes - Why has the field settled on four?
 
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.32906.svg)](http://dx.doi.org/10.5281/zenodo.32906)
-############################################
 
-#######################
-# SUMMARY
-#######################
-The repository contains instructions to replicate the analysis of identifying high-grade serous ovarian cancer subtypes across Australian, American, and Japanese populations. We leverage data from a variety of studies extracted from the bioconductor package curatedOvarianData (Ganzfried et al. 2013) as well as a dataset we uploaded to GEO (GSE74357). We apply a unified, unsupervised bioinformatics pipeline to compare subtypes across these populations and determine that specific subtypes are reliably identified. The most replicable subtypes were mesenchymal-like and proliferative-like and their sample representation was highly concordant with other independent clustering studies performed on single populations.
+## Summary
 
-#######################
-# CONTACT
-#######################
-Please report all bugs and direct coding questions to:
-GregWay@mail.med.upenn.edu
+The repository contains instructions to replicate the analysis of identifying
+high-grade serous ovarian cancer subtypes across Australian, American, and
+Japanese populations. We leverage data from a variety of studies extracted from
+the bioconductor package curatedOvarianData
+([Ganzfried et al. 2013](http://doi.org/10.1093/database/bat013)) as well as a
+ dataset we uploaded to GEO (GSE74357). We apply a unified, unsupervised
+bioinformatics pipeline to compare subtypes across these populations and
+determine that specific subtypes are reliably identified. The most replicable
+subtypes are mesenchymal-like and proliferative-like and their sample
+representation was highly concordant with other independent clustering studies
+performed on single populations.
 
-Please direct questions regarding the analysis or other correspondence to:
+## Contact
+
+For all analysis or coding related questions please file a
+[GitHub issue](https://github.com/greenelab/hgsc_subtypes/issues)
+
+Please direct all other correspondence to:
 Jennifer.A.Doherty@dartmouth.edu and/or CSGreene@mail.med.upenn.edu
 
-#######################
-# ANALYSIS
-#######################
-For ease of use and to ensure reproducibility, all analyses should be performed in our Docker image <https://hub.docker.com/r/gregway/hgsc_subtypes/>
-To install docker, please follow the friendly instructions provided here: <https://docs.docker.com/linux/>
 
-After installing Docker, install our docker image
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$docker pull gregway/hgsc_subtypes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Analysis
 
-Clone this github repository and run docker to perform analysis
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$git clone https://github.com/greenelab/hgsc_subtypes.git
-$docker run -d -v ~/<PATH>/hgsc_subtypes/:/hgsc_subtypes/ -p 5000:80 -i gregway/hgsc_subtypes sh hgsc_subtypes/docker/docker_command.sh
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Where PATH is the directory structure where the github repo is cloned. Note, runtime is on the order of several hours.
+[![](https://images.microbadger.com/badges/version/gregway/hgsc_subtypes.svg)](http://microbadger.com/images/gregway/hgsc_subtypes) [![](https://images.microbadger.com/badges/image/gregway/hgsc_subtypes.svg)](http://microbadger.com/images/gregway/hgsc_subtypes)
 
-####  FULL BUILD
+For ease of use and to ensure reproducibility, all analyses should be performed
+in our [Docker image](https://hub.docker.com/r/gregway/hgsc_subtypes/)
+To install docker, please follow these
+[friendly instructions](https://docs.docker.com/linux/)
 
-To retrieve the full build without installing docker download from <https://zenodo.org/record/53990>
-# DATA
-#######################
-All data was retrieved from curatedOvarianData except for the Mayo data (GSE74357).
+After installing Docker, please follow these steps:
 
-#######################
-# DEPENDENCIES
-#######################
+```sh
+docker pull gregway/hgsc_subtypes
+git clone https://github.com/greenelab/hgsc_subtypes.git
+
+# Run the analysis and save results to local volume
+docker run \
+--detach \
+--volume ~/<PATH>/hgsc_subtypes/:hgsc_subtypes/ \
+--publish 5000:80
+--interactive gregway/hgsc_subtypes bash hgsc_subtypes/docker/docker_command.sh
+```
+
+Where PATH is the local directory structure where the github repo is cloned. The
+`docker run` command will output the container ID of the analysis. Runtime is on
+the order of several hours.
+
+## Full Build
+
+To retrieve the full build without installing docker download our 
+[Zenodo record](https://zenodo.org/record/53990)
+
+## Data
+All data was retrieved from curatedOvarianData except for the Mayo data
+(GSE74357).
+
+## Dependencies
+
 All dependencies are pre-installed in the Docker image. 
 
 * For specific R package installations, view INSTALL.R. 
 * The analysis also requires the Sleipnir Normalizer function
 
-#######################
-# ACKNOWLEDGEMENTS
-#######################
+## Acknowledgements
 
-This work was supported by the Institute for Quantitative Biomedical Sciences; the Norris Cotton Cancer Center Developmental Funds; the National Cancer Institute at the National Institutes of Health (R01 CA168758 to J.A.D., F31 CA186625 to J.R., R01 CA122443 to E.L.G.); the Mayo Clinic Ovarian Cancer SPORE (P50 CA136393 to E.L.G.); the Mayo Clinic Comprehensive Cancer Center-Gene Analysis Shared Resource (P30 CA15083); the Gordon and Betty Moore Foundation’s Data-Driven Discovery Initiative (grant number GBMF 4552 to C.S.G.); and the American Cancer Society (grant number IRG 8200327 to C.S.G.).
+This work was supported by the Institute for Quantitative Biomedical Sciences
+(Dartmouth); The graduate program in Genomics and Computational Biology (Penn);
+The Norris Cotton Cancer Center Developmental Funds;
+the National Cancer Institute at the National Institutes of Health (R01 CA168758
+to J.A.D., F31 CA186625 to J.R., R01 CA122443 to E.L.G.); The Mayo Clinic
+Ovarian Cancer SPORE (P50 CA136393 to E.L.G.); The Mayo Clinic Comprehensive
+Cancer Center-Gene Analysis Shared Resource (P30 CA15083); The Gordon and Betty
+Moore Foundation’s Data-Driven Discovery Initiative (grant number GBMF 4552 to
+C.S.G.); and The American Cancer Society (grant number IRG 8200327 to C.S.G.).

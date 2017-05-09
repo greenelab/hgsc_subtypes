@@ -18,6 +18,9 @@
 ##  Modified date : 19 September 2015 12:00 PM EST
 ######################################################## 
 
+suppressMessages(library(checkpoint))
+suppressMessages(checkpoint("2016-03-01", checkpointLocation = "."))
+
 ######################## RUN under R version 2.15.0 (2012-03-30)
 ######################## TESTED under R version 3.1.2 (2014-10-31)
 ###################################################################
