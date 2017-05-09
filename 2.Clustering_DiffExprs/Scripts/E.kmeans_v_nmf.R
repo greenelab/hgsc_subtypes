@@ -6,6 +6,9 @@
 # ~~~~~~~~~~~~~~~~~~~~~
 # This script will compare clusters identified by k-means and NMF
 
+suppressMessages(library(checkpoint))
+suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
+
 args <- commandArgs(trailingOnly=TRUE)
 # args <- c("TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset")
 

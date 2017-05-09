@@ -6,6 +6,9 @@
 # ~~~~~~~~~~~~~~~~~~~~~
 # This script will output the AIC, BIC, and Silhouette Width plots
 
+suppressMessages(library(checkpoint))
+suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
+
 args <- commandArgs(trailingOnly=TRUE)
 # args <- c(2, 8, 20, 20, 123, "TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset")
 ############################################

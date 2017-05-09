@@ -8,6 +8,9 @@
 # except without removing LMP samples to contrast our biological filtering
 # findings
 
+suppressMessages(library(checkpoint))
+suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
+
 set.seed(123)
 
 ################################

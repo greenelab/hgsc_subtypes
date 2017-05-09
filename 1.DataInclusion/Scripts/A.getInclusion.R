@@ -10,6 +10,9 @@
 # This script will perform our inclusion criteria on all datasets included
 # in curatedOvarianData and a dataset from the Mayo Clinic
 
+suppressMessages(library(checkpoint))
+suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
+
 ####################################
 # Load Libraries
 ####################################
