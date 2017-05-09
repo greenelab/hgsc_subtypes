@@ -49,29 +49,18 @@ load("1.DataInclusion/Data/Mayo/MayoEset.Rda")
 
  
 # Load the AACES expression data
-aaces.exprs <- read.table("expression.tsv", sep = "\t", row.names = 1, header = TRUE)
-aaces.eset <- ExpressionSet(assayData = as.matrix(aaces.exprs))
+if (file.exists("expression.tsv")) {
+  aaces.exprs <- read.table("expression.tsv", sep = "\t", row.names = 1, header = TRUE)
+  aaces.eset <- ExpressionSet(assayData = as.matrix(aaces.exprs))
+  aaces <- T
+} else {
+  aaces <- F
+  "Warning: AACES dataset not found; proceeding with the remaining datasets."
+}
 
 ##################################
 # ANALYSIS
 ##################################
-
-# Process mayo.eset to include only high-grade serous ovarian tumor samples
-# mayo.pheno <- readr::read_csv(file.path("1.DataInclusion", "Data", "Mayo",
-#                                         "Mayo_Pheno_Data.csv"))
-# p <- pData(mayo.eset)
-# 
-# mapper <- data.frame(p$geo_accession)
-# mapper["unique_patient_ID"] <-
-#   unlist(lapply(p$title, function(x) strsplit(toString(x), split = "  ")[[1]][2]))
-# 
-# pheno.map <- dplyr::inner_join(mayo.pheno, mapper, by = "unique_patient_ID")
-# pheno.map.inclusion <- dplyr::filter(pheno.map, histological_type == "ser",
-#                                      grade == 3)
-# 
-# included.geo <- unlist(pheno.map.inclusion["p.geo_accession"])
-# mayo.eset <- mayo.eset[, sampleNames(mayo.eset) %in% included.geo]
-
 
 # Use the inclusion/exclusion decision tree to filter samples in all
 # curatedOvarainData datasets
@@ -82,22 +71,25 @@ inclusionTable.mayo <- simpleExclusion(mayo.eset)
 
 # Use the inclusion/exclusion decision tree on aaces data, 
 # manually add sample names
-inclusionTable.aaces <- simpleExclusion(aaces.eset)
-inclusionTable.aaces[[2]] <- sampleNames(aaces.eset)
-
-# Combine the inclusion results from curatedOvarianData and Mayo
-
 inclusionTable[[1]] <- cbind(inclusionTable[[1]],
-                             inclusionTable.mayo[[1]],
-                             inclusionTable.aaces[[1]])
+                             inclusionTable.mayo[[1]])
+colnames(inclusionTable[[1]])[(ncol(inclusionTable[[1]]))] <- "Mayo.eset"
 
-# The first list element in the inclusionTable is the data.frame which details
+# Add aaces to inclusion table if included
+if (aaces) {
+  inclusionTable.aaces <- simpleExclusion(aaces.eset)
+  inclusionTable.aaces[[2]] <- sampleNames(aaces.eset)
+  inclusionTable[[1]] <- cbind(inclusionTable[[1]],
+                               inclusionTable.aaces[[1]])
+  colnames(inclusionTable[[1]])[(ncol(inclusionTable[[1]]))] <- "aaces.eset"
+  
+}
+
+
+
+# Save a copy of the first list element, a data.frame which details
 # the creation of the analytic set and how many samples were excluded and why
 
-colnames(inclusionTable[[1]])[(ncol(inclusionTable[[1]]) - 1)] <- "Mayo.eset"
-colnames(inclusionTable[[1]])[(ncol(inclusionTable[[1]]))] <- "aaces.eset"
-
-# Save the data.frame to the harddrive
 write.csv(inclusionTable[[1]], "1.DataInclusion/Data/Inclusions.csv")
 
 # The second list element in inclusionTable is a list of dataset specific
@@ -145,31 +137,26 @@ for (i in 1:(length(goodSamples))) {
 
 names(esetList.chosen) <- names(goodSamples.chosen)
 
+esetList.chosen[[length(esetList.chosen) + 1]] <-
+  mayo.eset[, inclusionTable.mayo[[2]]]
+goodSamples.chosen[[length(esetList.chosen)]] <-
+  inclusionTable.mayo[[2]]
+names(esetList.chosen)[(length(esetList.chosen))] <- 
+  names(goodSamples.chosen)[(length(esetList.chosen))] <- "mayo.eset"
 
-esetList.chosen[[length(esetList.chosen) + 1]] <- mayo.eset[, inclusionTable.mayo[[2]]]
-esetList.chosen[[length(esetList.chosen) + 1]] <- aaces.eset[, inclusionTable.aaces[[2]]]
 
-goodSamples.chosen[[(length(esetList.chosen) - 1)]] <- inclusionTable.mayo[[2]]
-goodSamples.chosen[[length(esetList.chosen)]] <- inclusionTable.aaces[[2]]
-
-
-names(esetList.chosen)[(length(esetList.chosen) - 1)] <- 
-  names(goodSamples.chosen)[(length(esetList.chosen) - 1)] <- "mayo.eset"
-names(esetList.chosen)[length(esetList.chosen)] <-
-  names(goodSamples.chosen)[length(esetList.chosen)] <- "aaces.eset"
+if (aaces) {
+  esetList.chosen[[length(esetList.chosen) + 1]] <-
+    aaces.eset[, inclusionTable.aaces[[2]]]
+  goodSamples.chosen[[length(esetList.chosen)]] <-
+    inclusionTable.aaces[[2]]
+  names(esetList.chosen)[length(esetList.chosen)] <-
+    names(goodSamples.chosen)[length(esetList.chosen)] <- "aaces.eset"
+} 
 
 testesets <- esetList.chosen
-testesets[1:(length(esetList.chosen) - 2)] <- 
-  lapply(testesets[1:(length(testesets) - 2)],
-         function(X) {X$alt_sample_name <-
-                      paste(X$sample_type,
-                            gsub("[^0-9]", "", X$alt_sample_name), 
-                            sep = "_")
-                    pData(X) <- pData(X)[, !grepl("uncurated_author_metadata",
-                                                  colnames(pData(X)))]
-                    return(X)
-                    })
-
+testesets[1:(length(esetList.chosen) - 2)] <-
+  lapply(testesets[1:(length(testesets) - 2)], function(X) rename.esets(X))
 
 doppel.result <-
   doppelgangR::doppelgangR(testesets, corFinder.args = list(use.ComBat = TRUE),
@@ -231,4 +218,3 @@ for (i in 1:length(goodSamples.chosen)) {
       write.csv(sampleList, outFName)
     }
 }
-
