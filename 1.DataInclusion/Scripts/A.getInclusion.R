@@ -52,10 +52,10 @@ load("1.DataInclusion/Data/Mayo/MayoEset.Rda")
 if (file.exists("expression.tsv")) {
   aaces.exprs <- read.table("expression.tsv", sep = "\t", row.names = 1, header = TRUE)
   aaces.eset <- ExpressionSet(assayData = as.matrix(aaces.exprs))
-  aaces <- T
+  aaces <- TRUE
 } else {
-  aaces <- F
-  "Warning: AACES dataset not found; proceeding with the remaining datasets."
+  aaces <- FALSE
+  warning("Warning: AACES dataset not found; proceeding with the remaining datasets.")
 }
 
 ##################################
@@ -171,7 +171,8 @@ doppelResult.full_out <-
                       "expr.similarity", "expr.doppel",
                       "pheno.similarity", "pheno.doppel")]
 doppel.fname <-
-  "1.DataInclusion/Data/doppelgangR/pairwiseSampleComparisons.tsv"
+  file.path("1.DataInclusion", "Data",
+            "doppelgangR", "pairwiseSampleComparisons.tsv")
 write.table(doppelResult.full_out,
             file = doppel.fname,
             sep = "\t", quote = FALSE, row.names = FALSE)
@@ -205,16 +206,16 @@ for (i in 1:length(goodSamples.chosen)) {
       doppelSamples <- c(doppelSamples, lowcorSamples)
 
       sampleList <- setdiff(goodSamples.chosen[[i]], doppelSamples)
-      outFName <- paste("1.DataInclusion/Data/GoodSamples/",
-                        names(goodSamples.chosen)[i],
-                        "_samplesRemoved.csv", sep = "")
+      outFName <- file.path("1.DataInclusion", "Data", "GoodSamples",
+                            paste(names(goodSamples.chosen)[i],
+                                  "_samplesRemoved.csv", sep = ""))
       sampleList <- sampleList[sampleList != "X1"]
       write.csv(sampleList, outFName)
     } else {
       sampleList <- setdiff(goodSamples.chosen[[i]], lowcorSamples)
-      outFName <- paste("1.DataInclusion/Data/GoodSamples/",
-                        names(goodSamples.chosen)[i],
-                        "_samplesRemoved.csv", sep = "")
+      outFName <- file.path("1.DataInclusion", "Data", "GoodSamples",
+                            paste(names(goodSamples.chosen)[i], 
+                                  "_samplesRemoved.csv", sep = ""))
       write.csv(sampleList, outFName)
     }
 }
