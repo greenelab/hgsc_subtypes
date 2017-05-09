@@ -16,6 +16,18 @@ getAllDataSets <- function (packageName) {
   return(datasets)
 }
 
+# This function reformats/renames the input 
+# sample's alt_sample_name, sample_type
+rename.esets <- function(sample.info) {
+  sample.info$alt_sample_name <-
+    paste(sample.info$sample_type,
+          gsub("[^0-9]", "", sample.info$alt_sample_name), 
+          sep = "_")
+  pData(sample.info) <- pData(sample.info)[, !grepl("uncurated_author_metadata",
+                                                    colnames(pData(sample.info)))]
+  return(sample.info)
+}
+
 # This function will output an exclusion table of all the good samples
 exclusionTable <- function(esetVec) {
   outTable <- data.frame()
