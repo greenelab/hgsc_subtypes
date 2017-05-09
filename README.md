@@ -24,6 +24,21 @@ For all analysis or coding related questions please file a
 Please direct all other correspondence to:
 Jennifer.A.Doherty@dartmouth.edu and/or CSGreene@mail.med.upenn.edu
 
+## Environment
+
+To ensure analysis reproducibility, all R/Bioconductor/Python packages are
+versioned using a combination of
+[checkpoint](https://cran.r-project.org/web/packages/checkpoint/index.html)
+and [bioconda](https://github.com/bioconda/bioconda-recipes).
+
+To create an instance of this environment run the following:
+
+```sh
+conda env create --force --file environment.yml
+source activate hgsc_subtypes
+
+Rscript INSTALL.R
+```
 
 ## Analysis
 
