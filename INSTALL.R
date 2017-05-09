@@ -10,10 +10,6 @@
 # USAGE: This script is to be run upon docker image build
 
 library('methods')
-
-mirror <- "http://cran.us.r-project.org"
-install.packages('checkpoint', repos = mirror)
-
 library('checkpoint')
 
 ######################
@@ -46,33 +42,7 @@ cran_pkgs <- c(
 
 install.packages(cran_pkgs)
 
-######################
-# Install bioconductor packages
-######################
-source("https://bioconductor.org/biocLite.R")
-bioc_pkgs <- c(
-  'affy',
-  'Biobase',
-  'BiocParallel',
-  'biomaRt',
-  'sva',
-  'impute',
-  'siggenes',
-  'limma'
-)
-
-biocLite(bioc_pkgs, suppressUpdates = TRUE)
-
-######################
-# Install source packages
-######################
-# These packages must remain version controlled locally.
-# See docker/dockerfile for instructions on how to install
-
 # doppelgangR
 customLib <- "1.DataInclusion/doppelgangR-master/"
 install.packages(customLib, repos = NULL, type = "source")
 
-# curatedOvarianData
-customLib <- "../curatedOvarianData/"
-install.packages(customLib, repos = NULL, type = "source")
