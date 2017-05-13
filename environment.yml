@@ -1,6 +1,7 @@
 name: hgsc_subtypes 
 channels:
 - r
+- bioconda
 dependencies:
 - r-checkpoint=0.4.0
 - r-wgcna=1.51
@@ -15,3 +16,5 @@ dependencies:
 - bioconductor-annotationdbi=1.38.0
 - bioconductor-go.db=3.4.0
 - bioconductor-preprocesscore=1.34.0
+- bioconductor-biocparallel=1.6.6
+- bioconductor-geoquery=2.38.4
