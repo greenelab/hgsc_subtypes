@@ -29,12 +29,19 @@ library(GGally)
 library(reshape2)
 library(gridExtra)
 library(grid)
+
 # The script holds custom functions to run kmeans and SAM
-source("2.Clustering_DiffExprs/Scripts/Functions/kmeans_SAM_functions.R")
-source("2.Clustering_DiffExprs/Scripts/Functions/heatmap3.R")
+kmeans.fxn.path <- file.path("2.Clustering_DiffExprs", "Scripts", "Functions",
+                             "kmeans_SAM_functions.R")
+heatmap.fxn.path <- file.path("2.Clustering_DiffExprs", "Scripts",
+                              "Functions", "heatmap3.R")
+source(kmeans.fxn.path)
+source(heatmap.fxn.path)
 
 # The script loads the ovarian cancer datasets
-source("1.DataInclusion/Scripts/Functions/LoadOVCA_Data.R")
+load.ovca.path <- file.path("2.Clustering_DiffExprs", "Scripts", "Functions",
+                            "LoadOVCA_Data.R")
+source(load.ovca.path)
 
 ############################################
 # Constants
@@ -68,16 +75,16 @@ ExpData <- LoadOVCA_Data(datasets = argsCurated, genelist_subset = SAM_subset,
 
 # Read in common genes csv file. The csv was generated as an intersection of
 # the genes in TCGA, Yoshihara, Mayo, Tothill, and Bonome
-CommonGenes <- read.csv("1.DataInclusion/Data/Genes/CommonGenes_genelist.csv",
-                        header = T,
-                        stringsAsFactors = F)
+common.genes.path <- file.path("1.DataInclusion", "Data",
+                               "Genes", "CommonGenes_genelist.csv")
+CommonGenes <- read.csv(common.genes.path, header = T, stringsAsFactors = F)
 
 # Read in mad genes csv file. The file was generated as an intersection
 #of the top 1500 most variably expressed genes
+mad.genes.path <- file.path("1.DataInclusion", "Data", "Genes",
+                            "GlobalMAD_genelist.csv")
 GlobalMAD <-
-  read.csv(file = "1.DataInclusion/Data/Genes/GlobalMAD_genelist.csv",
-           header = T,
-           stringsAsFactors = F)
+  read.csv(file = mad.genes.path, header = T, stringsAsFactors = F)
 
 ############################################
 # Perform k-means clustering using Global MAD
@@ -99,15 +106,15 @@ if (!bNMF) {
   } else {
   for (dataset in names(ExpData)) {
     # Load NMF cluster membership files
+    nmf.path <- file.path("2.Clustering_DiffExprs", "Tables",
+                          "ClusterMembership", "nmf/")
     NMF_files <-
-      list.files("2.Clustering_DiffExprs/Tables/ClusterMembership/nmf/")
-    NMF_files <-
-      NMF_files[grepl("nmf.csv", NMF_files)]
-    file <-
-      NMF_files[grepl(dataset, NMF_files)]
+      list.files(nmf.path)
+    NMF_files <- NMF_files[grepl("nmf.csv", NMF_files)]
+    file <- NMF_files[grepl(dataset, NMF_files)]
+    member.path <- file.path(nmf.path, file)
     NMFclusterMemb <-
-      read.csv(paste("2.Clustering_DiffExprs/Tables/ClusterMembership/nmf/",
-                     file, sep = ""), sep = ",", row.names = 1, header = T)
+      read.csv(member.path, sep = ",", row.names = 1, header = T)
     colnames(NMFclusterMemb) <- c("ClusterK2", "ClusterK3", "ClusterK4")
     Clusters[[dataset]] <- NMFclusterMemb
   }
@@ -122,7 +129,7 @@ SamList <- RunSam(ExpData, Clusters, d.stat)
 # Combine d statistics
 ############################################
 # The following section will map clusters to each other using Pearson 
-# correlationsof moderated t score vectors generated from each gene's moderated
+# correlations of moderated t score vectors generated from each gene's moderated
 # t statistic. A moderated t statistic is a measure of mean gene expression
 # difference weighted by variance. Note - t statistic is equal to d statistic
 # from sam function.
@@ -221,10 +228,11 @@ for (centroids in krange) {
 # Assign a reference category for all other datasets to map to
 # Assign nmf clusters to kmeans clusters
 if (bNMF) {
+  fpath <- file.path("2.Clustering", "Tables", "DScores/")
   NewClusters <-
     AssignReference_NMF(kmeans_dscore_dir =
-                          "2.Clustering_DiffExprs/Tables/DScores/",
-                        nmf_Dlist = Dlist, nmf_cluster_list = Clusters,
+                        fpath, nmf_Dlist = Dlist,
+                        nmf_cluster_list = Clusters,
                         Reference = "TCGA")
 } else {
   NewClusters <- AssignReference("TCGA", Cluster = "ClusterK3",
@@ -376,7 +384,7 @@ if (!shuffle) {
       fName <-
         paste("KMembership_", names(ExpData)[i], "_mapped.csv", sep = "")
       write.csv(Clusters.mapped[[i]],
-                file = file.path("2.Clustering_DiffExprs/",
+                file = file.path("2.Clustering_DiffExprs",
                                  "Tables", "ClusterMembership",
                                  "nmf", fName), row.names = TRUE)
     }
@@ -402,14 +410,16 @@ if (!shuffle) {
 # We are only interested in the SAM results using k-means
 if (!shuffle) {
   if (!bNMF) {
-    write.table(Deltas, "2.Clustering_DiffExprs/Tables/SAM_Deltas.csv",
-                sep = ",")
+    fname <- file.path("2.Clustering_DiffExprs",
+                       "Tables", "SAM_Deltas.csv")
+    write.table(Deltas, fname, sep = ",")
 
     # Write the results of the SAM to a folder
     for (i in 1:length(SamList.mapped)) {
       file.name <-
-        paste("2.Clustering_DiffExprs/Tables/SAM_results/SAM_pVal-Stat_",
-                         names(SamList.mapped)[i], ".csv", sep = "")
+        file.path("2.Clustering_DiffExprs", "Tables", "SAM_results",
+                  paste("SAM_pVal-Stat_", names(SamList.mapped)[i],
+                        ".csv",sep = ""))
       write.table(SamList.mapped[[i]], file = file.name,
                   sep = ",", row.names = T,
                   col.names = NA)
@@ -450,18 +460,15 @@ for (dtaset in 1:length(argsCurated)) {
   # vectors and specify if nmf or not
   if (!shuffle) {
     if (!bNMF) {
-      write.table(tmpData,
-                  file = paste("2.Clustering_DiffExprs/Tables/DScores/", 
-                               argsCurated[dtaset], "_kmeans_DScoreVectors.csv",
-                               sep = ""),
-                  sep = ",", row.names = T, col.names = NA)
+      fpath <- file.path("2.Clustering_DiffExprs", "Tables", "DScores", 
+                         paste0(argsCurated[dtaset],
+                                "_kmeans_DScoreVectors.csv"))
     } else {
-      write.table(tmpData,
-                  file =
-                    paste("2.Clustering_DiffExprs/Figures/nmf/DscoreVectors/",
-                    argsCurated[dtaset], "_nmf_DScoreVectors.csv", sep = ""), 
-                  sep = ",", row.names = T, col.names = NA)
+      fpath <- file.path("2.Clustering_DiffExprs", "Figures", "nmf",
+                         "DscoreVectors", paste0(argsCurated[dtaset],
+                                                 "_nmf_DScoreVectors.csv"))
     }
+    write.table(tmpData, file = fpath, row.names = T, col.names = NA)
   }
 
   Dlist.mapped[[argsCurated[dtaset]]] <- tmpData
@@ -534,20 +541,21 @@ for (centroid in 1:length(Dlist.mapped)) {
   names(WithinDatasetCor)[centroid] <- names(Dlist.mapped)[centroid]
   if (!shuffle) {
     if (!bNMF) {
-      write.table(WithinDatasetCor[[centroid]], file = 
-                    paste("2.Clustering_DiffExprs/Tables/WithinCor/",
-                          names(WithinDatasetCor)[centroid],
-                          "_", SAM_subset,
-                          "_WithinDatasetCorrelations.csv", sep = ""),
-                  row.names = T, col.names = NA, sep = ",")
+      fpath <- file.path("2.Clustering_DiffExprs", "Tables", "WithinCor", 
+                         paste0(names(WithinDatasetCor)[centroid],
+                                "_", SAM_subset,
+                                "_WithinDatasetCorrelations.csv"))
+      
+
     } else {
-      write.table(WithinDatasetCor[[centroid]],
-                  file = paste("2.Clustering_DiffExprs/Figures/nmf/WithinCor/",
-                               names(WithinDatasetCor)[centroid],
-                               "_", SAM_subset,
-                               "nmf_WithinDatasetCorrelations.csv", sep = ""),
-                  row.names = T, col.names = NA, sep = ",")
+      fpath <- file.path("2.Clustering_DiffExprs", "Figures", "nmf",
+                         "WithinCor", paste0(names(WithinDatasetCor)[centroid],
+                                             "_", SAM_subset,
+                                             "nmf_WithinDatasetCorrelations", 
+                                             ".csv"))
     }
+    write.table(WithinDatasetCor[[centroid]], file = fpath,
+                row.names = T, col.names = NA, sep = ",")
   }
 }
 
@@ -579,20 +587,16 @@ for (centroid in 1:length(Dlist.mapped.cor)) {
   tmpCor <- tmpCor[, -1]
   if (!shuffle) {
     if (!bNMF) {
-      write.table(tmpCor, 
-                  file =
-                    paste(
-                      "2.Clustering_DiffExprs/Tables/AcrossCor/AcrossDatasetCor_K",
-                      krange[centroid], "_", SAM_subset, ".csv", sep = ""),
-                  sep = ",", row.names = T, col.names = NA)
+      fpath <- file.path("2.Clustering_DiffExprs", "Tables", 
+                         "AcrossCor", "AcrossDatasetCor_K", 
+                         paste0(krange[centroid], "_", SAM_subset, ".csv"))
     } else {
-      write.table(tmpCor,
-                  file =
-                    paste(
-                      "2.Clustering_DiffExprs/Figures/nmf/AcrossCor/AcrossDatasetCor_nmf_K",
-                      krange[centroid], "_", SAM_subset, ".csv", sep = ""),
-                  sep = ",", row.names = T, col.names = NA)
+      fpath <- file.path("2.Clustering_DiffExprs", "Tables", 
+                         "AcrossCor", "AcrossDatasetCor_nmf_K", 
+                         paste0(krange[centroid], "_", SAM_subset, ".csv"))
+      
     }
+    write.table(tmpCor, file = fpath, sep = ",", row.names = T, col.names = NA)
   }
 }
 

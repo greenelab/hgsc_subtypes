@@ -43,8 +43,8 @@ MADgenes <- function (Dataset, numGenes = 1500) {
 }
 
 
-KmeansGlobal <-
-  function (Dataset, FilteredGenes, kmin = 2, kmax = 4, starts = 20) {
+KmeansGlobal <- function (Dataset, FilteredGenes, kmin = 2,
+                          kmax = 4, starts = 20) {
   # ~~~~~~~~~~~~~~
   # Performs k-means clustering for a given Dataset over a given k-range
   #
@@ -68,7 +68,7 @@ KmeansGlobal <-
   DataSetClusterMembership <- data.frame()
   for (clusterK in 1:length(krange)) {
     # Print status to screen
-    cat("Clustering...", paste("k = ", krange[clusterK], sep = ""), "\n")
+    cat("Clustering...", paste0("k = ", krange[clusterK]), "\n")
     
     # Run the kmeans function
     dta_k <- kmeans(DataSet_Global, krange[clusterK], nstart = starts)
@@ -83,7 +83,7 @@ KmeansGlobal <-
   }
   DataSetClusterMembership <- data.frame(DataSetClusterMembership)
   colnames(DataSetClusterMembership) <-
-    paste("ClusterK", seq(kmin, kmax), sep = "")
+    paste0("ClusterK", seq(kmin, kmax))
   return(DataSetClusterMembership)
 }
 
@@ -117,8 +117,7 @@ getSamNames <- function (krange) {
 }
 
 
-RunSam <-
-  function (DataList, ClusterList, Method = "d.stat",
+RunSam <- function (DataList, ClusterList, Method = "d.stat",
             type = "normal", kFDR = 0.01) {
   # ~~~~~~~~~~~~~~
   # Perform SAM on all the input datasets for each k given
@@ -287,9 +286,9 @@ AssignReference <- function (Reference, Cluster, Cor, ClusterList) {
   for (map in 1:length(unique(Comparisons[[1]][, 4]))) {
     # Temporarily replace original cluster assignments
     ref[, 2][ref[, 2] == as.integer(Comparisons[[1]][map, 4])] <-
-      paste(map, "tmp", sep = "")
+      paste0(map, "tmp")
     ref[, 3][ref[, 3] == as.integer(Comparisons[[1]][map, 2])] <-
-      paste(map, "tmp", sep = "")
+      paste0(map, "tmp")
   }
   
   # If there is no "tmp" found in the column, make it cluster 4
@@ -327,18 +326,17 @@ AssignReference_NMF <- function (kmeans_dscore_dir, nmf_Dlist,
   # ~~~~~~~~~~~~~~
   
   # Upload the dscore vector for the reference
-  d_score_file <-
-    paste(kmeans_dscore_dir,
-          list.files(kmeans_dscore_dir)[grepl(Reference,
-                                              list.files(kmeans_dscore_dir))],
-          sep = "/")
+  kmeans_files = list.files(kmeans_dscore_dir)
+  kmeans_ref = kmeans_files[grepl(Reference, kmeans_files)]
+  d_score_file <- paste(kmeans_dscore_dir, kmeans_ref, sep = "/")
+  
   kmeans_dscore <-
     read.table(d_score_file, sep = ",", header = T,
                row.names = 1, stringsAsFactors = F)
   
   # Subset the Dlist to only the reference dataset
   Dlist_subset <- Dlist[[grep(Reference, names(Dlist))]]
-  colnames(Dlist_subset) <- paste("nmf_", colnames(Dlist_subset), sep = "")
+  colnames(Dlist_subset) <- paste0("nmf_", colnames(Dlist_subset))
   
   # Subset the list of cluster memberships
   clus_memb <- nmf_cluster_list[[grep(Reference, names(nmf_cluster_list))]]
@@ -399,21 +397,22 @@ AssignReference_NMF <- function (kmeans_dscore_dir, nmf_Dlist,
   # Map labels
   for (assgn in 1:nrow(k2_maps)) {
     map <- k2_maps[assgn, 1]
-    clus_memb$ClusterK2[grep(paste("^", map, "$", sep = ""),
-                             clus_memb$ClusterK2)] <-
-      paste(k2_maps[assgn, 2], "tmp", sep = "_")
+    place_ref <- grep(paste0("^", map, "$"),
+                      clus_memb$ClusterK2)
+    return_tmp <- paste(k2_maps[assgn, 2], "tmp", sep = "_")
+    clus_memb$ClusterK2[place_ref] <- return_tmp
   }
   
   for (assgn in 1:nrow(k3_maps)) {
     map <- k3_maps[assgn, 1]
-    clus_memb$ClusterK3[grep(paste("^", map, "$", sep = ""),
+    clus_memb$ClusterK3[grep(paste0("^", map, "$"),
                              clus_memb$ClusterK3)] <-
       paste(k3_maps[assgn, 2], "tmp", sep = "_")
   }
   
   for (assgn in 1:nrow(k4_maps)) {
     map <- k4_maps[assgn, 1]
-    clus_memb$ClusterK4[grep(paste("^", map, "$", sep = ""),
+    clus_memb$ClusterK4[grep(paste0("^", map, "$"),
                              clus_memb$ClusterK4)] <-
       paste(k4_maps[assgn, 2], "tmp", sep = "_")
   }
@@ -455,10 +454,10 @@ MapClusters <- function (DistMatrixList, dataset_names, Reference = "TCGA") {
   for (centroid in substr(names(DistMatrixList), 2, 2)) {
     
     # Add to the result list
-    resultList[[paste("K", centroid, sep = "")]] <- list()
+    resultList[[paste0("K", centroid)]] <- list()
     
     # Convert the correlation matrix to a dist object
-    thisDistance <- DistMatrixList[[paste("K", centroid, sep = "")]]
+    thisDistance <- DistMatrixList[[paste0("K", centroid)]]
     
     # Subset to only consider correlations with the reference dataset
     correlation_subset <- thisDistance[grep(Reference, thisDistance[, 1]), ]
@@ -476,7 +475,7 @@ MapClusters <- function (DistMatrixList, dataset_names, Reference = "TCGA") {
     
     for (clus in 1:length(reference_clus)) {
       # Keep adding to resultList
-      resultList[[paste("K", centroid, sep = "")]][[clus]] <-
+      resultList[[paste0("K", centroid)]][[clus]] <-
         c(reference_clus[clus])
       
       clus_subset <-
@@ -495,8 +494,8 @@ MapClusters <- function (DistMatrixList, dataset_names, Reference = "TCGA") {
         
         # After this logic you have the cluster with the highest correlation
         # Add it to the result list
-        resultList[[paste("K", centroid, sep = "")]][[clus]] <-
-          c(resultList[[paste("K", centroid, sep = "")]][[clus]], max_clus)
+        resultList[[paste0("K", centroid)]][[clus]] <-
+          c(resultList[[paste0("K", centroid)]][[clus]], max_clus)
         # Remove it from correlation_subset to never be considered again
         correlation_subset <-
           correlation_subset[!grepl(max_clus, correlation_subset[, 2]), ]
@@ -547,9 +546,9 @@ runNMF <-
     clusterMemb <- predict(clus.nmf)
     
     # Write the consensus mapping as a figure
-    png(paste("2.Clustering_DiffExprs/Figures/nmf/ConsensusMaps/",
-              fname, ".png", sep = ""),
-        width = 700, height = 570)
+    fpath <- file.path("2.Clustering_DiffExprs", "Figures", "nmf",
+                       "ConsensusMaps", paste0(fname, ".png"))
+    png(fpath, width = 700, height = 570)
     
     # Show a plot of k = 4 k means clusters overlayed with the NMF clusters
     consensusmap(clus.nmf, labCol = NA, labRow = NA, tracks = c("silhouette:"), 
@@ -927,7 +926,7 @@ plot_reassigned_heatmaps <- function(shuffle, bNMF, Dlist.mapped.cor) {
         }
       }
       print(num_clus)
-      fname <- paste(shuffle.string, "k", num_clus, ".pdf", sep = "")
+      fname <- paste0(shuffle.string, "k", num_clus, ".pdf")
       pdf(file.path("2.Clustering_DiffExprs", "Figures", fname))
       for (p in 1:length(all_centroid_plots)) {
         plot(all_centroid_plots[[p]])
