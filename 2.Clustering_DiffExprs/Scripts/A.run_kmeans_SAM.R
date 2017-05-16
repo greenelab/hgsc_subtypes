@@ -77,14 +77,13 @@ ExpData <- LoadOVCA_Data(datasets = argsCurated, genelist_subset = SAM_subset,
 # the genes in TCGA, Yoshihara, Mayo, Tothill, and Bonome
 common.genes.path <- file.path("1.DataInclusion", "Data",
                                "Genes", "CommonGenes_genelist.csv")
-CommonGenes <- read.csv(common.genes.path, header = T, stringsAsFactors = F)
+CommonGenes <- read.csv(common.genes.path, header = TRUE, stringsAsFactors = FALSE)
 
 # Read in mad genes csv file. The file was generated as an intersection
 #of the top 1500 most variably expressed genes
 mad.genes.path <- file.path("1.DataInclusion", "Data", "Genes",
                             "GlobalMAD_genelist.csv")
-GlobalMAD <-
-  read.csv(file = mad.genes.path, header = T, stringsAsFactors = F)
+GlobalMAD <- read.csv(file = mad.genes.path, header = TRUE, stringsAsFactors = FALSE)
 
 ############################################
 # Perform k-means clustering using Global MAD
@@ -99,8 +98,8 @@ if (!bNMF) {
   # Loop over each dataset with expression data
   for (dataset in names(ExpData)) {
     # Store the results of the k-means clustering to the Clusters list
-    Clusters[[dataset]] <-
-      KmeansGlobal(ExpData[[dataset]], GlobalMAD[ ,1], k, k2, starts = kStarts)
+    Clusters[[dataset]] <- KmeansGlobal(ExpData[[dataset]], GlobalMAD[ ,1],
+                                        k, k2, starts = kStarts)
   }
   # Extract cluster membership files for NMF results
   } else {
@@ -108,13 +107,12 @@ if (!bNMF) {
     # Load NMF cluster membership files
     nmf.path <- file.path("2.Clustering_DiffExprs", "Tables",
                           "ClusterMembership", "nmf/")
-    NMF_files <-
-      list.files(nmf.path)
+    NMF_files <- list.files(nmf.path)
     NMF_files <- NMF_files[grepl("nmf.csv", NMF_files)]
     file <- NMF_files[grepl(dataset, NMF_files)]
     member.path <- file.path(nmf.path, file)
-    NMFclusterMemb <-
-      read.csv(member.path, sep = ",", row.names = 1, header = T)
+    NMFclusterMemb <- read.csv(member.path, sep = ",", row.names = 1,
+                               header = TRUE)
     colnames(NMFclusterMemb) <- c("ClusterK2", "ClusterK3", "ClusterK4")
     Clusters[[dataset]] <- NMFclusterMemb
   }
@@ -229,11 +227,9 @@ for (centroids in krange) {
 # Assign nmf clusters to kmeans clusters
 if (bNMF) {
   fpath <- file.path("2.Clustering", "Tables", "DScores/")
-  NewClusters <-
-    AssignReference_NMF(kmeans_dscore_dir =
-                        fpath, nmf_Dlist = Dlist,
-                        nmf_cluster_list = Clusters,
-                        Reference = "TCGA")
+  NewClusters <- AssignReference_NMF(kmeans_dscore_dir = fpath, nmf_Dlist = Dlist,
+                                     nmf_cluster_list = Clusters,
+                                     Reference = "TCGA")
 } else {
   NewClusters <- AssignReference("TCGA", Cluster = "ClusterK3",
                                  Cor = WithinDatasetCor,
@@ -358,9 +354,9 @@ for (centroid in 1:length(NewClusters)) {
       # Reassign the clusters according to the new cluster ID
       outputDF[thisDF[, assgn] == origClusterID, assgn] <- newClusterID
 
-      message <-
-        paste("K", krange[assgn], ": Mapping Cluster ", origClusterID, " to ",
-                       newClusterID, " in ", thisDataset, "\n", sep = "")
+      message <- paste("K", krange[assgn], ": Mapping Cluster ", origClusterID,
+                       " to ", newClusterID, " in ", thisDataset,
+                       "\n", sep = "")
       cat(message)
     }
   }
@@ -381,12 +377,12 @@ if (!shuffle) {
     }
   } else {
     for (i in 1:length(Clusters.mapped)) {
-      fName <-
-        paste("KMembership_", names(ExpData)[i], "_mapped.csv", sep = "")
+      fName <- paste("KMembership_", names(ExpData)[i], "_mapped.csv",
+                     sep = "")
+      cluster.file <- file.path("2.Clustering_DiffExprs", "Tables",
+                                "ClusterMembership", "nmf", fName)
       write.csv(Clusters.mapped[[i]],
-                file = file.path("2.Clustering_DiffExprs",
-                                 "Tables", "ClusterMembership",
-                                 "nmf", fName), row.names = TRUE)
+                file = , row.names = TRUE)
     }
   }
 }
@@ -416,12 +412,11 @@ if (!shuffle) {
 
     # Write the results of the SAM to a folder
     for (i in 1:length(SamList.mapped)) {
-      file.name <-
-        file.path("2.Clustering_DiffExprs", "Tables", "SAM_results",
-                  paste("SAM_pVal-Stat_", names(SamList.mapped)[i],
-                        ".csv",sep = ""))
+      file.name <- file.path("2.Clustering_DiffExprs", "Tables", "SAM_results",
+                             paste("SAM_pVal-Stat_", names(SamList.mapped)[i],
+                                   ".csv",sep = ""))
       write.table(SamList.mapped[[i]], file = file.name,
-                  sep = ",", row.names = T,
+                  sep = ",", row.names = TRUE,
                   col.names = NA)
     }
   }
@@ -468,7 +463,7 @@ for (dtaset in 1:length(argsCurated)) {
                          "DscoreVectors", paste0(argsCurated[dtaset],
                                                  "_nmf_DScoreVectors.csv"))
     }
-    write.table(tmpData, file = fpath, row.names = T, col.names = NA)
+    write.table(tmpData, file = fpath, row.names = TRUE, col.names = NA)
   }
 
   Dlist.mapped[[argsCurated[dtaset]]] <- tmpData
@@ -555,7 +550,7 @@ for (centroid in 1:length(Dlist.mapped)) {
                                              ".csv"))
     }
     write.table(WithinDatasetCor[[centroid]], file = fpath,
-                row.names = T, col.names = NA, sep = ",")
+                row.names = TRUE, col.names = NA, sep = ",")
   }
 }
 
@@ -564,12 +559,12 @@ for (centroid in 1:length(Dlist.mapped)) {
 ############################################
 colnames(confidence_data) <- c("comparison", "value", "lower", "upper")
 
-t1 <-
-  unlist(apply(confidence_data, 1,
-               function(x) return((strsplit(x["comparison"], ":"))[[1]][1])))
-t2 <-
-  unlist(apply(confidence_data, 1,
-               function(x) return((strsplit(x["comparison"], ":"))[[1]][2])))
+t1 <- unlist(apply(confidence_data, 1,
+                   function(x) return((strsplit(x["comparison"],
+                                                ":"))[[1]][1])))
+t2 <- unlist(apply(confidence_data, 1,
+               function(x) return((strsplit(x["comparison"],
+                                            ":"))[[1]][2])))
 
 confidence.frame <- data.frame(confidence_data) 
 confidence.frame$test1 <- t1
@@ -596,7 +591,7 @@ for (centroid in 1:length(Dlist.mapped.cor)) {
                          paste0(krange[centroid], "_", SAM_subset, ".csv"))
       
     }
-    write.table(tmpCor, file = fpath, sep = ",", row.names = T, col.names = NA)
+    write.table(tmpCor, file = fpath, sep = ",", row.names = TRUE, col.names = NA)
   }
 }
 

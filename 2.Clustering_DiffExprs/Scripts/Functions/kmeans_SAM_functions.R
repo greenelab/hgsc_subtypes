@@ -37,8 +37,8 @@ MADgenes <- function (Dataset, numGenes = 1500) {
   numGenes <- as.numeric(paste(numGenes))
   
   # Order the genes and select the top MAD genes
-  Dataset.MAD.numGenes <-
-    rownames(Dataset)[order(Dataset.MAD, decreasing = T)][1:numGenes]
+  Dataset.MAD.numGenes <- rownames(Dataset)[order(Dataset.MAD,
+                                                  decreasing = TRUE)][1:numGenes]
   return(Dataset.MAD.numGenes)
 }
 
@@ -77,13 +77,12 @@ KmeansGlobal <- function (Dataset, FilteredGenes, kmin = 2,
     if (clusterK == 1) {
       DataSetClusterMembership <- as.data.frame(dta_k$cluster)
     } else {
-      DataSetClusterMembership <-
-        cbind(DataSetClusterMembership, as.data.frame(dta_k$cluster))
+      DataSetClusterMembership <- cbind(DataSetClusterMembership,
+                                        as.data.frame(dta_k$cluster))
     }
   }
   DataSetClusterMembership <- data.frame(DataSetClusterMembership)
-  colnames(DataSetClusterMembership) <-
-    paste0("ClusterK", seq(kmin, kmax))
+  colnames(DataSetClusterMembership) <- paste0("ClusterK", seq(kmin, kmax))
   return(DataSetClusterMembership)
 }
 
@@ -233,7 +232,7 @@ AssignReference <- function (Reference, Cluster, Cor, ClusterList) {
   
   # Order the melted correlation matrix by decreasing correlations and
   # reassign colnames
-  corMeltOrder <- corMelted[order(corMelted$value, decreasing = T),]
+  corMeltOrder <- corMelted[order(corMelted$value, decreasing = TRUE),]
   colnames(corMeltOrder) <- c("Var1", "Var2", "value")
   
   # Remove all self correlations comparisons
@@ -285,10 +284,10 @@ AssignReference <- function (Reference, Cluster, Cor, ClusterList) {
   # Focus on K = 3 vs. K = 4 first
   for (map in 1:length(unique(Comparisons[[1]][, 4]))) {
     # Temporarily replace original cluster assignments
-    ref[, 2][ref[, 2] == as.integer(Comparisons[[1]][map, 4])] <-
-      paste0(map, "tmp")
-    ref[, 3][ref[, 3] == as.integer(Comparisons[[1]][map, 2])] <-
-      paste0(map, "tmp")
+    ref[, 2][ref[, 2] == as.integer(Comparisons[[1]][map, 4])] <- paste0(map,
+                                                                         "tmp")
+    ref[, 3][ref[, 3] == as.integer(Comparisons[[1]][map, 2])] <- paste0(map,
+                                                                         "tmp")
   }
   
   # If there is no "tmp" found in the column, make it cluster 4
@@ -330,9 +329,8 @@ AssignReference_NMF <- function (kmeans_dscore_dir, nmf_Dlist,
   kmeans_ref = kmeans_files[grepl(Reference, kmeans_files)]
   d_score_file <- paste(kmeans_dscore_dir, kmeans_ref, sep = "/")
   
-  kmeans_dscore <-
-    read.table(d_score_file, sep = ",", header = T,
-               row.names = 1, stringsAsFactors = F)
+  kmeans_dscore <- read.table(d_score_file, sep = ",", header = TRUE,
+                              row.names = 1, stringsAsFactors = FALSE)
   
   # Subset the Dlist to only the reference dataset
   Dlist_subset <- Dlist[[grep(Reference, names(Dlist))]]
@@ -346,8 +344,8 @@ AssignReference_NMF <- function (kmeans_dscore_dir, nmf_Dlist,
   
   # Melt the correlation matrix
   cor_matrix_melted <- melt(cor_matrix)
-  cor_matrix_melted <-
-    cor_matrix_melted[order(cor_matrix_melted$value, decreasing = T), ]
+  cor_matrix_melted <- cor_matrix_melted[order(cor_matrix_melted$value,
+                                               decreasing = TRUE), ]
   
   # Get cluster specific matrices
   cor_matrix_k2 <- cor_matrix_melted[grep("K2", cor_matrix_melted$Var1), ]
@@ -405,16 +403,20 @@ AssignReference_NMF <- function (kmeans_dscore_dir, nmf_Dlist,
   
   for (assgn in 1:nrow(k3_maps)) {
     map <- k3_maps[assgn, 1]
-    clus_memb$ClusterK3[grep(paste0("^", map, "$"),
-                             clus_memb$ClusterK3)] <-
-      paste(k3_maps[assgn, 2], "tmp", sep = "_")
+    place_ref <- grep(paste0("^", map, "$"),
+                      clus_memb$ClusterK3)
+    return_tmp <- paste(k3_maps[assgn, 2], "tmp", sep = "_")
+    clus_memb$ClusterK3[place_ref] <- return_tmp
+  
   }
   
   for (assgn in 1:nrow(k4_maps)) {
     map <- k4_maps[assgn, 1]
-    clus_memb$ClusterK4[grep(paste0("^", map, "$"),
-                             clus_memb$ClusterK4)] <-
-      paste(k4_maps[assgn, 2], "tmp", sep = "_")
+    place_ref <- grep(paste0("^", map, "$"),
+                      clus_memb$ClusterK4)
+    return_tmp <- paste(k4_maps[assgn, 2], "tmp", sep = "_")
+    clus_memb$ClusterK4[place_ref] <- return_tmp
+    
   }
 
   # Return all cluster assignments to numeric values
@@ -475,11 +477,10 @@ MapClusters <- function (DistMatrixList, dataset_names, Reference = "TCGA") {
     
     for (clus in 1:length(reference_clus)) {
       # Keep adding to resultList
-      resultList[[paste0("K", centroid)]][[clus]] <-
-        c(reference_clus[clus])
+      resultList[[paste0("K", centroid)]][[clus]] <- c(reference_clus[clus])
       
-      clus_subset <-
-        correlation_subset[correlation_subset[, 1] == reference_clus[clus], ]
+      clus_subset <- correlation_subset[
+        correlation_subset[, 1] == reference_clus[clus], ]
       for (dataset in dataset_names) {
         clus_cor <- clus_subset[grep(dataset, clus_subset[, 2]), ]
         other_clus <- as.character(unique(clus_cor[, 2]))
@@ -497,8 +498,8 @@ MapClusters <- function (DistMatrixList, dataset_names, Reference = "TCGA") {
         resultList[[paste0("K", centroid)]][[clus]] <-
           c(resultList[[paste0("K", centroid)]][[clus]], max_clus)
         # Remove it from correlation_subset to never be considered again
-        correlation_subset <-
-          correlation_subset[!grepl(max_clus, correlation_subset[, 2]), ]
+        correlation_subset <-correlation_subset[
+          !grepl(max_clus, correlation_subset[, 2]), ]
       }
     }
   }
@@ -506,9 +507,8 @@ MapClusters <- function (DistMatrixList, dataset_names, Reference = "TCGA") {
 }
 
 
-runNMF <-
-  function (Data, k, fname, KClusterAssign,
-            nruns = 10, coph = F, coph_range = 2:8) {
+runNMF <- function (Data, k, fname, KClusterAssign, nruns = 10, coph = FALSE,
+                    coph_range = 2:8) {
   # ~~~~~~~~~~~~~~
   # This function will perform NMF clustering on gene expression data
   #
@@ -622,9 +622,8 @@ organize_confidence <- function(confidence_row) {
   if (first_dataset == second_dataset) {
     entry_result <- NA
   } else {
-    entry_result <-
-      dataset_entry(first_dataset, first_subtype,
-                    second_dataset, second_subtype, k)
+    entry_result <- dataset_entry(first_dataset, first_subtype, second_dataset,
+                                  second_subtype, k)
   }
   
   return_list <- list("conf" = entry_output, "entry" = entry_result)
@@ -869,8 +868,8 @@ plot_reassigned_heatmaps <- function(shuffle, bNMF, Dlist.mapped.cor) {
           builder <- paste(i, j, sep = "-")
           print(builder)
           
-          final_comparison <-
-            other_comparisons[grepl(j, other_comparisons[, 2]), ]
+          final_comparison <- other_comparisons[
+            grepl(j, other_comparisons[, 2]), ]
           final_comparison <-
             final_comparison[1:(nrow(final_comparison) / 2), ]
           
@@ -901,7 +900,6 @@ plot_reassigned_heatmaps <- function(shuffle, bNMF, Dlist.mapped.cor) {
                               split = "_Cluster")[[1]][1]
           y.label <- strsplit(toString(final_comparison$Var2[1]),
                               split = "_Cluster")[[1]][1]
-          
           
           g <- g + 
             geom_tile(color = "white") + 
