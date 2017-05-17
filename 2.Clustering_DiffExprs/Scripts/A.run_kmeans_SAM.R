@@ -14,9 +14,9 @@ suppressMessages(checkpoint("2016-03-01", checkpointLocation = "."))
 
 args <- commandArgs(trailingOnly = TRUE)
 
-args <- c(2, 4, 20, 123, FALSE, FALSE, "madgenes", "TCGA_eset", "mayo.eset",
-          "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset",
-          "aaces.eset")
+# args <- c(2, 4, 20, 123, FALSE, FALSE, "madgenes", "TCGA_eset", "mayo.eset",
+#          "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset",
+#          "aaces.eset")
 ############################################
 # Load Libraries
 ############################################

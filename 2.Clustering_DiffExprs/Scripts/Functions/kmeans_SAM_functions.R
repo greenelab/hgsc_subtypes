@@ -194,7 +194,7 @@ RunSam <- function (DataList, ClusterList, Method = "d.stat",
     }
   }  
   
-  if(type == "Delta") {
+  if (type == "Delta") {
     SamList <- list(SamList, Deltas)
   }
   
@@ -325,8 +325,8 @@ AssignReference_NMF <- function (kmeans_dscore_dir, nmf_Dlist,
   # ~~~~~~~~~~~~~~
   
   # Upload the dscore vector for the reference
-  kmeans_files = list.files(kmeans_dscore_dir)
-  kmeans_ref = kmeans_files[grepl(Reference, kmeans_files)]
+  kmeans_files <- list.files(kmeans_dscore_dir)
+  kmeans_ref <- kmeans_files[grepl(Reference, kmeans_files)]
   d_score_file <- paste(kmeans_dscore_dir, kmeans_ref, sep = "/")
   
   kmeans_dscore <- read.table(d_score_file, sep = ",", header = TRUE,
@@ -496,7 +496,7 @@ MapClusters <- function (DistMatrixList, dataset_names, Reference = "TCGA") {
         # After this logic you have the cluster with the highest correlation
         # Add it to the result list
         resultList[[paste0("K", centroid)]][[clus]] <- c(resultList[[
-          paste0("K",centroid)]][[clus]], max_clus)
+          paste0("K", centroid)]][[clus]], max_clus)
         # Remove it from correlation_subset to never be considered again
         correlation_subset <- correlation_subset[
           !grepl(max_clus, correlation_subset[, 2]), ]
@@ -850,20 +850,18 @@ dataset_entry <- function(dataset_one, one_subtype,
 plot_reassigned_heatmaps <- function(shuffle, bNMF, Dlist.mapped.cor) {
     if (shuffle) {
       shuffle.string <- "shuffle"
-    } else{
+    } else {
       shuffle.string <- ""
     }
     for (plot in 1:length(Dlist.mapped.cor)) {
-      # set k= (2, 3, or 4)
-      num_clus <- krange[plot]
       
+      num_clus <- krange[plot]
       # Build indices for plot comparisions
       all_centroid_plots <- list()
       data_iter <- 1
       for (i in datasets[1:(length(datasets) - 1)]) {
         other_comparisons <- Dlist.mapped.cor[[plot]][
           grepl(i, Dlist.mapped.cor[[plot]][, 1]), ]
-        head(other_comparisons)
         for (j in datasets[2:length(datasets)]) {
           builder <- paste(i, j, sep = "-")
           print(builder)
@@ -891,9 +889,7 @@ plot_reassigned_heatmaps <- function(shuffle, bNMF, Dlist.mapped.cor) {
           
           g <- ggplot(data = data.frame(final_comparison),
                       aes(x = Var1, y = Var2, fill = as.numeric(paste(value))))
-          head(final_comparison)
-          
-          
+
           x.label <- strsplit(toString(final_comparison$Var1[1]),
                               split = "_Cluster")[[1]][1]
           y.label <- strsplit(toString(final_comparison$Var2[1]),
@@ -929,5 +925,4 @@ plot_reassigned_heatmaps <- function(shuffle, bNMF, Dlist.mapped.cor) {
       dev.off()
     }
   return(NULL)
-  
 }
