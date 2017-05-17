@@ -74,6 +74,7 @@ LoadOVCA_Data <- function(datasets, goodsample_subset_dir = "1.DataInclusion/Dat
       # AACES eset
       dta <- read.table("expression.tsv", sep = "\t", row.names = 1, header = TRUE)
     } else {
+      print(eset_exprs)
       stop("Dataset does not exist in curatedOvarianData")
     }
 

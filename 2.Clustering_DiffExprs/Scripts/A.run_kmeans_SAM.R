@@ -14,9 +14,9 @@ suppressMessages(checkpoint("2016-03-01", checkpointLocation = "."))
 
 args <- commandArgs(trailingOnly = TRUE)
 
-# args <- c(2, 4, 20, 123, FALSE, FALSE, "madgenes", "TCGA_eset", "mayo.eset",
-#           "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset",
-#           "aaces.eset")
+args <- c(2, 4, 20, 123, FALSE, FALSE, "madgenes", "TCGA_eset", "mayo.eset",
+          "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset",
+          "aaces.eset")
 ############################################
 # Load Libraries
 ############################################
@@ -39,7 +39,7 @@ source(kmeans.fxn.path)
 source(heatmap.fxn.path)
 
 # The script loads the ovarian cancer datasets
-load.ovca.path <- file.path("2.Clustering_DiffExprs", "Scripts", "Functions",
+load.ovca.path <- file.path("1.DataInclusion", "Scripts", "Functions",
                             "LoadOVCA_Data.R")
 source(load.ovca.path)
 
@@ -106,7 +106,7 @@ if (!bNMF) {
   for (dataset in names(ExpData)) {
     # Load NMF cluster membership files
     nmf.path <- file.path("2.Clustering_DiffExprs", "Tables",
-                          "ClusterMembership", "nmf/")
+                          "ClusterMembership", "nmf")
     NMF_files <- list.files(nmf.path)
     NMF_files <- NMF_files[grepl("nmf.csv", NMF_files)]
     file <- NMF_files[grepl(dataset, NMF_files)]
@@ -153,8 +153,8 @@ for (dataset in argsCurated) {
     # Find the d score vector indices
     indeces <- grep("D", colnames(SamList[[listIndex]]))
     tmpSam <- SamList[[listIndex]][indeces]
-    colnames(tmpSam) <-
-      paste(names(SamList)[listIndex], colnames(tmpSam), sep = "_")
+    colnames(tmpSam) <- paste(names(SamList)[listIndex],
+                              colnames(tmpSam), sep = "_")
     if (elem == 1) {
       tmpSAMdata <- tmpSam
     } else {
@@ -226,7 +226,7 @@ for (centroids in krange) {
 # Assign a reference category for all other datasets to map to
 # Assign nmf clusters to kmeans clusters
 if (bNMF) {
-  fpath <- file.path("2.Clustering", "Tables", "DScores/")
+  fpath <- file.path("2.Clustering", "Tables", "DScores")
   NewClusters <- AssignReference_NMF(kmeans_dscore_dir = fpath, nmf_Dlist = Dlist,
                                      nmf_cluster_list = Clusters,
                                      Reference = "TCGA")
@@ -315,8 +315,8 @@ for (centroids in krange) {
 }
   
 # Map the rest of the clusters, after the reference clusters are in place
-newClus <-
-  MapClusters(NewDlist.cor, dataset_names = names(ExpData), Reference = "TCGA")
+newClus <- MapClusters(NewDlist.cor,dataset_names = names(ExpData),
+                       Reference = "TCGA")
 
 # Output a final cluster mappings list
 MapList <- list()
@@ -377,12 +377,11 @@ if (!shuffle) {
     }
   } else {
     for (i in 1:length(Clusters.mapped)) {
-      fName <- paste("KMembership_", names(ExpData)[i], "_mapped.csv",
-                     sep = "")
+      fName <- paste0("KMembership_", names(ExpData)[i], "_mapped.csv")
       cluster.file <- file.path("2.Clustering_DiffExprs", "Tables",
                                 "ClusterMembership", "nmf", fName)
       write.csv(Clusters.mapped[[i]],
-                file = , row.names = TRUE)
+                file = cluster.file , row.names = TRUE)
     }
   }
 }
@@ -576,19 +575,19 @@ confidence.frame$test2 <- t2
 ############################################
 
 for (centroid in 1:length(Dlist.mapped.cor)) {
-  tmpCor <-
-    dcast(Dlist.mapped.cor[[centroid]], Var1~Var2, mean, value = value)
+  tmpCor <- dcast(Dlist.mapped.cor[[centroid]],
+                  Var1~Var2, mean, value = value)
   rownames(tmpCor) <- tmpCor[, 1]
   tmpCor <- tmpCor[, -1]
   if (!shuffle) {
     if (!bNMF) {
       fpath <- file.path("2.Clustering_DiffExprs", "Tables", 
-                         "AcrossCor", "AcrossDatasetCor_K", 
-                         paste0(krange[centroid], "_", SAM_subset, ".csv"))
+                         "AcrossCor", paste0("AcrossDatasetCor_K", 
+                         krange[centroid], "_", SAM_subset, ".csv"))
     } else {
       fpath <- file.path("2.Clustering_DiffExprs", "Tables", 
-                         "AcrossCor", "AcrossDatasetCor_nmf_K", 
-                         paste0(krange[centroid], "_", SAM_subset, ".csv"))
+                         "AcrossCor", paste0("AcrossDatasetCor_nmf_K", 
+                         krange[centroid], "_", SAM_subset, ".csv"))
       
     }
     write.table(tmpCor, file = fpath, sep = ",", row.names = TRUE, col.names = NA)
@@ -600,9 +599,8 @@ for (centroid in 1:length(Dlist.mapped.cor)) {
 ############################################
 for (cor.list in 1:length(Dlist.mapped.cor)) {
   for (centroid in 1:(ncol(Dlist.mapped.cor[[cor.list]]) - 1)) {
-    Dlist.mapped.cor[[cor.list]] <-
-      Dlist.mapped.cor[[cor.list]][-grep(
-        "GSE26712_eset", paste(Dlist.mapped.cor[[cor.list]][, centroid])), ]
+    Dlist.mapped.cor[[cor.list]] <- Dlist.mapped.cor[[cor.list]][-grep(
+      "GSE26712_eset", paste(Dlist.mapped.cor[[cor.list]][, centroid])), ]
   }
 }
 
@@ -612,3 +610,4 @@ datasets <- argsCurated[-grep("GSE26712_eset", argsCurated)]
 # Plot Re-Assigned Heatmaps
 ############################################
 plot_reassigned_heatmaps(shuffle, bNMF, Dlist.mapped.cor)
+

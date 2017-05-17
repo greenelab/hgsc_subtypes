@@ -495,10 +495,10 @@ MapClusters <- function (DistMatrixList, dataset_names, Reference = "TCGA") {
         
         # After this logic you have the cluster with the highest correlation
         # Add it to the result list
-        resultList[[paste0("K", centroid)]][[clus]] <-
-          c(resultList[[paste0("K", centroid)]][[clus]], max_clus)
+        resultList[[paste0("K", centroid)]][[clus]] <- c(resultList[[
+          paste0("K",centroid)]][[clus]], max_clus)
         # Remove it from correlation_subset to never be considered again
-        correlation_subset <-correlation_subset[
+        correlation_subset <- correlation_subset[
           !grepl(max_clus, correlation_subset[, 2]), ]
       }
     }
@@ -633,8 +633,8 @@ organize_confidence <- function(confidence_row) {
 
 
 # Determine Dataset entry 
-dataset_entry <-
-  function(dataset_one, one_subtype, dataset_two, two_subtype, clus) {
+dataset_entry <- function(dataset_one, one_subtype,
+                          dataset_two, two_subtype, clus) {
   # ~~~~~~~~~~~~~~
   # This function will return a number depending on the dataset_name input
   #
@@ -861,8 +861,8 @@ plot_reassigned_heatmaps <- function(shuffle, bNMF, Dlist.mapped.cor) {
       all_centroid_plots <- list()
       data_iter <- 1
       for (i in datasets[1:(length(datasets) - 1)]) {
-        other_comparisons <-
-          Dlist.mapped.cor[[plot]][grepl(i, Dlist.mapped.cor[[plot]][, 1]), ]
+        other_comparisons <- Dlist.mapped.cor[[plot]][
+          grepl(i, Dlist.mapped.cor[[plot]][, 1]), ]
         head(other_comparisons)
         for (j in datasets[2:length(datasets)]) {
           builder <- paste(i, j, sep = "-")
@@ -870,9 +870,7 @@ plot_reassigned_heatmaps <- function(shuffle, bNMF, Dlist.mapped.cor) {
           
           final_comparison <- other_comparisons[
             grepl(j, other_comparisons[, 2]), ]
-          final_comparison <-
-            final_comparison[1:(nrow(final_comparison) / 2), ]
-          
+          final_comparison <- final_comparison[1:(nrow(final_comparison) / 2), ]
           
           if (data_iter == 1) {
             blank_glob <- ggplot(data = data.frame(final_comparison),
@@ -923,7 +921,6 @@ plot_reassigned_heatmaps <- function(shuffle, bNMF, Dlist.mapped.cor) {
           
         }
       }
-      print(num_clus)
       fname <- paste0(shuffle.string, "k", num_clus, ".pdf")
       pdf(file.path("2.Clustering_DiffExprs", "Figures", fname))
       for (p in 1:length(all_centroid_plots)) {
