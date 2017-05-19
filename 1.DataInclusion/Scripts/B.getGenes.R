@@ -40,16 +40,6 @@ getvenn <- function(venngenes, data_set_column) {
   return(return_venn_count)
 }
 
-alias_search <- function(gene.entry) {
-  if (grepl("///", gene.entry) == TRUE) {
-    print(TRUE)
-    allsplit <- strsplit(toString(gene.entry), "///")  
-    return(c(allsplit))  
-  } else {
-    return(gene.entry)
-  }
-}
-
 ################################
 # PART I: Load Data
 ################################
@@ -69,10 +59,10 @@ for (dataset in 1:length(ExpData)) {
   
   # If treating multiple mappings as unique genes, which for now we aren't:
   # if (length(datasetGenes.aliases) > 0){
-  #   for(gene.entry in 1:length(datasetGenes.aliases)) {
-  #     genelist <- strsplit(datasetGenes.aliases[[gene.entry]], "///")
-  #     for (g in genelist) {
-  #       datasetgenes.alone <- c(datasetgenes.alone, g)
+  #    datasetgenes.alone <- c(datasetgenes.alone,
+  #                            lapply( datasetgenes.alone,
+  #                            function(x) unlist(strsplit(x, "///"))[[1]]))
+  #
   #     }
   #   }
   # } 
@@ -134,12 +124,14 @@ if (!("aaces.eset" %in% args)){
   Yoshihara_venn <- getvenn(venn, 3)
   Tothill_venn <- getvenn(venn, 4)
   Bonome_venn <- getvenn(venn, 5)
+  venn.file.path <- file.path("1.DataInclusion", "Figures",
+                              "OverlappingGenesVenn")
   venn.plot <- venn.diagram(x = list('TCGA' = TCGA_venn,
                                      'Mayo' = Mayo_venn,
                                      'Yoshihara' = Yoshihara_venn,
                                      'Tothill' = Tothill_venn,
                                      'Bonome' = Bonome_venn),
-                            filename = "1.DataInclusion/Figures/SuppFigS1_OverlappingGenesVenn",
+                            filename = venn.file.path,
                             height = 3000, width = 3000,
                             fill = c("red", "green", "yellow", "blue", "purple"),
                             cat.cex = rep(1.6, 5),
