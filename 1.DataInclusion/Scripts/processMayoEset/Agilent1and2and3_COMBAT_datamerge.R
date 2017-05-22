@@ -48,6 +48,7 @@ suppressMessages(checkpoint("2016-03-01", checkpointLocation = "."))
 #require(sva)
 ## load library 'sva' that is needed for ComBat batch adjustment
 library(sva)
+library(Biobase)
 #Loading required package: corpcor
 #Loading required package: mgcv
 #This is mgcv 1.7-16. For overview type 'help("mgcv-package")'.
