@@ -17,8 +17,11 @@
 # INSTALL.R for package dependencies.
 # This script is run using a Docker image 
 # (see <https://hub.docker.com/r/gregway/hgsc_subtypes/>)
+# The actual 
 # ~~~~~~~~~~~~~~~~~~~~~
 ############################################
+# INSTALL DEPENDENCIES  
+Rscript INSTALL.R
 
 #################
 # PART ZERO: 
