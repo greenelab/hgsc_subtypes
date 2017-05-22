@@ -33,7 +33,7 @@ Agilent1and2and3_COMBAT_datamerge.R
 Rscript 1.DataInclusion/Scripts/processMayoEset/createMayoEset.R
 
 # Define Constants
-DATASETS="TCGA_eset Mayo GSE32062.GPL6480_eset GSE9891_eset"
+DATASETS="TCGA_eset mayo.eset GSE32062.GPL6480_eset GSE9891_eset"
 KMIN=2
 KMAX=4
 SEED=123
