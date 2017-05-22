@@ -37,7 +37,8 @@ cran_pkgs <- c(
   'outliers',
   'survival',
   'VennDiagram',
-  'mnormt'
+  'mnormt',
+  'gplots'
 )
 
 install.packages(cran_pkgs)
