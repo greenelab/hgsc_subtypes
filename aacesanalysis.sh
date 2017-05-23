@@ -3,23 +3,6 @@
 #exec &>hgsc_analysis.out 
 
 ############################################
-# Based on shell script from:
-# Cross-population analysis of high-grade serous ovarian cancer does
-# not support four subtypes
-#
-# Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
-# Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
-# ~~~~~~~~~~~~~~~~~~~~~
-# This script stores instructions to reproduce the HGSC subtyping analysis
-# across populations. All scripts and relevant files are included in the 
-# repository and the workflow depends on the running sequential scripts within 
-# the larger folder structure. See the README for general information and 
-# INSTALL.R for package dependencies.
-# This script is run using a Docker image 
-# (see <https://hub.docker.com/r/gregway/hgsc_subtypes/>)
-# The actual 
-# ~~~~~~~~~~~~~~~~~~~~~
-############################################
 # INSTALL DEPENDENCIES  
 Rscript INSTALL.R
 
@@ -60,14 +43,11 @@ AACES_PATH='aaces_expression.tsv'
 # NOTE: The Mayo Clinic Data is not currently in curatedOvarianData.
 
 # Output the samples for each dataset that pass the inclusion criteria
-#
 R --no-save --args $AACES_PATH 1.DataInclusion/Scripts/A.getInclusion.R  # (Table 1)
 
 # Output the common genes and the MAD (Median Absolute Deviation) genes to be 
 # used in developing moderated t score vectors and in clustering, respectively. 
-# This script will also output Venn diagrams for visualizing overlapping genes 
-# (Sup. Fig. S1) #NOTE: Bonome (GSE12672) is removed following the across 
-# dataset correlations analysis. Add it here.
+
 R --no-save --args $DATASETS "GSE26712_eset" < 1.DataInclusion/Scripts/\
 B.getGenes.R
 
@@ -94,11 +74,11 @@ $DATASETS "GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/A.run_kmeans_SAM.R
 # ~~~~~~~~~~~~~
 # k means & SAM (with common genes)
 # ~~~~~~~~~~~~~
-# Perform k means and SAM (Figure 1)
+# Perform k means and SAM
 R --no-save --args $KMIN $KMAX $NSTARTS $SEED FALSE $NO_SHUFFLE $SAM_SUBSET \
 $DATASETS "GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/A.run_kmeans_SAM.R
 
-# Output correlation matrices (Sup. Fig. S2)	
+# Output correlation matrices
 R --no-save --args $KMIN $KMAX $SEED Figures/CorrelationMatrix/ $DATASETS \
 "GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/B.CorrelationMatrix.R
 
