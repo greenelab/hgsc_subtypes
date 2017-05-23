@@ -45,6 +45,7 @@ NSTARTS=20
 NO_SHUFFLE=FALSE
 SHUFFLE=TRUE
 SAM_SUBSET='commongenes'
+AACES_PATH='aaces_expression.tsv'
 
 #################
 # PART ONE: 
@@ -59,7 +60,8 @@ SAM_SUBSET='commongenes'
 # NOTE: The Mayo Clinic Data is not currently in curatedOvarianData.
 
 # Output the samples for each dataset that pass the inclusion criteria
-Rscript 1.DataInclusion/Scripts/A.getInclusion.R  # (Table 1)
+#
+R --no-save --args $AACES_PATH 1.DataInclusion/Scripts/A.getInclusion.R  # (Table 1)
 
 # Output the common genes and the MAD (Median Absolute Deviation) genes to be 
 # used in developing moderated t score vectors and in clustering, respectively. 
