@@ -50,7 +50,7 @@ LoadOVCA_Data <- function(datasets,
   # Get the eset IDs
   detailedData.names <- detailedData$results[, 3]
 
-    # Initialize a list object
+  # Initialize a list object
   ExpData <- list()
   for (eset_exprs in datasets) {
     if (goodsample_subset_dir != "None") {
