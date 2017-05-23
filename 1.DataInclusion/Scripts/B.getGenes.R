@@ -11,7 +11,7 @@ suppressMessages(library(checkpoint))
 suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
 
 args <- commandArgs(trailingOnly = T)
-args <- c("TCGA_eset", "mayo.eset", "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset", "aaces.eset")
+# args <- c("TCGA_eset", "mayo.eset", "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset", "aaces.eset")
 # args <- c("TCGA_eset", "aaces.eset")
 ################################
 # Load Libraries
@@ -46,7 +46,7 @@ getvenn <- function(venngenes, data_set_column) {
 # Use the LoadOVCA_Data function to read in the datasets subset by commongenes
 ExpData <- LoadOVCA_Data(datasets = args, genelist_subset = "None")
 
- # Get all the common genes and universe genes
+# Get all the common genes and universe genes
 commongeneSet <- c()
 universe <- c()
 for (dataset in 1:length(ExpData)) {
