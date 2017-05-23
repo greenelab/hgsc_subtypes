@@ -46,7 +46,7 @@ getvenn <- function(venngenes, data_set_column) {
 # Use the LoadOVCA_Data function to read in the datasets subset by commongenes
 ExpData <- LoadOVCA_Data(datasets = args, genelist_subset = "None")
 
-# Get all the common genes and universe genes
+ # Get all the common genes and universe genes
 commongeneSet <- c()
 universe <- c()
 for (dataset in 1:length(ExpData)) {
