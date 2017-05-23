@@ -49,8 +49,8 @@ LoadOVCA_Data <- function(datasets,
   detailedData <- data(package = "curatedOvarianData")[3]
   # Get the eset IDs
   detailedData.names <- detailedData$results[, 3]
-  (rownames(exprs(get("TCGA_eset"))))[400:900]
-  # Initialize a list object
+
+    # Initialize a list object
   ExpData <- list()
   for (eset_exprs in datasets) {
     if (goodsample_subset_dir != "None") {
@@ -96,7 +96,6 @@ LoadOVCA_Data <- function(datasets,
     
     # Assign the list elements according to the subset of choice
     if (goodsample_subset_dir != "None" & genelist_subset != "None") {
-      #dta <- dplyr::filter(rownames(dta) %in%)
       ExpData[[eset_exprs]] <- dta[subset[, 1], goodSamples]
     } else if (goodsample_subset_dir == "None" & genelist_subset != "None") {
       ExpData[[eset_exprs]] <- dta[subset[, 1], ]
