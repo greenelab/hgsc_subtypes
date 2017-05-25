@@ -1,8 +1,8 @@
 ############################################
-# Cross-population analysis of high-grade serous 
+# Cross-population analysis of high-grade serous
 # ovarian cancer does not support four subtypes
 #
-# Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,  
+# Way, G.P., Rudd, J., Wang, C., Hamidi, H., Fridley, L.B,
 # Konecny, G., Goode, E., Greene, C.S., Doherty, J.A.
 # ~~~~~~~~~~~~~~~~~~~~~
 # This script will ensure reproducibility of workflow
@@ -13,7 +13,7 @@ library('methods')
 library('checkpoint')
 
 ######################
-# Install CRAN packages 
+# Install CRAN packages
 ######################
 dir.create('.checkpoint')
 checkpoint('2016-03-01', checkpointLocation = '.')
@@ -24,7 +24,7 @@ cran_pkgs <- c(
   'reshape',
   'reshape2',
   'scales',
-  'proto', 
+  'proto',
   'stringr',
   'mnormt',
   'sfsmisc',
@@ -33,16 +33,12 @@ cran_pkgs <- c(
   'devtools',
   'GGally',
   'gplots',
-  'NMF',
   'outliers',
+  'NMF',
   'survival',
   'VennDiagram',
   'mnormt'
 )
 
 install.packages(cran_pkgs)
-
-# doppelgangR
-customLib <- "1.DataInclusion/doppelgangR-master/"
-install.packages(customLib, repos = NULL, type = "source")
 
