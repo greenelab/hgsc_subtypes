@@ -43,7 +43,7 @@ AACES_PATH='aaces_expression.tsv'
 # NOTE: The Mayo Clinic Data is not currently in curatedOvarianData.
 
 # Output the samples for each dataset that pass the inclusion criteria
-R --no-save --args $AACES_PATH 1.DataInclusion/Scripts/A.getInclusion.R  # (Table 1)
+Rscript 1.DataInclusion/Scripts/A.getInclusion.R --aaces $AACES_PATH
 
 # Output the common genes and the MAD (Median Absolute Deviation) genes to be 
 # used in developing moderated t score vectors and in clustering, respectively. 
@@ -81,4 +81,3 @@ $DATASETS "GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/A.run_kmeans_SAM.R
 # Output correlation matrices
 R --no-save --args $KMIN $KMAX $SEED Figures/CorrelationMatrix/ $DATASETS \
 "GSE26712_eset" < 2.Clustering_DiffExprs/Scripts/B.CorrelationMatrix.R
-
