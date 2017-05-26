@@ -105,7 +105,8 @@ LoadOVCA_Data <- function(datasets,
     
     # Assign the list elements according to the subset of choice
     if (goodsample_subset_dir != "None" & genelist_subset != "None") {
-      ExpData[[eset_exprs]] <- dta[subset[, 1], colnames(dta) %in% goodSamples]
+      goodSamples <- goodSamples[colnames(dta) %in% goodSamples]
+      ExpData[[eset_exprs]] <- dta[subset[, 1], goodSamples]
     } else if (goodsample_subset_dir == "None" & genelist_subset != "None") {
       ExpData[[eset_exprs]] <- dta[subset[, 1], ]
     } else {
@@ -115,7 +116,7 @@ LoadOVCA_Data <- function(datasets,
     
     if (shuffle) {
       for (gene in 1:nrow(ExpData[[eset_exprs]])) {
-        random_vec <- sample(ExpData[[eset_exprs]][gene, ],
+        random_vec <- sample(ExpData[[eset_exprs]][gene,0-0  ],
                              ncol(ExpData[[eset_exprs]]))
         ExpData[[eset_exprs]][gene, ] <- random_vec
       }
