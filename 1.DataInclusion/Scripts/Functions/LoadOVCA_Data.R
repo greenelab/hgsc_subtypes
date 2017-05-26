@@ -116,7 +116,7 @@ LoadOVCA_Data <- function(datasets,
     
     if (shuffle) {
       for (gene in 1:nrow(ExpData[[eset_exprs]])) {
-        random_vec <- sample(ExpData[[eset_exprs]][gene,0-0  ],
+        random_vec <- sample(ExpData[[eset_exprs]][gene, ],
                              ncol(ExpData[[eset_exprs]]))
         ExpData[[eset_exprs]][gene, ] <- random_vec
       }
