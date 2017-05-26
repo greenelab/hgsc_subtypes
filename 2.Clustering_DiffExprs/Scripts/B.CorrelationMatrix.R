@@ -33,9 +33,7 @@ k = as.numeric(paste(args[1]))
 k2 = as.numeric(paste(args[2]))  #Number of clusters 
 SEED = as.numeric(paste(args[3])) 
 filepath = as.character(paste(args[4]))
-
 set.seed(SEED)
-
 krange = k:k2
 
 ############################################
@@ -171,3 +169,4 @@ for (dataset in 1:length(ExpData)) {
     dev.off()
   }
 }
+
