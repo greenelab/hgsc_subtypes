@@ -12,6 +12,7 @@
 
 suppressMessages(library(checkpoint))
 suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
+
 ####################################
 # Load Libraries
 ####################################
@@ -26,13 +27,7 @@ source("1.DataInclusion/Scripts/Functions/Inclusion_functions.R")
 ####################################
 # Load Constants
 ####################################
-args <- commandArgs(trailingOnly=TRUE)
 
-if (length(args) > 0) {
-  aacespath = paste(args[1]) 
-} else {
-  aacespath = "aaces_expression.tsv"
-}
 
 vars <- c("sample_type", "histological_type", "grade", "primarysite",
           "arrayedsite", "summarystage", "tumorstage", "substage",
@@ -44,6 +39,16 @@ minimumSamples <- 100
 
 # Esets that should never be included: Dressman and Bentink
 excludeEsets <- c("PMID17290060_eset", "E.MTAB.386_eset")
+
+# Load aaces path (if applicable)
+options <- list(optparse::make_option(c("--aaces"),
+                                      default = "aaces_expression.tsv",
+                                      help = "path to AACES dataset",
+                                      type = "character"))
+opt_parser <- optparse::OptionParser(option_list = options)
+opt <- optparse::parse_args(opt_parser)
+
+aacespath = opt$aaces
 
 ####################################
 # Load Data

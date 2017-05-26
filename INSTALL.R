@@ -37,7 +37,8 @@ cran_pkgs <- c(
   'NMF',
   'survival',
   'VennDiagram',
-  'mnormt'
+  'mnormt',
+  'optparse'
 )
 
 install.packages(cran_pkgs)

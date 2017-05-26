@@ -109,7 +109,8 @@ LoadOVCA_Data <- function(datasets,
     } else if (goodsample_subset_dir == "None" & genelist_subset != "None") {
       ExpData[[eset_exprs]] <- dta[subset[, 1], ]
     } else {
-      ExpData[[eset_exprs]] <- dta[, colnames(dta) %in% goodSamples]
+      goodSamples <- goodSamples[colnames(dta) %in% goodSamples]
+      ExpData[[eset_exprs]] <- dta[subset[, 1], goodSamples]
     }
     
     if (shuffle) {
