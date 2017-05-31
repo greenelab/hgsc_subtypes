@@ -14,8 +14,8 @@ suppressMessages(checkpoint("2016-03-01", checkpointLocation = "."))
 
 args <- commandArgs(trailingOnly = TRUE)
 
-# args <- c(2, 4, 20, 123, FALSE, FALSE, "madgenes", "TCGA_eset", "mayo.eset",
-#           "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset",
+# args <- c(2, 4, 20, 123, TRUE, FALSE, "commongenes", "TCGA_eset", "mayo.eset",
+#          "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset",
 #           "aaces.eset")
 ############################################
 # Load Libraries
@@ -74,7 +74,7 @@ ExpData <- LoadOVCA_Data(datasets = argsCurated, genelist_subset = SAM_subset,
                          shuffle = shuffle)
 
 # Read in common genes csv file. The csv was generated as an intersection of
-# the genes in TCGA, Yoshihara, Mayo, Tothill, and Bonome
+# the genes in TCGA, Yoshihara, Mayo, Tothill,Bonome, and AACES
 common.genes.path <- file.path("1.DataInclusion", "Data",
                                "Genes", "CommonGenes_genelist.csv")
 CommonGenes <- read.csv(common.genes.path, header = TRUE, stringsAsFactors = FALSE)
@@ -226,7 +226,7 @@ for (centroids in krange) {
 # Assign a reference category for all other datasets to map to
 # Assign nmf clusters to kmeans clusters
 if (bNMF) {
-  fpath <- file.path("2.Clustering", "Tables", "DScores")
+  fpath <- file.path("2.Clustering_DiffExprs", "Tables", "DScores")
   NewClusters <- AssignReference_NMF(kmeans_dscore_dir = fpath, nmf_Dlist = Dlist,
                                      nmf_cluster_list = Clusters,
                                      Reference = "TCGA")
@@ -235,7 +235,7 @@ if (bNMF) {
                                  Cor = WithinDatasetCor,
                                  ClusterList = Clusters)
 }
-
+  
 # Run SAM again but with TCGA clusters assigned as a reference
 ReferenceSamList <- RunSam(ExpData, NewClusters, d.stat)
 
@@ -315,7 +315,7 @@ for (centroids in krange) {
 }
   
 # Map the rest of the clusters, after the reference clusters are in place
-newClus <- MapClusters(NewDlist.cor,dataset_names = names(ExpData),
+newClus <- MapClusters(NewDlist.cor, dataset_names = names(ExpData),
                        Reference = "TCGA")
 
 # Output a final cluster mappings list
@@ -462,7 +462,7 @@ for (dtaset in 1:length(argsCurated)) {
                          "DscoreVectors", paste0(argsCurated[dtaset],
                                                  "_nmf_DScoreVectors.csv"))
     }
-    write.table(tmpData, file = fpath, row.names = TRUE, col.names = NA)
+    write.table(tmpData, file = fpath, row.names = TRUE, col.names = NA, sep = ",")
   }
 
   Dlist.mapped[[argsCurated[dtaset]]] <- tmpData
@@ -609,5 +609,5 @@ datasets <- argsCurated[-grep("GSE26712_eset", argsCurated)]
 ############################################
 # Plot Re-Assigned Heatmaps
 ############################################
-plot_reassigned_heatmaps(shuffle, bNMF, Dlist.mapped.cor)
+plot_reassigned_heatmaps(shuffle, bNMF, Dlist.mapped.cor, SAM_subset)
 

@@ -97,7 +97,6 @@ getSamNames <- function (krange) {
   # Returns:
   # A string of column names
   # ~~~~~~~~~~~~~~
-  
   # Get SAM colnames
   krange_grid <- expand.grid(c("SAMD", "SAMP"), min(krange):max(krange))
   
@@ -111,7 +110,6 @@ getSamNames <- function (krange) {
     samColNames <- c(samColNames, paste(krange_grid[gridrow, 1],
                                         krange_grid[gridrow, 2], sep = "_"))
   }
-  
   return(samColNames) 
 }
 
@@ -137,7 +135,6 @@ RunSam <- function (DataList, ClusterList, Method = "d.stat",
   
   # Determine the number of clusters were considered from kmeans
   numClusts <- ncol(ClusterList[[1]])
-  
   SamList <- list()
   Deltas <- c()
   for (dataset in 1:length(DataList)) {
@@ -183,7 +180,7 @@ RunSam <- function (DataList, ClusterList, Method = "d.stat",
       
       SamD <- data.frame(SamD)
       colnames(SamD) <- getSamNames(uniqueIDs)
-      
+
       # Store the SAM results in a list separated by dataset
       listIndex <- ((dataset - 1) * numClusts) + centroid
       SamList[[listIndex]] <- SamD
@@ -224,7 +221,6 @@ AssignReference <- function (Reference, Cluster, Cor, ClusterList) {
   
   # Get the within dataset correlation matrix for the given reference 
   corMat <- Cor[[grep(Reference, names(Cor))]]
-  
   require(reshape2)
   # Melt the corerlation matrix and assign column names
   corMelted <- melt(corMat)
@@ -304,9 +300,9 @@ AssignReference <- function (Reference, Cluster, Cor, ClusterList) {
   return(ClusterList)
 }
 
-
 AssignReference_NMF <- function (kmeans_dscore_dir, nmf_Dlist,
                                  nmf_cluster_list, Reference = "TCGA") {
+
   # ~~~~~~~~~~~~~~
   # This function will use a the dscores extracted in the kmeans mapping to map nmf
   # clusters
@@ -325,21 +321,28 @@ AssignReference_NMF <- function (kmeans_dscore_dir, nmf_Dlist,
   # ~~~~~~~~~~~~~~
   
   # Upload the dscore vector for the reference
+  
+  # kmeans_files is all the files in the directory Tables/DScores
+  # kmeans_ref is the file containing the reference set (TCGA kmeans in our case)
   kmeans_files <- list.files(kmeans_dscore_dir)
   kmeans_ref <- kmeans_files[grepl(Reference, kmeans_files)]
-  d_score_file <- paste(kmeans_dscore_dir, kmeans_ref, sep = "/")
+
+  d_score_file <- file.path(kmeans_dscore_dir, kmeans_ref)
   
+  # kmeans_dscore is all the dscores for TCGA kmeans TCGA_eset_ClusterKn_SAMD_N label
   kmeans_dscore <- read.table(d_score_file, sep = ",", header = TRUE,
                               row.names = 1, stringsAsFactors = FALSE)
   
   # Subset the Dlist to only the reference dataset
-  Dlist_subset <- Dlist[[grep(Reference, names(Dlist))]]
+  Dlist_subset <- nmf_Dlist[[grep(Reference, names(nmf_Dlist))]]
   colnames(Dlist_subset) <- paste0("nmf_", colnames(Dlist_subset))
   
   # Subset the list of cluster memberships
   clus_memb <- nmf_cluster_list[[grep(Reference, names(nmf_cluster_list))]]
-  
   # Get correlation matrix of nmf and kmeans results
+  Dlist_subset <- apply(Dlist_subset, c(1, 2), function(x) as.numeric(as.character(x)))
+  
+  kmeans_dscore <- apply(kmeans_dscore, c(1,2), function(x) as.numeric(as.character(x)))
   cor_matrix <- cor(Dlist_subset, kmeans_dscore)
   
   # Melt the correlation matrix
@@ -429,6 +432,7 @@ AssignReference_NMF <- function (kmeans_dscore_dir, nmf_Dlist,
   return(nmf_cluster_list)
 }
 
+#####################################################################################
 
 MapClusters <- function (DistMatrixList, dataset_names, Reference = "TCGA") {
   # ~~~~~~~~~~~~~~
@@ -847,7 +851,7 @@ dataset_entry <- function(dataset_one, one_subtype,
   return(return_list)
 }
 
-plot_reassigned_heatmaps <- function(shuffle, bNMF, Dlist.mapped.cor) {
+plot_reassigned_heatmaps <- function(shuffle, bNMF, Dlist.mapped.cor, SAM_subset) {
     if (shuffle) {
       shuffle.string <- "shuffle"
     } else {
@@ -864,8 +868,7 @@ plot_reassigned_heatmaps <- function(shuffle, bNMF, Dlist.mapped.cor) {
           grepl(i, Dlist.mapped.cor[[plot]][, 1]), ]
         for (j in datasets[2:length(datasets)]) {
           builder <- paste(i, j, sep = "-")
-          print(builder)
-          
+
           final_comparison <- other_comparisons[
             grepl(j, other_comparisons[, 2]), ]
           final_comparison <- final_comparison[1:(nrow(final_comparison) / 2), ]
@@ -917,7 +920,12 @@ plot_reassigned_heatmaps <- function(shuffle, bNMF, Dlist.mapped.cor) {
           
         }
       }
-      fname <- paste0(shuffle.string, "k", num_clus, ".pdf")
+      if (bNMF) {
+        type <- "NMF"
+      } else {
+        type <- "kmeans"
+      }
+      fname <- paste0(type, shuffle.string, "k", num_clus, "_", SAM_subset, ".pdf")
       pdf(file.path("2.Clustering_DiffExprs", "Figures", fname))
       for (p in 1:length(all_centroid_plots)) {
         plot(all_centroid_plots[[p]])
