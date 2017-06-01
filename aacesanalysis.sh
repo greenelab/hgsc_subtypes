@@ -21,8 +21,6 @@ Rscript 1.DataInclusion/Scripts/processMayoEset/\
 Agilent1and2and3_COMBAT_datamerge.R
 
 # Create an eset from the Mayo data
-# NOTE: This requires the Normalizer function from the Sleipnir library
-# (http://libsleipnir.bitbucket.org/)
 Rscript 1.DataInclusion/Scripts/processMayoEset/createMayoEset.R
 
 # Define Constants

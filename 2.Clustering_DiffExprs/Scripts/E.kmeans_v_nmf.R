@@ -37,37 +37,36 @@ nmfclusters.path <- file.path("2.Clustering_DiffExprs",
 datasetMembers_nmf <- list.files(path = nmfclusters.path)
 
 # Loop over each dataset given as arguments
-for (dataset in 1:length(args)) {
-  holder <- args[dataset]
-  
+for (dataset in args) {
+
   # Get the given membership files for NMF and kmeans
-  DMembership <- datasetMembers_kmeans[grep(holder, datasetMembers_kmeans)]
-  DMembershipNMF <- datasetMembers_nmf[grep(holder, datasetMembers_nmf)]
+  DMembership <- datasetMembers_kmeans[grep(dataset, datasetMembers_kmeans)]
+  DMembershipNMF <- datasetMembers_nmf[grep(dataset, datasetMembers_nmf)]
 
   # Load k-means File
   kmeans.path <- file.path("2.Clustering_DiffExprs", "Tables",
                            "DScores", DMembership)
-  DScoreList_kmeans[[args[dataset]]] <- read.table(kmeans.path,
-                                                   sep = ",", row.names = 1,
-                                                   header = T)
+  DScoreList_kmeans[[dataset]] <- read.table(kmeans.path,
+                                             sep = ",", row.names = 1,
+                                             header = T)
 
   # Load and process NMF file
   NMFpath <- file.path("2.Clustering_DiffExprs", "Figures", "nmf",
                        "DscoreVectors", DMembershipNMF)
   NMFfile <- read.table(NMFpath, sep = ",", row.names = 1, header = T)
 
-    colnames(NMFfile) <- c(paste(args[dataset], "_ClusterK2_1_NMF", sep = ""),
-                           paste(args[dataset], "_ClusterK2_2_NMF", sep = ""),
-                           paste(args[dataset], "_ClusterK3_1_NMF", sep = ""),
-                           paste(args[dataset], "_ClusterK3_2_NMF", sep = ""), 
-                           paste(args[dataset], "_ClusterK3_3_NMF", sep = ""),
-                           paste(args[dataset], "_ClusterK4_1_NMF", sep = ""), 
-                           paste(args[dataset], "_ClusterK4_2_NMF", sep = ""),
-                           paste(args[dataset], "_ClusterK4_3_NMF", sep = ""), 
-                           paste(args[dataset], "_ClusterK4_4_NMF", sep = ""))
+    colnames(NMFfile) <- c(paste(dataset, "_ClusterK2_1_NMF", sep = ""),
+                           paste(dataset, "_ClusterK2_2_NMF", sep = ""),
+                           paste(dataset, "_ClusterK3_1_NMF", sep = ""),
+                           paste(dataset, "_ClusterK3_2_NMF", sep = ""), 
+                           paste(dataset, "_ClusterK3_3_NMF", sep = ""),
+                           paste(dataset, "_ClusterK4_1_NMF", sep = ""), 
+                           paste(dataset, "_ClusterK4_2_NMF", sep = ""),
+                           paste(dataset, "_ClusterK4_3_NMF", sep = ""), 
+                           paste(dataset, "_ClusterK4_4_NMF", sep = ""))
   
   # Store NMF file
-  DScoreList_nmf[[args[dataset]]] <- NMFfile
+  DScoreList_nmf[[dataset]] <- NMFfile
 }
 
 ############################################

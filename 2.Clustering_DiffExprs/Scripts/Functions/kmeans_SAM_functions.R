@@ -432,7 +432,6 @@ AssignReference_NMF <- function (kmeans_dscore_dir, nmf_Dlist,
   return(nmf_cluster_list)
 }
 
-#####################################################################################
 
 MapClusters <- function (DistMatrixList, dataset_names, Reference = "TCGA") {
   # ~~~~~~~~~~~~~~

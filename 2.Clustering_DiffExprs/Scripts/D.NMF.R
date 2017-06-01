@@ -75,8 +75,8 @@ for (dataset in 1:length(ExpData)) {
   # For each centroid assignment, perform NMF and assign cluster 
   # membership files to newMatrix
   for (centroid in 1:length(rank1:rank2)) {
-    fname <- paste("NMF_Clusters_", names(ExpData)[dataset], "_K",
-                   centroid + 1, sep = "")
+    fname <- paste0("NMF_Clusters_", names(ExpData)[dataset], "_K",
+                   centroid + 1)
     
     # Run custom NMF function with 100 runs for k = 2, 3, and 4
     newMatrix[ , centroid] <- runNMF(ExpData[[dataset]],
