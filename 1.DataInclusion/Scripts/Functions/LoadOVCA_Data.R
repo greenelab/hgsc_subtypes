@@ -23,7 +23,7 @@ LoadOVCA_Data <- function(datasets,
                           madgenes_dir = "1.DataInclusion/Data/Genes/GlobalMAD_genelist.csv",
                           genelist_subset = "commongenes",
                           mayo_exprs_file = "1.DataInclusion/Data/Mayo/MayoEset.Rda",
-                          aaces_path = "expression.tsv",
+                          aaces_path = "aaces_expression.tsv",
                           shuffle = F) {
 # ~~~~~~~~~~~~~~
   # Loads ovarian cancer data from curatedOvarianData
@@ -105,13 +105,13 @@ LoadOVCA_Data <- function(datasets,
     
     # Assign the list elements according to the subset of choice
     if (goodsample_subset_dir != "None" & genelist_subset != "None") {
-      goodSamples <- goodSamples[colnames(dta) %in% goodSamples]
-      ExpData[[eset_exprs]] <- dta[subset[, 1], goodSamples]
+      good.sample.names <- colnames(dta)[colnames(dta) %in% goodSamples]
+      ExpData[[eset_exprs]] <- dta[subset[, 1], good.sample.names]
     } else if (goodsample_subset_dir == "None" & genelist_subset != "None") {
       ExpData[[eset_exprs]] <- dta[subset[, 1], ]
     } else {
-      goodSamples <- goodSamples[colnames(dta) %in% goodSamples]
-      ExpData[[eset_exprs]] <- dta[subset[, 1], goodSamples]
+      good.sample.names <- colnames(dta)[colnames(dta) %in% goodSamples]
+      ExpData[[eset_exprs]] <- dta[, good.sample.names]
     }
     
     if (shuffle) {
