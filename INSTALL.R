@@ -37,7 +37,6 @@ cran_pkgs <- c(
   'NMF',
   'survival',
   'VennDiagram',
-  'mnormt',
   'optparse'
 )
 
