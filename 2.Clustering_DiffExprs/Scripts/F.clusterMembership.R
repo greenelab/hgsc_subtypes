@@ -10,10 +10,10 @@ suppressMessages(library(checkpoint))
 suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
 
 args <- commandArgs(trailingOnly=TRUE)
-#args <- c("TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset")
+# args <- c("TCGA_eset", "mayo.eset", "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset", "aaces.eset")
 
 # Get dataset name of the esets that we're loading
-datasets <- c("TCGA", "Mayo", "Yoshihara", "Tothill", "Bonome")
+datasets <- c("TCGA", "mayo.eset", "Yoshihara", "Tothill", "Bonome", "aaces.eset")
 
 # List all kmeans files
 allkmeansFiles <- list.files("2.Clustering_DiffExprs/Tables/ClusterMembership/kmeans/")
@@ -64,3 +64,4 @@ colnames(clusterMembership) <- c('Dataset', 'ClusterK2_kmeans', 'ClusterK3_kmean
 # This is a supplemental table, write it to file
 write.table(clusterMembership, "2.Clustering_DiffExprs/Tables/ClusterMembership/FullClusterMembership.csv", 
             row.names = T, col.names = NA, sep = ",")
+

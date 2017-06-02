@@ -27,6 +27,8 @@ source("1.DataInclusion/Scripts/Functions/Inclusion_functions.R")
 ####################################
 # Load Constants
 ####################################
+
+
 vars <- c("sample_type", "histological_type", "grade", "primarysite",
           "arrayedsite", "summarystage", "tumorstage", "substage",
           "pltx", "tax", "neo", "recurrence_status", "vital_status",
@@ -37,6 +39,16 @@ minimumSamples <- 100
 
 # Esets that should never be included: Dressman and Bentink
 excludeEsets <- c("PMID17290060_eset", "E.MTAB.386_eset")
+
+# Load aaces path (if applicable)
+options <- list(optparse::make_option(c("--aaces"),
+                                      default = "aaces_expression.tsv",
+                                      help = "path to AACES dataset",
+                                      type = "character"))
+opt_parser <- optparse::OptionParser(option_list = options)
+opt <- optparse::parse_args(opt_parser)
+
+aacespath = opt$aaces
 
 ####################################
 # Load Data
@@ -49,8 +61,8 @@ load("1.DataInclusion/Data/Mayo/MayoEset.Rda")
 
  
 # Load the AACES expression data
-if (file.exists("expression.tsv")) {
-  aaces.exprs <- read.table("expression.tsv", sep = "\t", row.names = 1, header = TRUE)
+if (file.exists(aacespath)) {
+  aaces.exprs <- read.table(aacespath, sep = "\t", row.names = 1, header = TRUE)
   aaces.eset <- ExpressionSet(assayData = as.matrix(aaces.exprs))
   aaces <- TRUE
 } else {
@@ -83,8 +95,6 @@ if (aaces) {
   colnames(inclusionTable[[1]])[(ncol(inclusionTable[[1]]))] <- "aaces.eset"
   
 }
-
-
 
 # Save a copy of the first list element, a data.frame which details
 # the creation of the analytic set and how many samples were excluded and why
@@ -143,7 +153,6 @@ goodSamples.chosen[[length(esetList.chosen)]] <-
 names(esetList.chosen)[(length(esetList.chosen))] <- 
   names(goodSamples.chosen)[(length(esetList.chosen))] <- "mayo.eset"
 
-
 if (aaces) {
   esetList.chosen[[length(esetList.chosen) + 1]] <-
     aaces.eset[, inclusionTable.aaces[[2]]]
@@ -163,7 +172,6 @@ doppel.result <-
 
 
 # Process the doppelgangR results into data.frames and write to the harddrive
-
 doppelResult.full <- summary(doppel.result)
 doppelResult.full_out <-
   doppelResult.full[c("sample1", "sample2",
@@ -218,3 +226,4 @@ for (i in 1:length(goodSamples.chosen)) {
       write.csv(sampleList, outFName)
     }
 }
+

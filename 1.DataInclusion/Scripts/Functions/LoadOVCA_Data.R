@@ -23,7 +23,7 @@ LoadOVCA_Data <- function(datasets,
                           madgenes_dir = "1.DataInclusion/Data/Genes/GlobalMAD_genelist.csv",
                           genelist_subset = "commongenes",
                           mayo_exprs_file = "1.DataInclusion/Data/Mayo/MayoEset.Rda",
-                          aaces_path = "expression.tsv",
+                          aaces_path = "aaces_expression.tsv",
                           shuffle = F) {
 # ~~~~~~~~~~~~~~
   # Loads ovarian cancer data from curatedOvarianData
@@ -70,6 +70,15 @@ LoadOVCA_Data <- function(datasets,
       data(list = eset_exprs, package = "curatedOvarianData")
       ExpressionData <- get(eset_exprs)
       dta <- exprs(ExpressionData)
+      if (eset_exprs == "TCGA_eset") {
+        # load Levi Waldron's selected outliers to remove from TCGA
+        source(system.file("extdata", "patientselection.config",
+                           package="curatedOvarianData"))
+        outliers.toremove <- lapply(tcga.lowcor.outliers,
+                                    function(x) strsplit(x, ":")[[1]][2])
+        dta <- dta[, !(colnames(dta) %in% outliers.toremove)]
+      }
+      
       # Mayo data is not in curatedOvarianData
     } else if (grepl("mayo.eset", eset_exprs)) {
       cat("Loading", eset_exprs, "...\n")
@@ -96,11 +105,13 @@ LoadOVCA_Data <- function(datasets,
     
     # Assign the list elements according to the subset of choice
     if (goodsample_subset_dir != "None" & genelist_subset != "None") {
-      ExpData[[eset_exprs]] <- dta[subset[, 1], goodSamples]
+      good.sample.names <- colnames(dta)[colnames(dta) %in% goodSamples]
+      ExpData[[eset_exprs]] <- dta[subset[, 1], good.sample.names]
     } else if (goodsample_subset_dir == "None" & genelist_subset != "None") {
       ExpData[[eset_exprs]] <- dta[subset[, 1], ]
     } else {
-      ExpData[[eset_exprs]] <- dta[, goodSamples]
+      good.sample.names <- colnames(dta)[colnames(dta) %in% goodSamples]
+      ExpData[[eset_exprs]] <- dta[, good.sample.names]
     }
     
     if (shuffle) {
