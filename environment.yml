@@ -18,3 +18,5 @@ dependencies:
 - bioconductor-preprocesscore=1.34.0
 - bioconductor-biocparallel=1.6.6
 - bioconductor-geoquery=2.38.4
+- bioconductor-doppelgangr=1.4.1
+
