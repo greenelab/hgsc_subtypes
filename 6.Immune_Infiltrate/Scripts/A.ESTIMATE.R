@@ -31,7 +31,7 @@ source("1.DataInclusion/Scripts/Functions/LoadOVCA_Data.R")
 # Data in curatedOvarianData
 ############################################
 # Get data from the curatedOvarianData package  
-detailedData <- data(package="curatedOvarianData")[3]
+detailedData <- data(package = "curatedOvarianData")[3]
 # Get the eset IDs
 detailedData.names <- detailedData$results[ ,3]
 # Determine the datasets in curatedOvarianData
@@ -41,7 +41,7 @@ inCuratedOvarianData <- args %in% detailedData.names
 argsCurated <- args[inCuratedOvarianData]
 
 # Add Mayo to argsCurated
-if("mayo.eset" %in% args) {
+if ("mayo.eset" %in% args) {
   argsCurated = c(argsCurated[1], "mayo.eset", argsCurated[2:length(argsCurated)])
 }
 
