@@ -24,7 +24,8 @@ LoadOVCA_Data <- function(datasets,
                           genelist_subset = "commongenes",
                           mayo_exprs_file = "1.DataInclusion/Data/Mayo/MayoEset.Rda",
                           aaces_path = "aaces_expression.tsv",
-                          shuffle = F) {
+                          shuffle = F,
+                          zscore = F) {
 # ~~~~~~~~~~~~~~
   # Loads ovarian cancer data from curatedOvarianData
   #
@@ -122,6 +123,11 @@ LoadOVCA_Data <- function(datasets,
       }
     }
     
+    # Z-Score data if required
+    if (zscore) {
+      scored <- scale(ExpData[[eset_exprs]])
+      ExpData[[eset_exprs]] <- scored
+    }
   }
   # Return a list of subsetted gene expression data.frames for all
   # input datasets
