@@ -87,18 +87,16 @@ datasetMembers <- list.files(path = kmeansPath)
 nmfPath <- file.path("2.Clustering_DiffExprs", "Tables", "ClusterMembership", "nmf")
 datasetMembers_NMF <- list.files(path = nmfPath) 
 
-for (dataset in args) {
-  holder <- dataset
-  
+for (dataset in args) {  
   # kmeans cluster membership
-  ClusMember <- datasetMembers[grep(holder, datasetMembers)]
+  ClusMember <- datasetMembers[grep(dataset, datasetMembers)]
   kmeansFile <- file.path(kmeansPath, ClusMember)
   ClusData <- read.csv(kmeansFile, stringsAsFactors = FALSE)
   names(ClusData)[1] <- "Sample"
   ClusterMembershipList[[dataset]] <- ClusData
   
   # NMF cluster membership
-  ClusMember <- datasetMembers_NMF[grep(holder, datasetMembers_NMF)]
+  ClusMember <- datasetMembers_NMF[grep(dataset, datasetMembers_NMF)]
   ClusMember <- ClusMember[grepl("mapped", ClusMember)]
   nmfFile <- file.path(nmfPath, ClusMember)
   ClusData <- read.csv(nmfFile, stringsAsFactors = FALSE)
@@ -155,8 +153,7 @@ estimatePath <- file.path("6.Immune_Infiltrate", "Tables", "ESTIMATE")
 datasetMembers <- list.files(path = estimatePath)
 
 for (dataset in args) {
-  holder <- dataset
-  EstMembers <- datasetMembers[grep(holder, datasetMembers)]
+  EstMembers <- datasetMembers[grep(dataset, datasetMembers)]
   EstMember <- EstMembers[grep("estimate", EstMembers)]
 
   # Read and clean up input table
