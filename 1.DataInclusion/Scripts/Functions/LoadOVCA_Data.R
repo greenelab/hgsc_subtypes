@@ -24,8 +24,8 @@ LoadOVCA_Data <- function(datasets,
                           genelist_subset = "commongenes",
                           mayo_exprs_file = "1.DataInclusion/Data/Mayo/MayoEset.Rda",
                           aaces_path = "aaces_expression.tsv",
-                          shuffle = F,
-                          zscore = F) {
+                          shuffle = FALSE,
+                          zscore = FALSE) {
 # ~~~~~~~~~~~~~~
   # Loads ovarian cancer data from curatedOvarianData
   #
