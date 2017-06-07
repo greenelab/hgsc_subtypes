@@ -55,7 +55,8 @@ argsCurated <- args[inCuratedOvarianData]
 
 # Add Mayo to argsCurated
 if ("mayo.eset" %in% args) {
-  argsCurated = c(argsCurated[1], "mayo.eset", argsCurated[2:length(argsCurated)])
+  argsCurated = c(argsCurated[1], "mayo.eset", 
+                  argsCurated[2:length(argsCurated)])
 }
 
 ############################################
@@ -70,7 +71,8 @@ ExpData <- LoadOVCA_Data(datasets = argsCurated,
 for (dataset in names(ExpData)) {
   fName <- paste0(dataset, "_processed.gct")
   fPath <- file.path("6.Immune_Infiltrate", "Tables", "ESTIMATE", fName)
-  write.table(ExpData[[dataset]], fPath, sep = '\t', col.names = NA, quote = FALSE)
+  write.table(ExpData[[dataset]], fPath, sep = '\t', col.names = NA, 
+              quote = FALSE)
 }
 
 ############################################
@@ -81,10 +83,12 @@ for (dataset in names(ExpData)) {
 ClusterMembershipList <- list()
 ClusterMembershipList_NMF <- list()
 
-kmeansPath <- file.path("2.Clustering_DiffExprs", "Tables", "ClusterMembership", "kmeans")
+kmeansPath <- file.path("2.Clustering_DiffExprs", "Tables", 
+                        "ClusterMembership", "kmeans")
 datasetMembers <- list.files(path = kmeansPath)
 
-nmfPath <- file.path("2.Clustering_DiffExprs", "Tables", "ClusterMembership", "nmf")
+nmfPath <- file.path("2.Clustering_DiffExprs", "Tables", 
+                     "ClusterMembership", "nmf")
 datasetMembers_NMF <- list.files(path = nmfPath) 
 
 for (dataset in args) {  
@@ -115,8 +119,10 @@ for (dataset in args) {
   estimateFile <- paste0(dataset, "_estimate.gct")
 
   # Filter for common genes in the ESTIMATE function
-  inputFile <- file.path("6.Immune_Infiltrate", "Tables", "ESTIMATE", processedFile)
-  outputFile <- file.path("6.Immune_Infiltrate", "Tables", "ESTIMATE", filteredFile)
+  inputFile <- file.path("6.Immune_Infiltrate", "Tables", "ESTIMATE", 
+                         processedFile)
+  outputFile <- file.path("6.Immune_Infiltrate", "Tables", "ESTIMATE", 
+                          filteredFile)
   filterCommonGenes(input.f = inputFile,
                     output.f = outputFile,
                     id = "GeneSymbol")
@@ -135,8 +141,10 @@ for (dataset in args) {
   }
 
   # Run ESTIMATE algorithm
-  inputFile <- file.path("6.Immune_Infiltrate", "Tables", "ESTIMATE", filteredFile)
-  outputFile <- file.path("6.Immune_Infiltrate", "Tables", "ESTIMATE", estimateFile)
+  inputFile <- file.path("6.Immune_Infiltrate", "Tables", "ESTIMATE", 
+                         filteredFile)
+  outputFile <- file.path("6.Immune_Infiltrate", "Tables", "ESTIMATE", 
+                          estimateFile)
   estimateScore(input.ds = inputFile,
                 output.ds = outputFile,
                 platform = datasetPlatform[dataset])
@@ -179,12 +187,14 @@ ESTIMATEResultsList_NMF <- ESTIMATEResultsList
 # Merge ESTIMATE scores and clustering data
 ############################################
 for (dataset in args) {
-  ESTIMATEResultsList[[dataset]] <- inner_join(ESTIMATEResultsList[[dataset]], 
-                                               ClusterMembershipList[[dataset]],
-                                               by = "Sample")
-  ESTIMATEResultsList_NMF[[dataset]] <- inner_join(ESTIMATEResultsList[[dataset]],
-                                                   ClusterMembershipList_NMF[[dataset]],
-                                                   by = "Sample")
+  ESTIMATEResultsList[[dataset]] <- 
+    inner_join(ESTIMATEResultsList[[dataset]], 
+               ClusterMembershipList[[dataset]],
+               by = "Sample")
+  ESTIMATEResultsList_NMF[[dataset]] <- 
+    inner_join(ESTIMATEResultsList[[dataset]],
+               ClusterMembershipList_NMF[[dataset]],
+               by = "Sample")
 }
 
 ############################################
@@ -194,7 +204,8 @@ k_list <- c("K2", "K3", "K4")
 boxplot_theme <- theme(panel.background = element_blank(),
                        panel.border = element_rect(color = "black", fill = NA),
                        axis.text.y = element_text(size = 14, angle = 90,
-                                                  hjust = 0.4, colour = "black"),
+                                                  hjust = 0.4, 
+                                                  colour = "black"),
                        axis.text.x = element_text(size = 14, colour = "black"))
 
 # Analysis with k-means clustering
@@ -215,7 +226,8 @@ for (dataset in args) {
 
     # Plot ESTIMATE Score by subtype
     e <- ggplot(data = est_df, 
-                mapping = aes(x = Cluster, y = ESTIMATEScore, group = Cluster)) +
+                mapping = aes(x = Cluster, y = ESTIMATEScore, 
+                              group = Cluster)) +
       geom_boxplot() +
       scale_x_discrete(limits = paste(1:num_clus)) + 
       labs(title = "", x = "", y = "") +
@@ -231,7 +243,8 @@ for (dataset in args) {
 
       # Plot Tumor Purity by subtype
       p <- ggplot(data = pur_df, 
-                  mapping = aes(x = Cluster, y = TumorPurity, group = Cluster)) +
+                  mapping = aes(x = Cluster, y = TumorPurity, 
+                                group = Cluster)) +
         geom_boxplot() +
         scale_x_discrete(limits = paste(1:num_clus)) + 
         labs(title = "", x = "", y = "") +
@@ -247,7 +260,8 @@ for (dataset in args) {
   for (i in 1:length(ESTIMATEPlots)) {
     est_plot_eval <- paste0(est_plot_eval, "ESTIMATEPlots[[", i,"]]", ", ")
   }
-  est_plot_eval <- paste0(est_plot_eval, "ncol = length(ESTIMATEPlots)", ", nrow = 1)")
+  est_plot_eval <- paste0(est_plot_eval, "ncol = length(ESTIMATEPlots)", 
+                          ", nrow = 1)")
 
   # Write plot to PNG
   fName <- paste0(dataset, "_ESTIMATEScore_kmeans.png")
@@ -264,7 +278,8 @@ for (dataset in args) {
     for (i in 1:length(PurityPlots)) {
       pur_plot_eval <- paste0(pur_plot_eval, "PurityPlots[[", i, "]]", ", ")
     }
-    pur_plot_eval <- paste0(pur_plot_eval, "ncol = length(PurityPlots)", ", nrow = 1)")
+    pur_plot_eval <- paste0(pur_plot_eval, "ncol = length(PurityPlots)", 
+                            ", nrow = 1)")
 
     # Write plot to PNG
     fName <- paste0(dataset, "_TumorPurity_kmeans.png")
@@ -295,9 +310,11 @@ for (dataset in args) {
 
     # Plot scatter plot of Stromal vs. Immune Score by subtype
     s <- ggplot(data = svi_df,
-                mapping = aes(x = StromalScore, y = ImmuneScore, color = factor(Cluster))) +
+                mapping = aes(x = StromalScore, y = ImmuneScore, 
+                              color = factor(Cluster))) +
       geom_point(cex = 2.5) +
-      scale_colour_manual(values = c("skyblue1", "tomato", "springgreen", "violet")) +
+      scale_colour_manual(values = c("skyblue1", "tomato", "springgreen", 
+                                     "violet")) +
       labs(title = "",
            color = "Subtype",
            x = "Stromal Score",
@@ -322,7 +339,8 @@ for (dataset in args) {
   for (i in 1:length(StromalImmunePlots)) {
     svi_plot_eval <- paste0(svi_plot_eval, "StromalImmunePlots[[", i,"]]", ", ")
   }
-  svi_plot_eval <- paste0(svi_plot_eval, "ncol = length(StromalImmunePlots)", ", nrow = 1)")
+  svi_plot_eval <- paste0(svi_plot_eval, "ncol = length(StromalImmunePlots)", 
+                          ", nrow = 1)")
 
   # Write plot to PNG
   fName <- paste0(dataset, "_StromalvImmune_kmeans.png")
