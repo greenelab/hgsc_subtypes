@@ -42,3 +42,8 @@ cran_pkgs <- c(
 
 install.packages(cran_pkgs)
 
+######################
+# Install ESTIMATE
+######################
+rforge <- "http://r-forge.r-project.org"
+install.packages("estimate", repos = rforge, dependencies = TRUE)

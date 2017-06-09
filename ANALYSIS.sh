@@ -188,3 +188,15 @@ R --no-save --args $DATASETS < 5.Pathway/Scripts/A.GeneEnrichment.R
 
 # The output of this script is input into a PANTHER pathways analysis
 # (http://pantherdb.org/)
+
+#################
+# PART Six: 
+# Immune Infiltrate Analysis
+#################
+# ~~~~~~~~~~~~~~~~~~~~~
+# This section will perform analysis of immune cell type infiltration and
+# output figures characterizing results by subtype
+# ~~~~~~~~~~~~~~~~~~~~~
+
+# Perform ESTIMATE analysis for tumor purity
+R --no-save --args $DATASETS < 6.Immune_Infiltrate/Scripts/A.ESTIMATE.R
