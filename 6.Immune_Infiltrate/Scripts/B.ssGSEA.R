@@ -5,12 +5,15 @@
 # Analyzes gene set enrichment of 22 leukocyte signatures (LM22) with 
 # ssGSEA and plots enrichment by cancer subtype
 #
+# LM22 obtained from CIBERSORT (Newman et al., 2015)
+# [https://doi.org/10.1038/nmeth.3337]
+#
 # Usage: Run by selecting ovarian cancer datasets to be analyzed
 #
-#     Rscript 6.Immune_Infiltrate/Scripts/B.ssGSEA.R
+#     R --no-save --args $DATASETS < 6.Immune_Infiltrate/Scripts/B.ssGSEA.R
 #
-#     with the required argument:
-#         --args        Datasets to be analyzed
+#     with the argument:
+#         $DATASETS     a comma separated string of dataset names
 #
 # Output:
 # Tables with ssGSEA scores for each cell class
@@ -115,22 +118,23 @@ lm22ClassPath <- file.path("6.Immune_Infiltrate", "Gene_signatures",
                            "lm22_classes.csv")
 lm22_agg_read <- read.csv(lm22ClassPath, header = TRUE, 
                           stringsAsFactors = FALSE, fill = TRUE)
+
 # Create list of cell classes and included cell types
 data_iter <- 1
-for (i in lm22_agg_read) {
-  cat <- i[!is.na(i)]
-	lm22_agg[[data_iter]] <- names(lm22_geneset)[cat]
+for (cell_class in lm22_agg_read) {
+  types <- cell_class[!is.na(cell_class)]
+	lm22_agg[[data_iter]] <- names(lm22_geneset)[types]
 
   data_iter <- data_iter + 1
 }
 names(lm22_agg) <- colnames(lm22_agg_read)
 
-# Create gene signature list by cell class
+# Create gene signature list for each cell class
 lm22_agg_geneset <- list()
-for (i in 1:length(lm22_agg)) {
-  types <- lm22_agg[[i]]
+for (cell_class in 1:length(lm22_agg)) {
+  types <- lm22_agg[[cell_class]]
   unique_genes <- unique(unlist(lm22_geneset[types], use.names = FALSE))
-  lm22_agg_geneset[[i]] <- unique_genes
+  lm22_agg_geneset[[cell_class]] <- unique_genes
 }
 names(lm22_agg_geneset) <- names(lm22_agg)
 
