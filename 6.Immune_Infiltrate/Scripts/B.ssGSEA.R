@@ -123,7 +123,7 @@ lm22_agg_read <- read.csv(lm22ClassPath, header = TRUE,
 data_iter <- 1
 for (cell_class in lm22_agg_read) {
   types <- cell_class[!is.na(cell_class)]
-	lm22_agg[[data_iter]] <- names(lm22_geneset)[types]
+  lm22_agg[[data_iter]] <- names(lm22_geneset)[types]
 
   data_iter <- data_iter + 1
 }
@@ -131,10 +131,10 @@ names(lm22_agg) <- colnames(lm22_agg_read)
 
 # Create gene signature list for each cell class
 lm22_agg_geneset <- list()
-for (cell_class in 1:length(lm22_agg)) {
-  types <- lm22_agg[[cell_class]]
+for (cell_class_idx in 1:length(lm22_agg)) {
+  types <- lm22_agg[[cell_class_idx]]
   unique_genes <- unique(unlist(lm22_geneset[types], use.names = FALSE))
-  lm22_agg_geneset[[cell_class]] <- unique_genes
+  lm22_agg_geneset[[cell_class_idx]] <- unique_genes
 }
 names(lm22_agg_geneset) <- names(lm22_agg)
 
