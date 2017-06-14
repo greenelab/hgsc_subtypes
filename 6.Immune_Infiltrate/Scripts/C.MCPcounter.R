@@ -5,6 +5,10 @@
 # Estimate the abundance of immune and stromal infiltration in Tothill
 # using the MCPcounter algorithm
 #
+# Note: Due to MCPcounter's requirement of input data in Affymetrix 133P2
+# probesets, HUGO, or Entrez ID, only Tothill (133P2 probesets) could be
+# analyzed with this algorithm
+#
 # Usage: Run the script
 #
 #     Rscript 6.Immune_Infiltrate/Scripts/C.MCPcounter.R
@@ -53,19 +57,35 @@ mcp_result <- MCPcounter.estimate(expression = Tothill_eset,
                                   featuresType = "affy133P2_probesets")
 infiltration <- test_for_infiltration(mcp_result, platform = "133P2")
 
+# Save heatmap
+fName <- paste0("GSE9891", "_heatmap.png")
+fPath <- file.path("6.Immune_Infiltrate", "Figures", "MCPcounter", fName)
+png(filename = fPath, width = 1000, height = 800)
+heatmap(as.matrix(mcp_result),
+        col = colorRampPalette(c("blue", "white", "red"))(100))
+dev.off()
+
 # Format result data
 mcp_result <- t(mcp_result)
 mcp_result <- tibble::rownames_to_column(as.data.frame(mcp_result),
                                          "Sample")
+infiltration <- tibble::rownames_to_column(as.data.frame(infiltration),
+                                           "Sample")
 
 # Write results to disk
-fPath <- file.path("6.Immune_Infiltrate", "Tables", "MCPcounter", 
+mcpPath <- file.path("6.Immune_Infiltrate", "Tables", "MCPcounter", 
                    "GSE9891_mcp.csv")
-write.csv(mcp_result, fPath, quote = FALSE)
+write.csv(mcp_result, mcpPath, quote = FALSE)
+
+infilPath <- file.path("6.Immune_Infiltrate", "Tables", "MCPcounter", 
+                       "GSE9891_infiltration.csv")
+write.csv(infiltration, infilPath, quote = FALSE)
 
 # Add cluster membership
 mcp_result_cluster <- inner_join(mcp_result, ClusterMembership,
                                  by = "Sample")
+infiltration_cluster <- inner_join(infiltration, ClusterMembership,
+                                   by = "Sample")
 
 ############################################
 # Output plots
@@ -79,9 +99,11 @@ boxplot_theme <- theme(panel.background = element_blank(),
                        axis.text.x = element_text(size = 12, colour = "black"),
                        axis.title.y = element_text(size = 12, colour = "black",
                                                    face = "bold"))
+
+# Identify cell types analyzed by MCPcounter
 cell_types <- colnames(mcp_result)[-1]
 
-# Analysis with k-means clustering
+# MCPcounter score analysis with k-means clustering
 for (k in k_list) {
   MCPPlots <- list()
   data_iter <- 1
@@ -90,12 +112,11 @@ for (k in k_list) {
   for (type in cell_types) {
     plot_cols <- c("Sample", type, paste0("Cluster", k))
     plot_df <- mcp_result_cluster[plot_cols]
-    colnames(plot_df)[2] <- "Abundance"
-    colnames(plot_df)[3] <- "Cluster"
+    colnames(plot_df)[2:3] <- c("Abundance", "Cluster")
 
     # Plot by subtype
-    g <- ggplot (data = plot_df,
-                 mapping = aes (x = Cluster, y = Abundance, group = Cluster)) +
+    g <- ggplot(data = plot_df,
+                mapping = aes(x = Cluster, y = Abundance, group = Cluster)) +
       geom_boxplot() +
       scale_x_discrete(limits = paste(1:num_clus)) +
       labs(title = "", x = "", y = type) +
@@ -107,19 +128,71 @@ for (k in k_list) {
 
   # Build string to combine plots
   plot_eval <- "full_grobs <- grid.arrange("
-    for (i in 1:length(MCPPlots)) {
-      plot_eval <- paste0(plot_eval, "MCPPlots[[", i, "]]", ", ")
-    }
-    plot_eval <- paste0(plot_eval, "ncol = 3", 
-                        ", nrow = ceiling(length(MCPPlots) / 3))")
+  for (i in 1:length(MCPPlots)) {
+    plot_eval <- paste0(plot_eval, "MCPPlots[[", i, "]]", ", ")
+  }
+  plot_eval <- paste0(plot_eval, "ncol = 3", 
+                      ", nrow = ceiling(length(MCPPlots) / 3))")
 
   # Write plot to PNG
   fName <- paste0("GSE9891", "_", k, "_MCP.png")
   fPath <- file.path("6.Immune_Infiltrate", "Figures", "MCPcounter", 
                      fName)
   png(filename = fPath,
-        width = 400 * 3,
-        height = 400 * ceiling(length(MCPPlots) / 3))
-    eval(parse(text = plot_eval))
-    dev.off()
+      width = 400 * 3,
+      height = 400 * ceiling(length(MCPPlots) / 3))
+  eval(parse(text = plot_eval))
+  dev.off()
+}
+
+# Identify cell types analyzed with infiltration
+infil_cell_types <- c()
+for (type_idx in 2:length(infiltration)) {
+  # Select only cell types with no NA values
+  infil <- is.na(infiltration[type_idx])
+  if (sum(infil) == 0) {
+    infil_cell_types <- c(infil_cell_types, colnames(infil))
+  }
+}
+
+# Infiltration analysis with k-means clustering
+for (k in k_list) {
+  InfilPlots <- list()
+  data_iter <- 1
+  num_clus <- gsub("K", "", k)
+
+  for (type in infil_cell_types) {
+    plot_cols <- c("Sample", type, paste0("Cluster", k))
+    plot_df <- infiltration_cluster[plot_cols]
+    colnames(plot_df)[2:3] <- c("Infiltration", "Cluster")
+
+    # Plot by subtype
+    g <- ggplot(data = plot_df,
+                mapping = aes(x = Cluster, y = Infiltration, group = Cluster)) +
+      geom_boxplot() +
+      scale_x_discrete(limits = paste(1:num_clus)) +
+      labs(title = "", x = "", y = type) +
+      boxplot_theme
+    InfilPlots[[data_iter]] <- g
+
+    data_iter <- data_iter + 1
+  }
+
+  # Build string to combine plots
+  plot_eval <- "full_grobs <- grid.arrange("
+  for (i in 1:length(InfilPlots)) {
+    plot_eval <- paste0(plot_eval, "InfilPlots[[", i, "]]", ", ")
+  }
+  plot_eval <- paste0(plot_eval, "ncol = 4", 
+                      ", nrow = ceiling(length(InfilPlots) / 4))")
+
+  # Write plot to PNG
+  fName <- paste0("GSE9891", "_", k, "_Infiltration.png")
+  fPath <- file.path("6.Immune_Infiltrate", "Figures", "MCPcounter", 
+                     fName)
+  png(filename = fPath,
+      width = 400 * 4,
+      height = 400 * ceiling(length(InfilPlots) / 4))
+  eval(parse(text = plot_eval))
+  dev.off()
 }
