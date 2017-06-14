@@ -51,4 +51,5 @@ install.packages("estimate", repos = rforge, dependencies = TRUE)
 ######################
 # Install MCPcounter
 ######################
+library(devtools)
 install_github("ebecht/MCPcounter",ref="master", subdir="Source")
