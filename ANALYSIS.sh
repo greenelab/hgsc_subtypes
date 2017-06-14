@@ -194,9 +194,21 @@ R --no-save --args $DATASETS < 5.Pathway/Scripts/A.GeneEnrichment.R
 # Immune Infiltrate Analysis
 #################
 # ~~~~~~~~~~~~~~~~~~~~~
-# This section will perform analysis of immune cell type infiltration and
+# This section will perform analysis of immune cell infiltration and
 # output figures characterizing results by subtype
 # ~~~~~~~~~~~~~~~~~~~~~
 
-# Perform ESTIMATE analysis for tumor purity
+# ~~~~~~~~~~~~~
+# ESTIMATE
+# ~~~~~~~~~~~~~
+# Perform ESTIMATE analysis to observe immune/stromal cell
+# infiltration and infer a tumor purity for each individual tumor
+# sample
 R --no-save --args $DATASETS < 6.Immune_Infiltrate/Scripts/A.ESTIMATE.R
+
+# ~~~~~~~~~~~~~
+# ssGSEA
+# ~~~~~~~~~~~~~
+# Perform ssGSEA analysis to observe gene set enrichment of 22 leukocyte
+# signatures (LM22)
+R --no-save --args $DATASETS < 6.Immune_Infiltrate/Scripts/B.ssGSEA.R

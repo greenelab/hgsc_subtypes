@@ -19,4 +19,4 @@ dependencies:
 - bioconductor-biocparallel=1.6.6
 - bioconductor-geoquery=2.38.4
 - bioconductor-doppelgangr=1.4.1
-
+- bioconductor-gsva=1.24.1
