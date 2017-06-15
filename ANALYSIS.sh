@@ -212,3 +212,10 @@ R --no-save --args $DATASETS < 6.Immune_Infiltrate/Scripts/A.ESTIMATE.R
 # Perform ssGSEA analysis to observe gene set enrichment of 22 leukocyte
 # signatures (LM22)
 R --no-save --args $DATASETS < 6.Immune_Infiltrate/Scripts/B.ssGSEA.R
+
+# ~~~~~~~~~~~~~
+# MCPcounter
+# ~~~~~~~~~~~~~
+# Perform MCPcounter analysis on Tothill to estimate the abundance of 
+# immune and stromal infiltration into tumor samples
+Rscript 6.Immune_Infiltrate/Scripts/C.MCPcounter.R

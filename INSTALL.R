@@ -47,3 +47,9 @@ install.packages(cran_pkgs)
 ######################
 rforge <- "http://r-forge.r-project.org"
 install.packages("estimate", repos = rforge, dependencies = TRUE)
+
+######################
+# Install MCPcounter
+######################
+library(devtools)
+install_github("ebecht/MCPcounter", ref = "master", subdir = "Source")
