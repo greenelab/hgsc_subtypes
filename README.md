@@ -9,8 +9,10 @@ high-grade serous ovarian cancer subtypes across Australian, American, and
 Japanese populations. A full report of this analysis is published in
 _G3: Genes, Genomes, Genetics_
 ([Way et al. 2016](https://doi.org/10.1534/g3.116.033514)).
+Instructions are provided in
+[release version 1.3](https://github.com/greenelab/hgsc_subtypes/tree/1.3)
+to reproduce this analysis.
 
- 
 In the study, we leverage data extracted from the bioconductor package
 curatedOvarianData
 ([Ganzfried et al. 2013](http://doi.org/10.1093/database/bat013)) as well as a
@@ -24,7 +26,8 @@ clustering studies performed on single populations.
 
 We are currently working on adding African American HGSC samples to this
 pipeline to determine the representation of HGSC subtypes in an additional
-population.
+population. This project is in development and will be associated with a
+future release.
 
 ## Contact
 
