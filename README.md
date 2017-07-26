@@ -40,48 +40,24 @@ source activate hgsc_subtypes
 Rscript INSTALL.R
 ```
 
-## Analysis
+## Analyses
 
-[![](https://images.microbadger.com/badges/version/gregway/hgsc_subtypes.svg)](http://microbadger.com/images/gregway/hgsc_subtypes) [![](https://images.microbadger.com/badges/image/gregway/hgsc_subtypes.svg)](http://microbadger.com/images/gregway/hgsc_subtypes)
+There are currently two pipelines in place to analyze hgsc subtypes, to
+reproduce the results of either pipeline, run:
 
-For ease of use and to ensure reproducibility, all analyses should be performed
-in our [Docker image](https://hub.docker.com/r/gregway/hgsc_subtypes/)
-To install docker, please follow these
-[friendly instructions](https://docs.docker.com/linux/)
+```
+# Cross-population HGSC subtypes analysis 
+bash hgsc_subtypes_pipeline.sh
 
-After installing Docker, please follow these steps:
-
-```sh
-docker pull gregway/hgsc_subtypes
-git clone https://github.com/greenelab/hgsc_subtypes.git
-
-# Run the analysis and save results to local volume
-docker run \
---detach \
---volume ~/<PATH>/hgsc_subtypes/:hgsc_subtypes/ \
---publish 5000:80
---interactive gregway/hgsc_subtypes bash hgsc_subtypes/docker/docker_command.sh
+# African American HGSC subtypes analysis
+bash aaces_subtypes_pipeline.sh
 ```
 
-Where PATH is the local directory structure where the github repo is cloned. The
-`docker run` command will output the container ID of the analysis. Runtime is on
-the order of several hours.
-
-## Full Build
-
-To retrieve the full build without installing docker download our 
-[Zenodo record](https://zenodo.org/record/53990)
-
 ## Data
-All data was retrieved from curatedOvarianData except for the Mayo data
-(GSE74357).
 
-## Dependencies
-
-All dependencies are pre-installed in the Docker image. 
-
-* For specific R package installations, view INSTALL.R. 
-* The analysis also requires the Sleipnir Normalizer function
+All data was retrieved from curatedOvarianData except for the
+[Mayo data](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74357)
+and AACES data.
 
 ## Acknowledgements
 
