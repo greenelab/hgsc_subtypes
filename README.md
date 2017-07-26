@@ -6,8 +6,13 @@
 
 The repository contains instructions to replicate the analysis of identifying
 high-grade serous ovarian cancer subtypes across Australian, American, and
-Japanese populations. We leverage data from a variety of studies extracted from
-the bioconductor package curatedOvarianData
+Japanese populations. A full report of this analysis is published in G3:
+Genes, Genomes, Genetics
+([Way et al. 2016](https://doi.org/10.1534/g3.116.033514)).
+
+ 
+In the study, we leverage data extracted from the bioconductor package
+curatedOvarianData
 ([Ganzfried et al. 2013](http://doi.org/10.1093/database/bat013)) as well as a
  dataset we uploaded to GEO 
 ([GSE74357](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74357)). We
@@ -25,9 +30,6 @@ population.
 
 For all analysis or coding related questions please file a
 [GitHub issue](https://github.com/greenelab/hgsc_subtypes/issues)
-
-Please direct all other correspondence to:
-Jennifer.A.Doherty@dartmouth.edu and/or CSGreene@mail.med.upenn.edu
 
 ## Environment
 
