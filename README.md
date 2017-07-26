@@ -51,7 +51,7 @@ R --no-save < install_custom.R
 
 ## Analyses
 
-There are currently two pipelines in place to analyze hgsc subtypes, to
+There are currently two pipelines in place to analyze hgsc subtypes. To
 reproduce the results of either pipeline, activate the `hgsc_subtypes`
 environment and run:
 
