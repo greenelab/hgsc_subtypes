@@ -4,17 +4,16 @@
 
 ## Summary
 
-The repository contains instructions to replicate the analysis of identifying
-high-grade serous ovarian cancer subtypes across Australian, American, and
-Japanese populations. A full report of this analysis is published in
-_G3: Genes, Genomes, Genetics_
+In this repository, we compare high-grade serous ovarian cancer (HGSC) subtypes
+across Australian, American, and Japanese populations. We determine that two or
+three subtypes are most consistent across different datasets. A full report of
+this analysis is published in _G3: Genes, Genomes, Genetics_
 ([Way et al. 2016](https://doi.org/10.1534/g3.116.033514)).
 Instructions are provided in
 [release version 1.3](https://github.com/greenelab/hgsc_subtypes/tree/1.3)
-to reproduce this analysis.
+to reproduce the analysis.
 
-In the study, we leverage data extracted from the bioconductor package
-curatedOvarianData
+We leverage data extracted from the bioconductor package `curatedOvarianData`
 ([Ganzfried et al. 2013](http://doi.org/10.1093/database/bat013)) as well as a
  dataset we uploaded to GEO 
 ([GSE74357](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74357)). We
