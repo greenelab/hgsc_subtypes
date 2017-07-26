@@ -6,8 +6,8 @@
 
 The repository contains instructions to replicate the analysis of identifying
 high-grade serous ovarian cancer subtypes across Australian, American, and
-Japanese populations. A full report of this analysis is published in G3:
-Genes, Genomes, Genetics
+Japanese populations. A full report of this analysis is published in
+_G3: Genes, Genomes, Genetics_
 ([Way et al. 2016](https://doi.org/10.1534/g3.116.033514)).
 
  
