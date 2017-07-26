@@ -9,12 +9,17 @@ high-grade serous ovarian cancer subtypes across Australian, American, and
 Japanese populations. We leverage data from a variety of studies extracted from
 the bioconductor package curatedOvarianData
 ([Ganzfried et al. 2013](http://doi.org/10.1093/database/bat013)) as well as a
- dataset we uploaded to GEO (GSE74357). We apply a unified, unsupervised
-bioinformatics pipeline to compare subtypes across these populations and
-determine that specific subtypes are reliably identified. The most replicable
-subtypes are mesenchymal-like and proliferative-like and their sample
-representation was highly concordant with other independent clustering studies
-performed on single populations.
+ dataset we uploaded to GEO 
+([GSE74357](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74357)). We
+apply a unified, unsupervised bioinformatics pipeline to compare subtypes across
+these populations and determine that specific subtypes are reliably identified.
+The most replicable subtypes are mesenchymal-like and proliferative-like and
+their sample representation was highly concordant with other independent
+clustering studies performed on single populations.
+
+We are currently working on adding African American HGSC samples to this
+pipeline to determine the representation of HGSC subtypes in an additional
+population.
 
 ## Contact
 
