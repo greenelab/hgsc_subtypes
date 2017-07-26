@@ -17,9 +17,6 @@
 # Box plots by subtype for ESTIMATE score and tumor purity
 # Scatter plots by subtype for comparing Stromal and Immune score
 
-suppressMessages(library(checkpoint))
-suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
-
 args <- commandArgs(trailingOnly = TRUE)
 
 # args <- c("TCGA_eset", "mayo.eset", "GSE32062.GPL6480_eset", "GSE9891_eset")

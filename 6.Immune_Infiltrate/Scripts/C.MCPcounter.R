@@ -17,9 +17,6 @@
 # Tables with MCPcounter results for each sample
 # Box plots by subtype for results
 
-suppressMessages(library(checkpoint))
-suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
-
 ############################################
 # Load Libraries
 ############################################
