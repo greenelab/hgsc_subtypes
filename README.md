@@ -4,25 +4,34 @@
 
 ## Summary
 
-The repository contains instructions to replicate the analysis of identifying
-high-grade serous ovarian cancer subtypes across Australian, American, and
-Japanese populations. We leverage data from a variety of studies extracted from
-the bioconductor package curatedOvarianData
+In this repository, we compare high-grade serous ovarian cancer (HGSC) subtypes
+across Australian, American, and Japanese populations. We determine that two or
+three subtypes are most consistent across different datasets. A full report of
+this analysis is published in _G3: Genes, Genomes, Genetics_
+([Way et al. 2016](https://doi.org/10.1534/g3.116.033514)).
+Instructions are provided in
+[release version 1.3](https://github.com/greenelab/hgsc_subtypes/tree/1.3)
+to reproduce the analysis.
+
+We leverage data extracted from the bioconductor package `curatedOvarianData`
 ([Ganzfried et al. 2013](http://doi.org/10.1093/database/bat013)) as well as a
- dataset we uploaded to GEO (GSE74357). We apply a unified, unsupervised
-bioinformatics pipeline to compare subtypes across these populations and
-determine that specific subtypes are reliably identified. The most replicable
-subtypes are mesenchymal-like and proliferative-like and their sample
-representation was highly concordant with other independent clustering studies
-performed on single populations.
+ dataset we uploaded to GEO 
+([GSE74357](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74357)). We
+apply a unified, unsupervised bioinformatics pipeline to compare subtypes across
+these populations and determine that specific subtypes are reliably identified.
+The most replicable subtypes are mesenchymal-like and proliferative-like and
+their sample representation was highly concordant with other independent
+clustering studies performed on single populations.
+
+We are currently working on adding African American HGSC samples to this
+pipeline to determine the representation of HGSC subtypes in an additional
+population. This project is in development and will be associated with a
+future release.
 
 ## Contact
 
 For all analysis or coding related questions please file a
 [GitHub issue](https://github.com/greenelab/hgsc_subtypes/issues)
-
-Please direct all other correspondence to:
-Jennifer.A.Doherty@dartmouth.edu and/or CSGreene@mail.med.upenn.edu
 
 ## Environment
 
@@ -40,48 +49,24 @@ source activate hgsc_subtypes
 Rscript INSTALL.R
 ```
 
-## Analysis
+## Analyses
 
-[![](https://images.microbadger.com/badges/version/gregway/hgsc_subtypes.svg)](http://microbadger.com/images/gregway/hgsc_subtypes) [![](https://images.microbadger.com/badges/image/gregway/hgsc_subtypes.svg)](http://microbadger.com/images/gregway/hgsc_subtypes)
-
-For ease of use and to ensure reproducibility, all analyses should be performed
-in our [Docker image](https://hub.docker.com/r/gregway/hgsc_subtypes/)
-To install docker, please follow these
-[friendly instructions](https://docs.docker.com/linux/)
-
-After installing Docker, please follow these steps:
+There are currently two pipelines in place to analyze hgsc subtypes, to
+reproduce the results of either pipeline, run:
 
 ```sh
-docker pull gregway/hgsc_subtypes
-git clone https://github.com/greenelab/hgsc_subtypes.git
+# Cross-population HGSC subtypes analysis 
+bash hgsc_subtypes_pipeline.sh
 
-# Run the analysis and save results to local volume
-docker run \
---detach \
---volume ~/<PATH>/hgsc_subtypes/:hgsc_subtypes/ \
---publish 5000:80
---interactive gregway/hgsc_subtypes bash hgsc_subtypes/docker/docker_command.sh
+# African American HGSC subtypes analysis
+bash aaces_subtypes_pipeline.sh
 ```
 
-Where PATH is the local directory structure where the github repo is cloned. The
-`docker run` command will output the container ID of the analysis. Runtime is on
-the order of several hours.
-
-## Full Build
-
-To retrieve the full build without installing docker download our 
-[Zenodo record](https://zenodo.org/record/53990)
-
 ## Data
-All data was retrieved from curatedOvarianData except for the Mayo data
-(GSE74357).
 
-## Dependencies
-
-All dependencies are pre-installed in the Docker image. 
-
-* For specific R package installations, view INSTALL.R. 
-* The analysis also requires the Sleipnir Normalizer function
+All data was retrieved from curatedOvarianData except for the
+[Mayo data](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74357)
+and AACES data.
 
 ## Acknowledgements
 
