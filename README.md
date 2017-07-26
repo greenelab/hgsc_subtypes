@@ -50,7 +50,7 @@ Rscript INSTALL.R
 There are currently two pipelines in place to analyze hgsc subtypes, to
 reproduce the results of either pipeline, run:
 
-```
+```sh
 # Cross-population HGSC subtypes analysis 
 bash hgsc_subtypes_pipeline.sh
 
