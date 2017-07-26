@@ -37,7 +37,7 @@ To create an instance of this environment run the following:
 conda env create --force --file environment.yml
 source activate hgsc_subtypes
 
-Rscript INSTALL.R
+R --no-save < install_custom.R
 ```
 
 ## Analysis
