@@ -9,9 +9,6 @@
 # across k and across datasets, it will output cluster membership files and 
 # correlations
 
-suppressMessages(library(checkpoint))
-suppressMessages(checkpoint("2016-03-01", checkpointLocation = "."))
-
 args <- commandArgs(trailingOnly = TRUE)
 
 # args <- c(2, 4, 20, 123, TRUE, FALSE, "commongenes", "TCGA_eset", "mayo.eset",

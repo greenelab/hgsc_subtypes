@@ -19,9 +19,6 @@
 # Tables with ssGSEA scores for each cell class
 # Box plots by subtype for ssGSEA scores
 
-suppressMessages(library(checkpoint))
-suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
-
 args <- commandArgs(trailingOnly = TRUE)
 
 # args <- c("TCGA_eset", "mayo.eset", "GSE32062.GPL6480_eset", "GSE9891_eset")

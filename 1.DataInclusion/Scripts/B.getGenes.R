@@ -7,9 +7,6 @@
 # Output gene lists (common genes and MAD genes) and
 # Overlapping Genes Venn Diagram: Supplemental Figure 1
 
-suppressMessages(library(checkpoint))
-suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
-
 args <- commandArgs(trailingOnly = T)
 # args <- c("TCGA_eset", "mayo.eset", "GSE32062.GPL6480_eset", "GSE9891_eset", "GSE26712_eset", "aaces.eset")
 # args <- c("TCGA_eset", "aaces.eset")

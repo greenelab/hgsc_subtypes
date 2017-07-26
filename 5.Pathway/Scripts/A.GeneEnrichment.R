@@ -7,9 +7,6 @@
 # The script will output a table of the differentially expressed genes for each cluster, 
 # both positively and negatively regulated
 
-suppressMessages(library(checkpoint))
-suppressMessages(checkpoint('2016-03-01', checkpointLocation = "."))
-
 args <- commandArgs(trailingOnly=TRUE)
 #args <- c("TCGA_eset", "Mayo", "GSE32062.GPL6480_eset", "GSE9891_eset")
 
