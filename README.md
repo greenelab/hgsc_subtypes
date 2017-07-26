@@ -36,8 +36,8 @@ For all analysis or coding related questions please file a
 ## Environment
 
 To ensure analysis reproducibility, _most_ packages are versioned using conda.
-The only exceptions are [`MCPcounter'](https://github.com/ebecht/MCPcounter)
-and [`ESTIMATE`](https://r-forge.r-project.org/projects/estimate/), which are
+The only exceptions are [MCPcounter](https://github.com/ebecht/MCPcounter)
+and [ESTIMATE](https://r-forge.r-project.org/projects/estimate/), which are
 downloaded by running `install_custom.R`.
 
 To create a complete instance of this environment run the following:
