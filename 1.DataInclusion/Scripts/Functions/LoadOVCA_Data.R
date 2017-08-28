@@ -23,6 +23,7 @@ LoadOVCA_Data <- function(datasets,
                           madgenes_dir = "1.DataInclusion/Data/Genes/GlobalMAD_genelist.csv",
                           genelist_subset = "commongenes",
                           mayo_exprs_file = "1.DataInclusion/Data/Mayo/MayoEset.Rda",
+                          aaces_exprs_file = "1.DataInclusion/Data/Aaces/aaces.eset.RData",
                           aaces_path = "aaces_expression.tsv",
                           shuffle = FALSE,
                           zscore = FALSE) {
@@ -85,11 +86,11 @@ LoadOVCA_Data <- function(datasets,
       cat("Loading", eset_exprs, "...\n")
       mayo.eset <- get(load(mayo_exprs_file))
       dta <- exprs(mayo.eset)
+      # neither is AACES
     } else if (grepl("aaces", eset_exprs)) {
       cat("Loading", eset_exprs, "...\n")
-      # AACES eset
-      dta <- read.table(aaces_path, sep = "\t", row.names = 1,
-                        header = TRUE)
+      aaces.eset <- get(load(aaces_exprs_file))
+      dta <- exprs(aaces.eset)
     } else {
       stop("Dataset does not exist in curatedOvarianData")
     }
