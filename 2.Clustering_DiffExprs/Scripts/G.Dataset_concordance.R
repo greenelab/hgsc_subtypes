@@ -78,7 +78,7 @@ write.table(reorderK4, "2.Clustering_DiffExprs/Tables/Data_Concordance/TCGA_Kmea
 # Analyze Konecny cluster membership
 ############################################
 # Load the file that stores our cluster assignments
-KonecnyClusterAssign <- read.csv("2.Clustering_DiffExprs/Tables/ClusterMembership/kmeans/KMembership_Mayo.csv", row.names = 1)
+KonecnyClusterAssign <- read.csv("2.Clustering_DiffExprs/Tables/ClusterMembership/kmeans/KMembership_mayo.eset.csv", row.names = 1)
 
 # This is a supplementary table in the Konecney supplemental material, it is indexed by "ov number"
 Kon_Sup <- read.csv("2.Clustering_DiffExprs/Data/Konecny_supplemental.csv", row.names = 1)
