@@ -22,8 +22,8 @@ dependencies:
 - r::r-reshape=0.8.7
 - conda-forge::r-ggally=1.3.2
 - conda-forge::r-optparse=1.4.4
-- bioconda::r-outliers=0.14
 - conda-forge::r-venndiagram=1.6.17
+- bioconda::r-outliers=0.14
 - bioconda::r-wgcna=1.51
 - bioconda::bioconductor-affy=1.50.0
 - bioconda::bioconductor-annotationdbi=1.38.0
