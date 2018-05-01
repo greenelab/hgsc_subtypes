@@ -1,6 +1,6 @@
 # Gene Expression Correlations with Nanostring Subtype Classifier
 
-**Gregory Way and Casey Greene, 2018**
+**Gregory Way, Casey Greene, and Jennifer Doherty 2018**
 
 Previous research identified a sparse classifier of few genes that can classify High Grade Serous Ovarian Cancer (HGSC) subtypes.
 This classifier (Lasso) was selected to induce sparsity in the solutions so that the identified genes can be placed on a [nanostring](https://www.nanostring.com/) panel.
@@ -12,7 +12,7 @@ We use [curatedOvarianData](https://bioconductor.org/packages/release/data/exper
 ## Procedure
 
 We take the 29 nanostring genes and consider their gene expression vectors across the four datasets independently.
-We then take pairwise correlations of each of these 29 genes against **all** other genes for each dataset.
+We then take pairwise Pearson correlations of each of these 29 genes against **all** other genes for each dataset.
 Lastly, we consider the genes in the top 5% and top 1% of these correlations for all 29 genes for each dataset.
 The final output is a long data frame (`results/all_threshold_classifier_gene_correlations.tsv`) that stores the highest correlated genes against the nanostring classifier genes.
 
