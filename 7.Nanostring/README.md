@@ -3,7 +3,7 @@
 **Gregory Way, Casey Greene, and Jennifer Doherty 2018**
 
 Previous research identified a sparse classifier of few genes that can classify High Grade Serous Ovarian Cancer (HGSC) subtypes.
-This classifier (Lasso) was selected to induce sparsity in the solutions so that the identified genes can be placed on a [nanostring](https://www.nanostring.com/) panel.
+This classifier (Random Forest) was used to find a sparse set of genes to be placed on a [nanostring](https://www.nanostring.com/) panel.
 
 Here, we test the correlation of these genes against all other genes measured across four HGSC gene expression datasets.
 The datasets include TCGA, Tothill, Yoshihara, and Mayo.
@@ -11,10 +11,28 @@ We use [curatedOvarianData](https://bioconductor.org/packages/release/data/exper
 
 ## Procedure
 
-We take the 29 nanostring genes and consider their gene expression vectors across the four datasets independently.
-We then take pairwise Pearson correlations of each of these 29 genes against **all** other genes for each dataset.
-Lastly, we consider the genes in the top 5% and top 1% of these correlations for all 29 genes for each dataset.
-The final output is a long data frame (`results/all_threshold_classifier_gene_correlations.tsv`) that stores the highest correlated genes against the nanostring classifier genes.
+We take the 59 nanostring genes and consider their gene expression vectors across the four datasets independently.
+We then take pairwise Pearson correlations of each of these 59 genes against **all** other genes for each dataset.
+Lastly, we consider the genes in the top 5% and top 1% of these correlations for all 59 genes for each dataset.
+The useful output is a long data frame (`results/all_threshold_classifier_gene_correlations.tsv`) that stores the highest correlated genes against the nanostring classifier genes.
+
+In addition, we output geneset files (`.gmt` format) under 4 different tiers of confidence.
+The file is located in `results/correlated_hgsc_classifier_genes.gmt`.
+The format of each line in this tab separated file is [classifier gene and confidence tier, correlated geneset (1, 2, ..., n)].
+The first gene in the correlated geneset is the classifier gene itself.
+
+| Confidence Tier | Description |
+| :-------------: | :---------- |
+| Tier 1A | Genes in 99% threshold correlations for all 4 datasets |
+| Tier 1B | Genes in 99% threshold correlations for all 3 datasets measured in (allows for a single dataset with missing measurements) |
+| Tier 2A | Genes in 95% threshold correlations for all 4 datasets |
+| Tier 2B | Genes in 95% threshold correlations for all 3 datasets measured in (allows for a single dataset with missing measurements) |
+| Tier 3 | Genes in 95% threshold correlations for 3/4 datasets (allows for a single dataset to not have correlation) |
+| Tier 4 | Genes in 95% threshold correlations for 2/4 datasets (allows for two datasets to not have correlations) |
+
+The tier system is built into the single `.gmt`.
+For high confident genesets use Tier 1A but at the cost of smaller sets.
+All correlations at the 95% or 99% percentile in at least 1 dataset are given in `results/all_threshold_classifier_gene_correlations`.
 
 ## Computational Environment
 
@@ -38,7 +56,8 @@ The scripts are located in the `scripts/` folder and include:
 | `A.get_correlation_output.R` | (A) Correlations between HGSC genes and subtype classifier genes (B) Missing classifier genes by dataset |
 | `B.explore_correlations.py` | (A) Distribution of correlations across classifier genes and datasets (B) 95% and 99% threshold correlation dataframes in long format |
 | `C.threshold_venns.R` | Venn diagrams describing correlated genes across datasets for both thresholds and against all 29 classifier genes |
-| `D.get_overlap_genes.R` | A final summary dataframe sorted by highest correlated genes with the highest support (99% threshold across all 4 datasets) |
+| `D.get_overlap_genes.R` | A summary dataframe sorted by highest correlated genes with the highest support (99% threshold across all 4 datasets) |
+| `E.output_gmt_geneset_tiers.R` | A single `.gmt` file for use in downstream gene set enrichment-like analyses |
 
 ## Output DataFrame
 
@@ -58,3 +77,4 @@ The file is sorted by percentage of datasets encountered, if the correlation exi
 Note that the scenario `(0, 1)` is possible for the 95% threshold and 99% threshold.
 This happens when a significant gene by gene correlation exists in a different number of datasets per threshold.
 
+This file is compiled into a `.gmt` file with confidence tiers.
