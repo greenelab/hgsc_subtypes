@@ -9,8 +9,8 @@
 # Tier 1B - Genes in 99% threshold correlations for all 3 datasets measured in
 # Tier 2A - Genes in 95% threshold correlations for all 4 datasets
 # Tier 2B - Genes in 95% threshold correlations for all 3 datasets measured in
-# Tier 3 - Genes in 99% threshold correlations for 3/4 datasets
-# Tier 4 - Genes in 95% threshold correlations for 3/4 datasets
+# Tier 3 - Genes in 95% threshold correlations for 3/4 datasets
+# Tier 4 - Genes in 95% threshold correlations for 2/4 datasets
 #
 # Output:
 # A single Gene Matrix Transposed (.gmt) file describing gene sets of
@@ -72,7 +72,8 @@ tier_1b  <- df %>%
 
 # Tier 2a - Exactly as tier 1a but includes genes in the 95% percentile
 tier_2a  <- df %>%
-  dplyr::filter(num_datasets == 4, percent_datasets == 1) %>%
+  dplyr::filter(relaxed_thresh == 1, num_datasets == 4,
+                percent_datasets == 1) %>%
   dplyr::group_by(classifier_gene) %>%
   reshape2::acast(classifier_gene ~ gene, value.var = "relaxed_thresh",
                   fill = 0)
