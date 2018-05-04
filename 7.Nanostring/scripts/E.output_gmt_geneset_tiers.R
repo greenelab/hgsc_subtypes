@@ -77,7 +77,7 @@ tier_2a  <- df %>%
   dplyr::group_by(classifier_gene) %>%
   reshape2::acast(classifier_gene ~ gene, value.var = "relaxed_thresh",
                   fill = 0)
-# Tier 2a - Exactly as tier 1b but includes genes in the 95% percentile
+# Tier 2b - Exactly as tier 1b but includes genes in the 95% percentile
 tier_2b  <- df %>%
   dplyr::filter(relaxed_thresh == 1, num_datasets >= 3,
                 percent_datasets == 1) %>%
