@@ -12,13 +12,19 @@
 
 library(dplyr)
 
-file <- file.path("data", "nanostring_classifier.tsv")
-classifier_df <- readr::read_tsv(file)
+file <- file.path("7.Nanostring", "data", "overallFreqs.csv")
+
+# Column rf stores the classifier genes - sort and take top 59
+top_n_genes <- 59
+classifier_df <- readr::read_csv(file) %>%
+  dplyr::arrange(desc(rfFreq)) %>%
+  dplyr::top_n(n = 59) %>%
+  dplyr::mutate(genes = toupper(genes))
 
 data <- c("TCGA_eset", "mayo.eset", "GSE32062.GPL6480_eset", "GSE9891_eset")
 
 # The script loads the ovarian cancer datasets
-load.ovca.path <- file.path("..", "1.DataInclusion", "Scripts", "Functions",
+load.ovca.path <- file.path("1.DataInclusion", "Scripts", "Functions",
                             "LoadOVCA_Data.R")
 source(load.ovca.path)
 
@@ -29,7 +35,7 @@ all_cor <- list()
 missing_info <- c()
 comp_idx <- 1
 # Loop through each unique gene in the classifier
-for (gene in unique(classifier_df$gene)) {
+for (gene in unique(classifier_df$genes)) {
 
   # Loop through each of the four datasets
   for (dataset in names(ExpData)) {
@@ -67,11 +73,12 @@ for (gene in unique(classifier_df$gene)) {
 # Output results
 # 1) Long correlation dataframe
 output_df <- dplyr::bind_rows(all_cor)
-file <- file.path("results", "classifier_correlation.tsv")
+file <- file.path("7.Nanostring", "results", "rf_classifier_correlation.tsv")
 readr::write_tsv(output_df, file)
 
 # 2) Missing gene by dataset information
+rownames(missing_info) <- 1:nrow(missing_info)
 missing_info <- as.data.frame(missing_info)
 colnames(missing_info) <- c("gene", "dataset")
-file <- file.path("results", "missing_gene_by_dataset.tsv")
+file <- file.path("7.Nanostring", "results", "rf_missing_gene_by_dataset.tsv")
 readr::write_tsv(missing_info, file)
