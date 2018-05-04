@@ -104,18 +104,18 @@ output_all_venns <- function(df, output_dir, threshold) {
 }
 
 # Load thresholded dataframes
-base_file <- "results"
-fig_base <- "figures"
+base_file <- file.path("7.Nanostring", "results")
+fig_base <- file.path("7.Nanostring", "figures")
 
-file <- file.path(base_file, "high_99_quantile_correlated_genes.tsv")
+file <- file.path(base_file, "rf_high_99_quantile_correlated_genes.tsv")
 high_df <- readr::read_tsv(file)
 
-file <- file.path(base_file, "relaxed_95_quantile_correlated_genes.tsv")
+file <- file.path(base_file, "rf_relaxed_95_quantile_correlated_genes.tsv")
 relaxed_df <- readr::read_tsv(file)
 
 # Output all Venn Diagrams
-high_out <- file.path(fig_base, "venns", "high_threshold")
+high_out <- file.path(fig_base, "rf_venns", "high_threshold")
 output_all_venns(high_df, output_dir = high_out, threshold = "99")
 
-relaxed_out <- file.path(fig_base, "venns", "relaxed_threshold")
+relaxed_out <- file.path(fig_base, "rf_venns", "relaxed_threshold")
 output_all_venns(relaxed_df, output_dir = relaxed_out, threshold = "95")
