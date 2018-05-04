@@ -13,16 +13,16 @@
 
 library(dplyr)
 
-base_file <- "results"
+base_file <- file.path("7.Nanostring", "results")
 
 # Load thresholded dataframes
-file <- file.path(base_file, "high_99_quantile_correlated_genes.tsv")
+file <- file.path(base_file, "rf_high_99_quantile_correlated_genes.tsv")
 high_df <- readr::read_tsv(file)
-high_df$threshold <- "99_threshold"
+high_df$threshold <- "high_thresh"
 
-file <- file.path(base_file, "relaxed_95_quantile_correlated_genes.tsv")
+file <- file.path(base_file, "rf_relaxed_95_quantile_correlated_genes.tsv")
 relaxed_df <- readr::read_tsv(file)
-relaxed_df$threshold <- "95_threshold"
+relaxed_df$threshold <- "relaxed_thresh"
 
 # Not all classifier genes were measured by each platform - find out how many
 classifier_gene_per_dataset <- high_df %>% 
@@ -37,7 +37,7 @@ all_cor_df <- dplyr::bind_rows(high_df, relaxed_df) %>%
   dplyr::left_join(classifier_gene_per_dataset, by = 'classifier_gene')
 
 # Wrangle classifier data into interpretable output dataframe and output
-f <- file.path(base_file, "all_thresholded_classifier_gene_correlations.tsv")
+f <- file.path(base_file, "rf_all_thresholded_classifier_gene_correlations.tsv")
 output_cor_df <- all_cor_df %>%
   dplyr::group_by(classifier_gene, gene, threshold, num_datasets) %>% 
   dplyr::summarise(num_datasets_gene = n(),
@@ -51,6 +51,6 @@ output_cor_df <- all_cor_df %>%
                   value.var = "classifier_gene") %>%
   dplyr::as.tbl() %>%
   dplyr::arrange(desc(percent_datasets),
-                 desc(`99_threshold`),
+                 desc(high_thresh),
                  desc(max_gene_cor)) %>%
   readr::write_tsv(f)
