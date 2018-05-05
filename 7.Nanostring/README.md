@@ -34,6 +34,10 @@ The tier system is built into the single `.gmt`.
 For high confident genesets use Tier 1A but at the cost of smaller sets.
 All correlations at the 95% or 99% percentile in at least 1 dataset are given in `results/all_threshold_classifier_gene_correlations`.
 
+We then run a geneset overrepresentation analysis (ORA) using `Tier 1B` genes using all unique genes measured in the 4 datasets as background.
+We use [WebGestalt](https://doi.org/10.1093/nar/gkx356 "WebGestalt 2017: a more comprehensive, powerful, flexible and interactive gene set enrichment analysis toolkit") for ORA.
+The results of the pathway analysis are stored in `results/overrepresented_pathways_classifier_genes.tsv`.
+
 ## Computational Environment
 
 All processing and analysis scripts were performed using the conda environment specified in `environment.yml`.
@@ -57,11 +61,14 @@ The scripts are located in the `scripts/` folder and include:
 | `B.explore_correlations.py` | (A) Distribution of correlations across classifier genes and datasets (B) 95% and 99% threshold correlation dataframes in long format |
 | `C.threshold_venns.R` | Venn diagrams describing correlated genes across datasets for both thresholds and against all 29 classifier genes |
 | `D.get_overlap_genes.R` | A summary dataframe sorted by highest correlated genes with the highest support (99% threshold across all 4 datasets) |
-| `E.output_gmt_geneset_tiers.R` | A single `.gmt` file for use in downstream gene set enrichment-like analyses |
+| `E.gmt_genesets_pathway_analysis.R` | A single `.gmt` file for use in downstream gene set enrichment-like analyses |
+| `F.summarize_pathways.R` | A single table describing top 15 enriched gene ontology terms for each classifier gene |
 
-## Output DataFrame
+## Output
 
-The file `results/all_threshold_classifier_gene_correlations.tsv` contains 57,551 rows describing correlations of HGSC gene expression values against 29 nanostring classifier genes.
+### All thresholded gene correlations
+
+The file `results/all_threshold_classifier_gene_correlations.tsv` contains 57,551 rows describing correlations of HGSC gene expression values against 59 nanostring classifier genes.
 A description of the columns are:
 
 1. `classifier_gene` - The gene used in the nanostring subtype classifier
@@ -77,4 +84,23 @@ The file is sorted by percentage of datasets encountered, if the correlation exi
 Note that the scenario `(0, 1)` is possible for the 95% threshold and 99% threshold.
 This happens when a significant gene by gene correlation exists in a different number of datasets per threshold.
 
+### Gene set file
+
 This file is compiled into a `.gmt` file with confidence tiers.
+See above for more details on tiers.
+
+### Overrepresented Pathways
+
+The gene stores the top 15 enriched gene ontology (GO) biological process terms against correlated genesets for all classifier genes.
+A description of the columns:
+
+1. `classifier_gene` - The gene used in the nanostring subtype classifier
+2. `tier` - which geneset tier was used (in this case `tier-1B` was used)
+3. `geneset` - GO identifier
+4. `description` - GO term description
+5. `link` - a direct link to the GO term online information
+6. `PValue` - unadjusted P value for enrichment
+7. `FDR` - Benjamini-Hochberg adjusted P value
+8. `OverlapGene_UserID` - Which input genes were found in the given pathway
+
+The analyses is designed so that others may make different decisions on which genesets, tiers, or pathways to use.
