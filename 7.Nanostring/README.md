@@ -96,7 +96,8 @@ For high confident genesets use Tier 1A but at the cost of smaller sets.
 
 ### Overrepresented pathways
 
-The gene stores the top 15 enriched gene ontology (GO) biological process terms against correlated genesets for all classifier genes.
+The table stores the top 15 enriched gene ontology (GO) biological process terms against correlated genesets for all classifier genes.
+We use `Tier 1B` genesets as input.
 A description of the columns:
 
 1. `classifier_gene` - The gene used in the nanostring subtype classifier
