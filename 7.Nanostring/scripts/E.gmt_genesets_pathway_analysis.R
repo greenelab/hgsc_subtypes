@@ -1,6 +1,6 @@
 # Nanostring Classifier Genes
 # Gregory Way 2018
-# 7.Nanostring/scripts/E.output_gmt_geneset_tiers.R
+# 7.Nanostring/scripts/E.gmt_genesets_pathway_analysis.R
 #
 # Define a tier system based on confidence of correlation between classifier
 # genes and HGSC gene expression. The tier system is as follows:
@@ -13,10 +13,13 @@
 # Tier 4 - Genes in 95% threshold correlations for 2/4 datasets
 #
 # Output:
-# A single Gene Matrix Transposed (.gmt) file describing gene sets of
-# correlated genes against random forest classifier genes
+# A Gene Matrix Transposed (.gmt) file describing gene sets of correlated genes
+# against random forest classifier genes. And a series of overrepresentation
+# pathway analyses of these correlated genes (tier 1b) in the 
+# 7.Nanostring/results/gestalt/ folder.
 
 library(dplyr)
+library(WebGestaltR)
 
 compile_gmt <- function(tier_matrix, tier_name) {
   # Extract geneset in gmt format based on input matrix
@@ -117,4 +120,32 @@ gmt_file <- file.path(base, "correlated_hgsc_classifier_genes.gmt")
 for (gmt in big_gmt_list) {
   write.table(t(gmt), file = gmt_file, sep = "\t", append = TRUE,
               col.names = FALSE, row.names = FALSE, quote = FALSE)
+}
+
+# Perform an overrepresentation analysis on tier 1B genesets
+ref_file <- file.path("7.Nanostring", "results", "background_genes.txt")
+ref_genes <- readr::read_tsv(ref_file, col_names = FALSE)
+
+geneset_dir <- file.path("7.Nanostring", "results", "gestalt")
+if (!dir.exists(geneset_dir)) {
+  dir.create(geneset_dir)
+}
+
+for (gmt_idx in 1:length(tier_1b_gmt)) {
+  geneset_name <- names(tier_1b_gmt)[gmt_idx]
+  geneset <- tier_1b_gmt[[geneset_name]]
+  webgestalt_output <-
+    WebGestaltR::WebGestaltR(enrichMethod = "ORA",
+                             organism = "hsapiens",
+                             interestGene = geneset,
+                             interestGeneType = "genesymbol",
+                             minNum = 4,
+                             sigMethod = "top",
+                             topThr = 15,
+                             fdrMethod = "BH",
+                             is.output = TRUE,
+                             outputDirectory = geneset_dir,
+                             referenceGene = as.vector(ref_genes$X1),
+                             referenceGeneType = "genesymbol",
+                             projectName = geneset_name)
 }
