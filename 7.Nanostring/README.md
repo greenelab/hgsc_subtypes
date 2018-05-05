@@ -11,28 +11,21 @@ We use [curatedOvarianData](https://bioconductor.org/packages/release/data/exper
 
 ## Procedure
 
+### Part I
+
 We take the 59 nanostring genes and consider their gene expression vectors across the four datasets independently.
 We then take pairwise Pearson correlations of each of these 59 genes against **all** other genes for each dataset.
 Lastly, we consider the genes in the top 5% and top 1% of these correlations for all 59 genes for each dataset.
-The useful output is a long data frame (`results/all_threshold_classifier_gene_correlations.tsv`) that stores the highest correlated genes against the nanostring classifier genes.
+A useful output is the long data frame (`results/all_threshold_classifier_gene_correlations.tsv`), which stores the highest correlated genes against the nanostring classifier genes.
 
-In addition, we output geneset files (`.gmt` format) under 4 different tiers of confidence.
+### Part II
+
+In addition, we output geneset files ([`.gmt` format](https://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats)) under 4 different tiers of confidence (see below).
 The file is located in `results/correlated_hgsc_classifier_genes.gmt`.
-The format of each line in this tab separated file is [classifier gene and confidence tier, correlated geneset (1, 2, ..., n)].
+The format of each line in this tab separated file is: [classifier gene and confidence tier, correlated geneset (1, 2, ..., n)].
 The first gene in the correlated geneset is the classifier gene itself.
 
-| Confidence Tier | Description |
-| :-------------: | :---------- |
-| Tier 1A | Genes in 99% threshold correlations for all 4 datasets |
-| Tier 1B | Genes in 99% threshold correlations for all 3 datasets measured in (allows for a single dataset with missing measurements) |
-| Tier 2A | Genes in 95% threshold correlations for all 4 datasets |
-| Tier 2B | Genes in 95% threshold correlations for all 3 datasets measured in (allows for a single dataset with missing measurements) |
-| Tier 3 | Genes in 95% threshold correlations for 3/4 datasets (allows for a single dataset to not have correlation) |
-| Tier 4 | Genes in 95% threshold correlations for 2/4 datasets (allows for two datasets to not have correlations) |
-
-The tier system is built into the single `.gmt`.
-For high confident genesets use Tier 1A but at the cost of smaller sets.
-All correlations at the 95% or 99% percentile in at least 1 dataset are given in `results/all_threshold_classifier_gene_correlations`.
+### Part III
 
 We then run a geneset overrepresentation analysis (ORA) using `Tier 1B` genes using all unique genes measured in the 4 datasets as background.
 We use [WebGestalt](https://doi.org/10.1093/nar/gkx356 "WebGestalt 2017: a more comprehensive, powerful, flexible and interactive gene set enrichment analysis toolkit") for ORA.
@@ -87,9 +80,21 @@ This happens when a significant gene by gene correlation exists in a different n
 ### Gene set file
 
 This file is compiled into a `.gmt` file with confidence tiers.
-See above for more details on tiers.
+The confidence tiers include
 
-### Overrepresented Pathways
+| Confidence Tier | Description |
+| :-------------: | :---------- |
+| Tier 1A | Genes in 99% threshold correlations for all 4 datasets |
+| Tier 1B | Genes in 99% threshold correlations for all 3 datasets measured in (allows for a single dataset with missing measurements) |
+| Tier 2A | Genes in 95% threshold correlations for all 4 datasets |
+| Tier 2B | Genes in 95% threshold correlations for all 3 datasets measured in (allows for a single dataset with missing measurements) |
+| Tier 3 | Genes in 95% threshold correlations for 3/4 datasets (allows for a single dataset to not have correlation) |
+| Tier 4 | Genes in 95% threshold correlations for 2/4 datasets (allows for two datasets to not have correlations) |
+
+The tier system is built into the single `.gmt`.
+For high confident genesets use Tier 1A but at the cost of smaller sets.
+
+### Overrepresented pathways
 
 The gene stores the top 15 enriched gene ontology (GO) biological process terms against correlated genesets for all classifier genes.
 A description of the columns:
