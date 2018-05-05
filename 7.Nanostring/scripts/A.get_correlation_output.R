@@ -34,12 +34,14 @@ ExpData <- LoadOVCA_Data(datasets = data, genelist_subset = "None")
 all_cor <- list()
 missing_info <- c()
 comp_idx <- 1
+background_genes <- c()
 # Loop through each unique gene in the classifier
 for (gene in unique(classifier_df$genes)) {
 
   # Loop through each of the four datasets
   for (dataset in names(ExpData)) {
     exprs_df <- ExpData[[dataset]]
+    background_genes <- unique(c(background_genes, rownames(exprs_df)))
 
     # Make sure the gene exists in the dataset
     if (gene %in% rownames(exprs_df)) {
@@ -82,3 +84,8 @@ missing_info <- as.data.frame(missing_info)
 colnames(missing_info) <- c("gene", "dataset")
 file <- file.path("7.Nanostring", "results", "rf_missing_gene_by_dataset.tsv")
 readr::write_tsv(missing_info, file)
+
+# 3) Background genes
+a <- as.data.frame(background_genes[order(background_genes)])
+file <- file.path("7.Nanostring", "results", "background_genes.txt")
+readr::write_tsv(a, file, col_names = FALSE)
