@@ -38,19 +38,33 @@ all_cor_df <- dplyr::bind_rows(high_df, relaxed_df) %>%
 
 # Wrangle classifier data into interpretable output dataframe and output
 f <- file.path(base_file, "rf_all_thresholded_classifier_gene_correlations.tsv")
-output_cor_df <- all_cor_df %>%
-  dplyr::group_by(classifier_gene, gene, threshold, num_datasets) %>% 
+
+all_cor_df %>%
+  # Collect groups of genes and identifiers across datasets
+  dplyr::group_by(classifier_gene, gene, threshold, num_datasets) %>%
+
+  # Determine count and the extent the correlation was observed across datasets
   dplyr::summarise(num_datasets_gene = n(),
                    min_gene_cor = min(gene_cor),
                    max_gene_cor = max(gene_cor)) %>%
-  dplyr::mutate(percent_datasets = (num_datasets_gene / num_datasets)) %>% 
+
+  # Create a new variable determining the percentage of dataset observations
+  dplyr::mutate(percent_datasets = (num_datasets_gene / num_datasets)) %>%
+
+  # Cast the dataframe stratified by threshold and display membership (length)
   reshape2::dcast(classifier_gene + gene + num_datasets + percent_datasets +
                     min_gene_cor + max_gene_cor ~
                     threshold,
                   fun.aggregate = function(x) length(x),
                   value.var = "classifier_gene") %>%
+
+  # Convert back to a tibble object
   dplyr::as.tbl() %>%
+  
+  # Sort tibble by confidence in correlation
   dplyr::arrange(desc(percent_datasets),
                  desc(high_thresh),
                  desc(max_gene_cor)) %>%
+  
+  # Write the output file
   readr::write_tsv(f)
