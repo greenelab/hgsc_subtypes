@@ -45,8 +45,9 @@ compile_gmt <- function(tier_matrix, tier_name) {
   return(geneset_list)
 }
 
-base <- file.path("7.Nanostring", "results")
-f <- file.path(base, "rf_all_thresholded_classifier_gene_correlations.tsv")
+results_dir <- file.path("7.Nanostring", "results")
+f <- file.path(results_dir,
+               "rf_all_thresholded_classifier_gene_correlations.tsv")
 df <- readr::read_tsv(f,
                       col_types = list(.default = "c",
                                        num_datasets = readr::col_integer(),
@@ -116,7 +117,7 @@ big_gmt_list <- c(tier_1a_gmt, tier_1b_gmt, tier_2a_gmt, tier_2b_gmt,
                    tier_3_gmt, tier_4_gmt)
 
 # Write contents of gmt list into file line by line
-gmt_file <- file.path(base, "correlated_hgsc_classifier_genes.gmt")
+gmt_file <- file.path(results_dir, "correlated_hgsc_classifier_genes.gmt")
 for (gmt in big_gmt_list) {
   write.table(t(gmt), file = gmt_file, sep = "\t", append = TRUE,
               col.names = FALSE, row.names = FALSE, quote = FALSE)
