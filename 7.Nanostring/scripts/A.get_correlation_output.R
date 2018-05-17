@@ -18,7 +18,7 @@ file <- file.path("7.Nanostring", "data", "overallFreqs.csv")
 top_n_genes <- 59
 classifier_df <- readr::read_csv(file) %>%
   dplyr::arrange(desc(rfFreq)) %>%
-  dplyr::top_n(n = 59) %>%
+  dplyr::top_n(n = top_n_genes) %>%
   dplyr::mutate(genes = toupper(genes))
 
 data <- c("TCGA_eset", "mayo.eset", "GSE32062.GPL6480_eset", "GSE9891_eset")
@@ -41,6 +41,8 @@ for (gene in unique(classifier_df$genes)) {
   # Loop through each of the four datasets
   for (dataset in names(ExpData)) {
     exprs_df <- ExpData[[dataset]]
+    
+    # Track background genes for pathway analysis comparisons
     background_genes <- unique(c(background_genes, rownames(exprs_df)))
 
     # Make sure the gene exists in the dataset
