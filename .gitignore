@@ -2,6 +2,7 @@
 Rplots.pdf
 .Rhistory
 .checkpoint
+*.ipynb_checkpoints/
 aaces.eset.RData
 aaces_expression.tsv
 7.Nanostring/data/*
