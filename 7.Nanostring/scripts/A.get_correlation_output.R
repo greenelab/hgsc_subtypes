@@ -75,19 +75,22 @@ for (gene in unique(classifier_df$genes)) {
 }
 
 # Output results
+base_dir <- file.path("7.Nanostring", "results")
+dir.create(base_dir)
+
 # 1) Long correlation dataframe
 output_df <- dplyr::bind_rows(all_cor)
-file <- file.path("7.Nanostring", "results", "rf_classifier_correlation.tsv")
+file <- file.path(base_dir, "rf_classifier_correlation.tsv")
 readr::write_tsv(output_df, file)
 
 # 2) Missing gene by dataset information
 rownames(missing_info) <- 1:nrow(missing_info)
 missing_info <- as.data.frame(missing_info)
 colnames(missing_info) <- c("gene", "dataset")
-file <- file.path("7.Nanostring", "results", "rf_missing_gene_by_dataset.tsv")
+file <- file.path(base_dir, "rf_missing_gene_by_dataset.tsv")
 readr::write_tsv(missing_info, file)
 
 # 3) Background genes
-a <- as.data.frame(background_genes[order(background_genes)])
-file <- file.path("7.Nanostring", "results", "background_genes.txt")
-readr::write_tsv(a, file, col_names = FALSE)
+background_df <- as.data.frame(background_genes[order(background_genes)])
+file <- file.path(base_dir, "background_genes.txt")
+readr::write_tsv(background_df, file, col_names = FALSE)
