@@ -51,7 +51,7 @@ The scripts are located in the `scripts/` folder and include:
 | Script | Output |
 | :----- | :----- |
 | `A.get_correlation_output.R` | (A) Correlations between HGSC genes and subtype classifier genes (B) Missing classifier genes by dataset |
-| `B.explore_correlations.py` | (A) Distribution of correlations across classifier genes and datasets (B) 95% and 99% threshold correlation dataframes in long format |
+| `B.explore_correlations.ipynb` | (A) Distribution of correlations across classifier genes and datasets (B) 95% and 99% threshold correlation dataframes in long format |
 | `C.threshold_venns.R` | Venn diagrams describing correlated genes across datasets for both thresholds and against all 29 classifier genes |
 | `D.get_overlap_genes.R` | A summary dataframe sorted by highest correlated genes with the highest support (99% threshold across all 4 datasets) |
 | `E.gmt_genesets_pathway_analysis.R` | A single `.gmt` file for use in downstream gene set enrichment-like analyses |
