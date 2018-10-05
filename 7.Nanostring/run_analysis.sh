@@ -10,7 +10,7 @@ Rscript 7.Nanostring/scripts/A.get_correlation_output.R
 
 # Step 2 - Explore these correlations, output figures, and several descriptive results
 jupyter nbconvert --to=html \
-        --FilesWriter.build_directory=scripts \
+        --FilesWriter.build_directory=7.Nanostring/scripts \
         --ExecutePreprocessor.kernel_name=python3 \
         --ExecutePreprocessor.timeout=10000 \
         --execute 7.Nanostring/scripts/B.explore_correlations.ipynb
