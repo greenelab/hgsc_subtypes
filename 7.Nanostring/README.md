@@ -57,6 +57,13 @@ The scripts are located in the `scripts/` folder and include:
 | `E.gmt_genesets_pathway_analysis.R` | A single `.gmt` file for use in downstream gene set enrichment-like analyses |
 | `F.summarize_pathways.R` | A single table describing top 15 enriched gene ontology terms for each classifier gene |
 
+To reproduce the entire pipeline, run the following (after activating the conda environment)
+
+```bash
+# Make sure the base directory is `hgsc_subtypes`
+bash 7.Nanostring/run_analysis.sh
+```
+
 ## Output
 
 ### All thresholded gene correlations
