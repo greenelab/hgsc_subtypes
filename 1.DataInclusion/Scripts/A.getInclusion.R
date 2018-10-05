@@ -21,6 +21,10 @@ library(outliers)
 # This R script holds custom inclusion functions
 source("1.DataInclusion/Scripts/Functions/Inclusion_functions.R")
 
+# Load patient selection info from curatedOvarianData package
+source(system.file("extdata", "patientselection.config",
+                   package = "curatedOvarianData"))
+
 ####################################
 # Load Constants
 ####################################
@@ -45,7 +49,7 @@ options <- list(optparse::make_option(c("--aaces"),
 opt_parser <- optparse::OptionParser(option_list = options)
 opt <- optparse::parse_args(opt_parser)
 
-aacespath = opt$aaces
+aacespath <- opt$aaces
 
 ####################################
 # Load Data
@@ -192,6 +196,11 @@ for (i in 1:length(goodSamples.chosen)) {
     cut <- mean(sub$expr.similarity) - (2 * sd(sub$expr.similarity))
     inc <- sub[sub$expr.similarity > cut, ]
     samp <- setdiff(sub$sample1, inc$sample1)
+    
+    if (names(goodSamples.chosen)[i] == 'TCGA_eset') {
+      samp <- tcga.lowcor.outliers
+    }
+    
     lowcorSamples <- c()
     if (length(samp) != 0) {
       lowcorSamples <- unlist(strsplit(samp, ":"))[seq(2, length(samp) * 2, 2)]
@@ -223,4 +232,3 @@ for (i in 1:length(goodSamples.chosen)) {
       write.csv(sampleList, outFName)
     }
 }
-
