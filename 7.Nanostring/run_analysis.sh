@@ -5,6 +5,12 @@
 #
 # NOTE: all scripts should be run from the top `hgsc_subtypes` directory
 
+set -o errexit
+exec &>7.Nanostring/nanostring_analysis.out
+
+# Step 0 - Install package inside conda environment
+Rscript 7.Nanostring/scripts/0.install_custom.R
+
 # Step 1 - Obtain the correlation output files
 Rscript 7.Nanostring/scripts/A.get_correlation_output.R
 
