@@ -115,7 +115,9 @@ relaxed_df <- readr::read_tsv(file)
 
 # Output all Venn Diagrams
 high_out <- file.path(fig_base, "rf_venns", "high_threshold")
+dir.create(high_out, recursive = TRUE)
 output_all_venns(high_df, output_dir = high_out, threshold = "99")
 
 relaxed_out <- file.path(fig_base, "rf_venns", "relaxed_threshold")
+dir.create(relaxed_out, recursive = TRUE)
 output_all_venns(relaxed_df, output_dir = relaxed_out, threshold = "95")

@@ -14,12 +14,40 @@ library(dplyr)
 
 file <- file.path("7.Nanostring", "data", "overallFreqs.csv")
 
+# OPTION 1: Classifier genes
 # Column rf stores the classifier genes - sort and take top 59
-top_n_genes <- 59
+# top_n_genes <- 59
+# classifier_df <- readr::read_csv(file) %>%
+#   dplyr::arrange(desc(rfFreq)) %>%
+#   dplyr::top_n(n = top_n_genes) %>%
+#   dplyr::mutate(genes = toupper(genes))
+
+# OPTION 2: 10 genes for remaining variability
+# Select 10 genes that are thought to capture most remaining variability 
+# that is not captured by the classifier genes
 classifier_df <- readr::read_csv(file) %>%
-  dplyr::arrange(desc(rfFreq)) %>%
-  dplyr::top_n(n = top_n_genes) %>%
-  dplyr::mutate(genes = toupper(genes))
+  dplyr::filter(genes == "BOP1" 
+                  |genes == "DNAI1"
+                  |genes == "HSF1"
+                  |genes == "LRRC50"
+                  |genes == "MS4A3"
+                  |genes == "NTN2L"
+                  |genes == "SHARPIN"
+                  |genes == "SLC12A3"
+                  |genes == "SOX10"
+                  |genes == "TSNAXIP1")
+  
+# OPTION 3: All 513 genes
+#classifier_df <- readr::read_csv(file) %>%
+#   dplyr::mutate(genes = toupper(genes))
+
+# OPTION 4: 454 genes that are not part of the classifier
+  # Column rf stores the classifier genes - sort and take bottom 454
+  # bottom_n_genes <- 454
+  # classifier_df <- readr::read_csv(file) %>%
+  #   dplyr::arrange(desc(rfFreq)) %>%
+  #   dplyr::bottom_n(n = bottom_n_genes) %>%
+  #   dplyr::mutate(genes = toupper(genes))
 
 data <- c("TCGA_eset", "mayo.eset", "GSE32062.GPL6480_eset", "GSE9891_eset")
 
@@ -77,6 +105,9 @@ for (gene in unique(classifier_df$genes)) {
 # Output results
 base_dir <- file.path("7.Nanostring", "results")
 dir.create(base_dir)
+
+fig_dir <- file.path("7.Nanostring", "figures")
+dir.create(fig_dir)
 
 # 1) Long correlation dataframe
 output_df <- dplyr::bind_rows(all_cor)
